@@ -1,0 +1,34 @@
+[
+  {
+    "id": "PKG-01",
+    "nama": "Paket Warga 10 Mbps",
+    "kecepatan": "10 Mbps",
+    "harga": 100000,
+    "mikrotik_profile": "10Mbps",
+    "deskripsi": "Paket hemat internet rumah untuk browsing, sosmed, dan streaming HD"
+  },
+  {
+    "id": "PKG-02",
+    "nama": "Paket Warga 20 Mbps",
+    "kecepatan": "20 Mbps",
+    "harga": 150000,
+    "mikrotik_profile": "20Mbps",
+    "deskripsi": "Cocok untuk keluarga 3-5 perangkat, meeting online & streaming 4K"
+  },
+  {
+    "id": "PKG-03",
+    "nama": "Paket Gamer 30 Mbps",
+    "kecepatan": "30 Mbps",
+    "harga": 250000,
+    "mikrotik_profile": "30Mbps",
+    "deskripsi": "Prioritas bandwidth, latency rendah untuk gaming & download cepat"
+  },
+  {
+    "id": "PKG-04",
+    "nama": "Paket Bisnis 50 Mbps",
+    "kecepatan": "50 Mbps",
+    "harga": 350000,
+    "mikrotik_profile": "50Mbps",
+    "deskripsi": "Paket kecepatan tinggi untuk kantor, toko, warkop, dan multi-user"
+  }
+]

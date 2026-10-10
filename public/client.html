@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portal Pelanggan - RT/RW.net</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Library jsPDF via CDN untuk Unduh Kwitansi PDF Digital -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between font-sans">
+
+  <!-- Header Nav Portal Pelanggan -->
+  <header class="bg-indigo-700 text-white shadow-md">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="text-2xl">🌐</span>
+        <div>
+          <h1 class="text-lg font-bold leading-tight">Portal Pelanggan RT/RW.net</h1>
+          <p class="text-xs text-indigo-200">Informasi Tagihan & Layanan Internet Anda</p>
+        </div>
+      </div>
+      <div id="headerUserActions" class="hidden flex items-center gap-2">
+        <span id="headerCustName" class="text-xs font-semibold bg-white/15 px-3 py-1.5 rounded-lg text-white"></span>
+        <button id="btnLogout" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-lg text-white font-medium transition flex items-center gap-1">
+          <span>🚪</span> Keluar
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-4xl mx-auto px-4 py-8 flex-1 w-full">
+
+    <!-- 1. FORM LOGIN PELANGGAN -->
+    <div id="viewLogin" class="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-slate-100">
+      <div class="text-center mb-6">
+        <div class="inline-flex p-3 rounded-2xl bg-indigo-50 text-indigo-700 mb-3 text-3xl">
+          📡
+        </div>
+        <h2 class="text-xl font-bold text-slate-900">Masuk ke Client Area</h2>
+        <p class="text-xs text-slate-500 mt-1">Masukkan ID Pelanggan atau Nomor WhatsApp yang terdaftar untuk melihat tagihan dan masa aktif Anda.</p>
+      </div>
+
+      <form id="formLogin" class="space-y-4">
+        <div>
+          <label for="inputIdentifier" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">ID Pelanggan / Nomor WhatsApp</label>
+          <div class="relative">
+            <input type="text" id="inputIdentifier" required placeholder="Contoh: PLG001 atau 081234567891" class="w-full border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">Bisa menggunakan ID Pelanggan (misal: <strong>PLG001</strong>) atau nomor WhatsApp.</p>
+        </div>
+
+        <p id="loginError" class="text-red-600 text-xs font-medium hidden bg-red-50 p-2.5 rounded-lg border border-red-200"></p>
+
+        <button type="submit" id="btnLoginSubmit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+          <span>Masuk Sekarang</span> ➜
+        </button>
+      </form>
+
+      <div class="mt-6 pt-5 border-t text-center text-xs text-slate-500">
+        Butuh bantuan atau nomor belum terdaftar? <br>
+        <span class="text-indigo-600 font-semibold">Hubungi Pengurus RT/RW.net setempat.</span>
+      </div>
+    </div>
+
+    <!-- 2. DASHBOARD CLIENT AREA (Setelah Login) -->
+    <div id="viewDashboard" class="hidden space-y-6">
+
+      <!-- Bar Sambutan & Quick Info -->
+      <div class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-600 rounded-2xl p-6 text-white shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs bg-white/20 text-white px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider" id="dashCustomerId">PLG001</span>
+            <span class="text-xs text-indigo-100" id="dashWilayah"></span>
+          </div>
+          <h2 class="text-2xl font-extrabold mt-1" id="dashClientName">Nama Pelanggan</h2>
+          <p class="text-xs text-indigo-100 mt-0.5" id="dashAlamat"></p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="btnOpenReportIssue" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5">
+            <span>🚨</span> Lapor Gangguan
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Kartu Status Utama -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Kartu 1: Status Pembayaran -->
+        <div class="bg-white rounded-2xl p-5 shadow border border-slate-100">
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wide">Status Tagihan Bulan Ini</span>
+          <div class="mt-2 flex items-center justify-between">
+            <span id="dashStatusTagihan" class="text-lg font-black px-3 py-1 rounded-full"></span>
+            <span id="dashHarga" class="text-sm font-bold text-slate-700"></span>
+          </div>
+          <p class="text-xs text-slate-500 mt-2" id="dashTagihanDesc"></p>
+        </div>
+
+        <!-- Kartu 2: Sisa Masa Aktif Paket -->
+        <div class="bg-white rounded-2xl p-5 shadow border border-slate-100">
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wide">Sisa Masa Aktif Paket</span>
+          <div class="mt-2">
+            <p class="text-2xl font-black text-indigo-700" id="dashSisaHari"></p>
+            <p class="text-xs font-semibold text-slate-600 mt-0.5" id="dashStatusMasaAktif"></p>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">Jatuh Tempo: <span id="dashJatuhTempo" class="font-medium text-slate-700"></span></p>
+        </div>
+
+        <!-- Kartu 3: Status Koneksi Jaringan -->
+        <div class="bg-white rounded-2xl p-5 shadow border border-slate-100">
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wide">Kondisi Jaringan Internet</span>
+          <div class="mt-2 flex items-center gap-2">
+            <span id="dashStatusJaringan" class="text-lg font-black px-3 py-1 rounded-full"></span>
+          </div>
+          <p class="text-xs text-slate-500 mt-2" id="dashPaketName"></p>
+          <p class="text-xs text-amber-700 mt-1 font-medium hidden" id="dashKendalaAlert"></p>
+        </div>
+
+        <!-- Kartu 4: Perangkat ONT / Modem Pelanggan -->
+        <div class="bg-white rounded-2xl p-5 shadow border border-slate-100 flex flex-col justify-between">
+          <div>
+            <span class="text-xs text-slate-400 font-bold uppercase tracking-wide flex items-center gap-1">
+              <span>📟</span> Perangkat ONT / Modem
+            </span>
+            <div class="mt-2">
+              <p class="font-extrabold text-slate-800 text-sm leading-snug" id="dashDeviceTipe">-</p>
+              <p class="text-[11px] font-mono text-slate-500 mt-0.5">SN: <span id="dashDeviceSN" class="font-bold text-slate-700">-</span></p>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+            <span id="dashDeviceKepemilikan" class="font-semibold text-slate-600">-</span>
+            <span id="dashDeviceGaransi" class="text-slate-400">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opsi Pembayaran (Jika Belum Lunas) -->
+      <div id="boxPaymentSection" class="hidden space-y-4">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- 1. METODE QRIS (5 Cols) -->
+          <div class="lg:col-span-5 bg-sky-50/70 border border-sky-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="px-2.5 py-0.5 bg-sky-200 text-sky-800 text-[11px] font-bold rounded-full">Metode 1: QRIS Online</span>
+                <span class="text-[10px] text-slate-500 font-semibold">Otomatis / Instan</span>
+              </div>
+              <div class="text-center bg-white p-3 rounded-xl border border-sky-100 shadow-xs mb-3">
+                <img src="/qris-dana.jpg" alt="QRIS DANA Bisnis" class="w-44 h-auto mx-auto object-contain rounded-lg">
+                <p class="text-[10px] text-slate-500 mt-2 font-medium">Scan via DANA, GoPay, OVO, ShopeePay, BCA, dll</p>
+              </div>
+              <div class="bg-white p-2.5 rounded-xl border border-sky-100 text-[11px] text-slate-600 space-y-0.5">
+                <p>Merchant: <strong class="text-slate-800">Workshop JanYe (DANA Bisnis)</strong></p>
+                <p>NMID: <strong class="text-slate-800 font-mono">ID1026610426227</strong></p>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-400 text-center mt-3">Scan kode QR di atas sesuai total nominal tagihan Anda.</p>
+          </div>
+
+          <!-- 2. METODE TRANSFER BANK MANUAL (7 Cols) -->
+          <div class="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-lg">💳</span>
+                  <span class="font-bold text-slate-900 text-sm">Metode 2: Transfer Bank Manual</span>
+                </div>
+                <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded-full border border-indigo-100">Bagi yang belum pakai QRIS</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-3.5 leading-relaxed">
+                Jika Anda lebih terbiasa transfer lewat ATM, Mobile Banking, atau setor tunai di Agen bank/BRILink, silakan transfer ke salah satu rekening resmi di bawah ini:
+              </p>
+
+              <!-- Daftar Rekening Bank Dinamis -->
+              <div id="clientBankAccountsList" class="space-y-2.5">
+                <div class="p-3 rounded-xl border border-slate-100 bg-slate-50 text-center text-xs text-slate-400">
+                  Memuat daftar rekening bank...
+                </div>
+              </div>
+            </div>
+
+            <!-- Petunjuk & Konfirmasi WhatsApp -->
+            <div class="mt-4 pt-3.5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <span class="text-slate-500 text-[11px]">Setelah transfer, simpan struk/bukti transaksi Anda.</span>
+              <button type="button" id="btnConfirmBankTransferWA" class="w-full sm:w-auto px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 text-xs">
+                <span>💬</span> Konfirmasi Bukti Transfer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab & Konten: Riwayat Pembayaran & Riwayat Laporan -->
+      <div class="bg-white rounded-2xl shadow border border-slate-100 overflow-hidden">
+        <div class="border-b px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <h3 class="font-bold text-slate-800 text-base">Riwayat Tagihan & Pembayaran Bulanan</h3>
+          <span class="text-xs text-slate-400">Rekam jejak transaksi bulan-bulan sebelumnya</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs sm:text-sm">
+            <thead class="bg-slate-50 text-slate-600 border-b">
+              <tr>
+                <th class="px-5 py-3 text-left">Periode Bulan</th>
+                <th class="px-5 py-3 text-left">Nominal Tagihan</th>
+                <th class="px-5 py-3 text-left">Status</th>
+                <th class="px-5 py-3 text-left">Tanggal Bayar</th>
+                <th class="px-5 py-3 text-right">Kwitansi</th>
+              </tr>
+            </thead>
+            <tbody id="clientHistoryRows" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Riwayat Kendala & Laporan Gangguan Pelanggan -->
+      <div class="bg-white rounded-2xl shadow border border-slate-100 p-6 space-y-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base">Riwayat Kestabilan Koneksi & Laporan Gangguan</h3>
+            <p class="text-xs text-slate-500">Catatan status DOWN/UP dan riwayat pengaduan Anda ke tim teknisi.</p>
+          </div>
+        </div>
+
+        <div id="clientNetworkLogsList" class="space-y-2.5"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Modal Form Lapor Gangguan -->
+  <div id="modalReportIssue" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div class="bg-gradient-to-r from-amber-500 to-orange-600 px-5 py-4 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🚨</span>
+          <div>
+            <h3 class="font-bold text-base leading-tight">Form Pengaduan Gangguan</h3>
+            <p class="text-xs text-amber-100">Laporan Anda langsung terhubung ke teknisi</p>
+          </div>
+        </div>
+        <button type="button" id="btnCloseModalReport" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+
+      <form id="formReportIssue" class="p-6 space-y-4 text-sm">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Rincian Kendala / Keluhan Internet:</label>
+          <textarea id="inputIssueText" rows="4" required placeholder="Contoh: Lampu indikator LOS merah di router / Internet putus sejak jam 19.00 / Koneksi sangat lambat" class="w-full border rounded-xl p-3 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+          <p class="text-[11px] text-slate-400 mt-1">Sertakan detail seperti kondisi lampu router atau sejak kapan koneksi terganggu.</p>
+        </div>
+
+        <p id="reportError" class="text-red-600 text-xs hidden"></p>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" id="btnCancelReport" class="px-4 py-2 text-xs font-medium rounded-lg border hover:bg-slate-50 text-slate-700">Batal</button>
+          <button type="submit" id="btnSubmitReport" class="px-4 py-2 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow transition flex items-center gap-1.5">
+            <span>🚀</span> Kirim Laporan ke Admin
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t py-4 text-center text-xs text-slate-400 mt-12">
+    &copy; 2026 RT/RW.net Komunitas. Sistem Layanan Mandiri Pelanggan.
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-slate-900 text-white text-xs sm:text-sm px-4 py-3 rounded-xl shadow-2xl hidden z-50"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const rupiah = (n) => 'Rp ' + Number(n).toLocaleString('id-ID');
+const tgl = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+const periodeLabel = (p) => p ? new Date(p + '-01T00:00:00').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : '-';
+const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+let currentClient = null;
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3000);
+}
+
+// 1. Tampilkan Data Dashboard Pelanggan
+function renderClientDashboard(client) {
+  currentClient = client;
+
+  // Header
+  $('headerCustName').textContent = `${client.nama} (${client.customer_id})`;
+  $('headerUserActions').classList.remove('hidden');
+
+  // Sambutan
+  $('dashCustomerId').textContent = client.customer_id;
+  $('dashWilayah').textContent = `📍 ${client.wilayah || '-'}`;
+  $('dashClientName').textContent = client.nama;
+  $('dashAlamat').textContent = `${client.alamat} • No WA: ${client.whatsapp}`;
+
+  // Kartu 1: Status Pembayaran
+  const lunas = client.status_tagihan === 'Lunas';
+  $('dashStatusTagihan').textContent = client.status_tagihan;
+  $('dashStatusTagihan').className = `text-lg font-black px-3.5 py-1 rounded-full ${lunas ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+  $('dashHarga').textContent = `${rupiah(client.harga)} / bln`;
+  $('dashTagihanDesc').textContent = lunas ? '✅ Tagihan bulan ini telah selesai terbayar.' : '⚠️ Menunggu pembayaran. Silakan bayar via QRIS.';
+
+  // Kartu 2: Sisa Masa Aktif
+  $('dashSisaHari').textContent = client.sisa_hari_text || (client.sisa_hari >= 0 ? `${client.sisa_hari} Hari` : `Lewat ${Math.abs(client.sisa_hari)} Hari`);
+  $('dashStatusMasaAktif').textContent = client.status_masa_aktif;
+  $('dashJatuhTempo').textContent = tgl(client.jatuh_tempo);
+
+  // Kartu 3: Kondisi Jaringan
+  const aktif = client.status_jaringan === 'Aktif';
+  $('dashStatusJaringan').textContent = aktif ? '🟢 Jaringan Normal' : '🔴 Terisolir / Gangguan';
+  $('dashStatusJaringan').className = `text-sm font-bold px-3 py-1 rounded-full ${aktif ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`;
+  $('dashPaketName').textContent = `Paket: ${client.paket}`;
+  
+  if (client.catatan_kendala) {
+    $('dashKendalaAlert').textContent = `⚠️ Catatan: ${client.catatan_kendala}`;
+    $('dashKendalaAlert').classList.remove('hidden');
+  } else {
+    $('dashKendalaAlert').classList.add('hidden');
+  }
+
+  // Kartu 4: Perangkat ONT / Modem
+  const dev = client.device || {};
+  $('dashDeviceTipe').textContent = dev.tipe || 'ONT Standar RT/RW.net';
+  $('dashDeviceSN').textContent = dev.serial_number || '-';
+  const isDipinjamkan = (dev.status_kepemilikan || '').includes('Dipinjamkan') || (dev.status_kepemilikan || '').includes('Sewa');
+  $('dashDeviceKepemilikan').innerHTML = isDipinjamkan 
+    ? '<span class="text-amber-700 font-bold">📦 Aset Sewa RT/RW</span>' 
+    : '<span class="text-emerald-700 font-bold">🏷️ Milik Pribadi</span>';
+  $('dashDeviceGaransi').textContent = dev.garansi_sampai ? `Garansi s.d. ${dev.garansi_sampai}` : 'Garansi Bebas';
+
+  // Tampilkan box pembayaran (QRIS & Transfer Bank) jika belum lunas
+  if (!lunas) {
+    if ($('boxPaymentSection')) $('boxPaymentSection').classList.remove('hidden');
+    renderClientBankAccounts(client.bank_accounts || []);
+  } else {
+    if ($('boxPaymentSection')) $('boxPaymentSection').classList.add('hidden');
+  }
+
+  // Riwayat Invoices Bulanan
+  const invoices = client.invoices || [];
+  $('clientHistoryRows').innerHTML = invoices.map((inv) => {
+    const isPaid = inv.status === 'Lunas';
+    return `<tr class="hover:bg-slate-50/80 transition">
+      <td class="px-5 py-3 font-semibold text-slate-800">${periodeLabel(inv.periode)}</td>
+      <td class="px-5 py-3 font-medium text-slate-700">${rupiah(inv.nominal)}</td>
+      <td class="px-5 py-3">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${isPaid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${inv.status}</span>
+      </td>
+      <td class="px-5 py-3 text-slate-600">${tgl(inv.tanggal_bayar)}</td>
+      <td class="px-5 py-3 text-right whitespace-nowrap">
+        ${isPaid ? `
+          <button type="button" class="btn-download-pdf inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-lg text-xs border border-indigo-200 transition shadow-sm active:scale-95" data-periode="${esc(inv.periode)}" title="Unduh Kwitansi Pembayaran PDF">
+            <span>📄</span> Unduh Kwitansi PDF
+          </button>
+        ` : `
+          <span class="text-xs text-slate-400 italic">Belum Lunas</span>
+        `}
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" class="p-6 text-center text-slate-400">Belum ada riwayat pembayaran</td></tr>';
+
+  // Riwayat Log Jaringan & Laporan
+  const logs = client.network_logs || [];
+  $('clientNetworkLogsList').innerHTML = logs.map((log) => {
+    const isDown = log.status === 'DOWN';
+    const isSelesai = log.status_penanganan === 'Selesai';
+    const isProses = log.status_penanganan === 'Sedang Dikerjakan';
+    let badgeText = log.status_penanganan || (isDown ? 'Pending' : 'Selesai');
+    let badgeColor = isSelesai ? 'bg-emerald-100 text-emerald-800' : (isProses ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800');
+    return `<div class="p-3.5 rounded-xl border ${isDown ? 'bg-red-50/60 border-red-200' : 'bg-emerald-50/60 border-emerald-200'} flex items-start gap-3">
+      <span class="text-base">${isDown ? '🔴' : '🟢'}</span>
+      <div class="flex-1">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-bold text-xs px-2 py-0.5 rounded ${badgeColor}">${badgeText}</span>
+          <span class="font-bold text-xs px-2 py-0.5 rounded ${isDown ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}">${log.status}</span>
+          <span class="text-xs text-slate-600 font-medium">${esc(log.waktu)}</span>
+        </div>
+        <p class="text-xs text-slate-800 font-bold mt-1">⚡ ${esc(log.jenis_kendala || log.keterangan || '-')}</p>
+        ${log.teknisi && log.teknisi !== 'Menunggu Penugasan' ? `<p class="text-[11px] text-indigo-700 mt-0.5">👷‍♂️ Teknisi: ${esc(log.teknisi)}</p>` : ''}
+        ${log.catatan_perbaikan ? `<p class="text-[11px] text-slate-600 mt-0.5">Catatan: ${esc(log.catatan_perbaikan)}</p>` : ''}
+        ${isSelesai && log.durasi ? `<p class="text-[11px] text-emerald-700 mt-0.5 font-medium">⏱️ Durasi Penyelesaian: ${esc(log.durasi)}</p>` : ''}
+      </div>
+    </div>`;
+  }).join('') || '<div class="p-6 text-center text-slate-400 text-xs">Belum ada riwayat gangguan atau pengaduan. Koneksi Anda berjalan normal.</div>';
+
+  // Switch View
+  $('viewLogin').classList.add('hidden');
+  $('viewDashboard').classList.remove('hidden');
+}
+
+// 2. Submit Form Login Pelanggan
+$('formLogin').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const identifier = $('inputIdentifier').value.trim();
+  $('loginError').classList.add('hidden');
+  $('btnLoginSubmit').disabled = true;
+  $('btnLoginSubmit').innerHTML = '<span>Memeriksa Akun...</span>';
+
+  try {
+    const res = await fetch('/api/client/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      $('loginError').textContent = data.error || 'Gagal masuk. Periksa kembali ID Pelanggan Anda.';
+      $('loginError').classList.remove('hidden');
+    } else {
+      // Simpan session ID di localStorage agar tidak logout saat reload
+      localStorage.setItem('client_session_id', data.client.customer_id);
+      renderClientDashboard(data.client);
+      toast(`Selamat datang, ${data.client.nama}`);
+    }
+  } catch (err) {
+    $('loginError').textContent = 'Terjadi kesalahan server: ' + err.message;
+    $('loginError').classList.remove('hidden');
+  } finally {
+    $('btnLoginSubmit').disabled = false;
+    $('btnLoginSubmit').innerHTML = '<span>Masuk Sekarang</span> ➜';
+  }
+});
+
+// 3. Tombol Logout
+$('btnLogout').addEventListener('click', () => {
+  localStorage.removeItem('client_session_id');
+  currentClient = null;
+  $('headerUserActions').classList.add('hidden');
+  $('viewDashboard').classList.add('hidden');
+  $('viewLogin').classList.remove('hidden');
+  $('inputIdentifier').value = '';
+  toast('Anda telah keluar dari Portal Pelanggan.');
+});
+
+// 4. Modal Lapor Gangguan
+function openReportModal() {
+  $('inputIssueText').value = '';
+  $('reportError').classList.add('hidden');
+  $('modalReportIssue').classList.remove('hidden');
+  $('modalReportIssue').classList.add('flex');
+  $('inputIssueText').focus();
+}
+
+function closeReportModal() {
+  $('modalReportIssue').classList.add('hidden');
+  $('modalReportIssue').classList.remove('flex');
+}
+
+$('btnOpenReportIssue').addEventListener('click', openReportModal);
+$('btnCloseModalReport').addEventListener('click', closeReportModal);
+$('btnCancelReport').addEventListener('click', closeReportModal);
+
+$('formReportIssue').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!currentClient) return;
+  const keluhan = $('inputIssueText').value.trim();
+  if (!keluhan) return;
+
+  $('btnSubmitReport').disabled = true;
+  $('btnSubmitReport').textContent = 'Mengirim Laporan...';
+
+  try {
+    const res = await fetch('/api/client/report-issue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_id: currentClient.customer_id,
+        keluhan: keluhan
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      $('reportError').textContent = data.error || 'Gagal mengirim laporan';
+      $('reportError').classList.remove('hidden');
+    } else {
+      closeReportModal();
+      renderClientDashboard(data.client);
+      toast('Laporan gangguan berhasil dikirim ke teknisi RT/RW.net!');
+    }
+  } catch (err) {
+    $('reportError').textContent = 'Error: ' + err.message;
+    $('reportError').classList.remove('hidden');
+  } finally {
+    $('btnSubmitReport').disabled = false;
+    $('btnSubmitReport').innerHTML = '<span>🚀</span> Kirim Laporan ke Admin';
+  }
+});
+
+// ---- 5. Fitur Unduh Kwitansi PDF (jsPDF & Cetak Digital Khusus Client) ----
+function downloadKwitansiPDF(inv) {
+  if (!currentClient || !inv) return;
+
+  const noKwitansi = `KW-${currentClient.customer_id}-${(inv.periode || '').replace('-', '')}`;
+  const periodeStr = periodeLabel(inv.periode);
+  const tglBayarStr = tgl(inv.tanggal_bayar);
+  const fileName = `Kwitansi-${currentClient.customer_id}-${inv.periode}.pdf`;
+
+  if (window.jspdf && window.jspdf.jsPDF) {
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a5' // Dimensi standar kwitansi A5: 148mm x 210mm
+      });
+
+      // 1. Aksen Garis Atas
+      doc.setFillColor(67, 56, 202); // Indigo 700
+      doc.rect(14, 10, 120, 2.5, 'F');
+
+      // 2. Info Kop Brand RT/RW.net (Kiri)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(15);
+      doc.setTextColor(30, 27, 75); // Indigo 950
+      doc.text('RT/RW.net DIGITAL', 14, 21);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139); // Slate 500
+      doc.text('Komunitas Jaringan Internet Berkecepatan Tinggi', 14, 26);
+      doc.text('Bukti Pembayaran & Kwitansi Resmi Elektronik', 14, 30);
+
+      // 3. Judul & No Kwitansi (Kanan)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(5, 150, 105); // Emerald 600
+      doc.text('KWITANSI LUNAS', 134, 21, { align: 'right' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`No. Kwitansi: ${noKwitansi}`, 134, 26, { align: 'right' });
+      doc.text(`Tgl Unduh: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`, 134, 30, { align: 'right' });
+
+      // 4. Garis Pembatas
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.4);
+      doc.line(14, 34, 134, 34);
+
+      // 5. Box Data Pelanggan & Rincian Pembayaran
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(14, 38, 120, 34, 2, 2, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(14, 38, 120, 34, 2, 2, 'S');
+
+      // Kolom Kiri: Pelanggan
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text('TELAH DITERIMA DARI:', 18, 44);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(15, 23, 42);
+      doc.text(currentClient.nama || '-', 18, 49.5);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`ID Pelanggan : ${currentClient.customer_id}`, 18, 54.5);
+      doc.text(`Alamat        : ${(currentClient.alamat || '-').slice(0, 38)}`, 18, 59.5);
+      doc.text(`Wilayah       : ${currentClient.wilayah || '-'}`, 18, 64.5);
+      doc.text(`WhatsApp    : ${currentClient.whatsapp || '-'}`, 18, 69.5);
+
+      // Kolom Kanan: Rincian Transaksi
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text('RINCIAN TRANSAKSI:', 78, 44);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Bulan Tagihan   : ${periodeStr}`, 78, 49.5);
+      doc.text(`Tanggal Bayar   : ${tglBayarStr}`, 78, 54.5);
+      doc.text(`Metode Bayar    : QRIS DANA / Kasir Sistem`, 78, 59.5);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(5, 150, 105);
+      doc.text(`Status Tagihan   : LUNAS (Valid)`, 78, 64.5);
+
+      // 6. Tabel Item Rincian Layanan
+      doc.setFillColor(241, 245, 249);
+      doc.rect(14, 76, 120, 7.5, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(14, 76, 120, 7.5, 'S');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(51, 65, 85);
+      doc.text('NO', 18, 81);
+      doc.text('DESKRIPSI LAYANAN', 28, 81);
+      doc.text('PERIODE', 82, 81);
+      doc.text('JUMLAH (RP)', 130, 81, { align: 'right' });
+
+      // Baris Item
+      doc.setDrawColor(226, 232, 240);
+      doc.line(14, 94, 134, 94);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(30, 41, 59);
+      doc.text('1.', 18, 88.5);
+      doc.text(`Langganan Akses Internet (${currentClient.paket})`, 28, 88.5);
+      doc.text(periodeStr, 82, 88.5);
+      doc.text(rupiah(inv.nominal), 130, 88.5, { align: 'right' });
+
+      // 7. Box Total Pembayaran Lunas
+      doc.setFillColor(236, 253, 245);
+      doc.setDrawColor(167, 243, 208);
+      doc.roundedRect(14, 97, 120, 13, 2, 2, 'FD');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(6, 95, 70);
+      doc.text('TOTAL PEMBAYARAN LUNAS:', 20, 105);
+
+      doc.setFontSize(12);
+      doc.setTextColor(4, 120, 87);
+      doc.text(rupiah(inv.nominal), 130, 105, { align: 'right' });
+
+      // 8. Keterangan Resmi
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Keterangan: Pembayaran telah diterima penuh untuk pemakaian internet periode tersebut.', 14, 115);
+      doc.text('Kwitansi digital ini sah dan diterbitkan secara resmi oleh Sistem Billing RT/RW.net.', 14, 119);
+
+      // 9. Tanda Tangan Pelanggan & Cap Digital Sah
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(71, 85, 105);
+      doc.text('Pelanggan,', 20, 127);
+      doc.setFont('helvetica', 'bold');
+      doc.text(currentClient.nama || '-', 20, 146);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`ID: ${currentClient.customer_id}`, 20, 150);
+
+      // Cap Sah Stempel Digital
+      doc.setDrawColor(5, 150, 105);
+      doc.setLineWidth(0.6);
+      doc.roundedRect(76, 124, 58, 27, 2, 2, 'S');
+
+      doc.setFillColor(236, 253, 245);
+      doc.roundedRect(77, 125, 56, 25, 1.5, 1.5, 'F');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(4, 120, 87);
+      doc.text('★ LUNAS - VERIFIED ★', 105, 130.5, { align: 'center' });
+
+      doc.setFontSize(7);
+      doc.setTextColor(6, 95, 70);
+      doc.text('SISTEM BILLING RT/RW.NET', 105, 135.5, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Tanggal: ${tglBayarStr}`, 105, 140, { align: 'center' });
+      doc.text(`ID Trx: ${noKwitansi}`, 105, 144, { align: 'center' });
+      doc.setFontSize(6);
+      doc.setTextColor(16, 185, 129);
+      doc.text('DIVERIFIKASI RESMI OLEH SISTEM', 105, 148, { align: 'center' });
+
+      // 10. Footer Dokumen
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.3);
+      doc.line(14, 157, 134, 157);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text('Kwitansi elektronik ini tidak memerlukan tanda tangan basah dan sah di mata pengelola.', 74, 162, { align: 'center' });
+
+      // Download file PDF instan
+      doc.save(fileName);
+      toast(`✅ Kwitansi PDF berhasil diunduh: ${fileName}`);
+      return;
+    } catch (err) {
+      console.error('jsPDF generation error, fallback to print window:', err);
+    }
+  }
+
+  // Fallback cetak jika library jsPDF belum siap
+  openPrintableReceiptFallback(inv);
+}
+
+function openPrintableReceiptFallback(inv) {
+  const noKwitansi = `KW-${currentClient.customer_id}-${(inv.periode || '').replace('-', '')}`;
+  const periodeStr = periodeLabel(inv.periode);
+  const tglBayarStr = tgl(inv.tanggal_bayar);
+
+  const printWindow = window.open('', '_blank', 'width=700,height=800');
+  if (!printWindow) {
+    return alert('Mohon izinkan pop-up browser untuk mencetak/mengunduh kwitansi.');
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+      <meta charset="UTF-8">
+      <title>Kwitansi ${noKwitansi}</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 30px; color: #1e293b; }
+        .receipt-box { max-width: 620px; margin: 0 auto; border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px; }
+        .brand { font-size: 20px; font-weight: 800; color: #4338ca; }
+        .sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+        .title { text-align: right; font-size: 18px; font-weight: bold; color: #059669; }
+        .trx { text-align: right; font-size: 11px; color: #64748b; margin-top: 2px; }
+        .info-grid { display: flex; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 12px; margin-bottom: 16px; }
+        .table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
+        .table th, .table td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        .table th { background: #f1f5f9; font-weight: 700; color: #475569; }
+        .total-box { display: flex; justify-content: space-between; align-items: center; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 12px; font-weight: bold; margin-bottom: 20px; }
+        .total-val { font-size: 18px; color: #047857; }
+        .footer-sign { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; padding-top: 10px; }
+        .stamp { border: 2px dashed #059669; border-radius: 8px; background: #ecfdf5; padding: 8px 16px; text-align: center; color: #047857; font-weight: bold; font-size: 12px; }
+        @media print { .no-print { display: none; } body { margin: 0; } }
+      </style>
+    </head>
+    <body>
+      <div class="receipt-box">
+        <div class="header">
+          <div>
+            <div class="brand">RT/RW.net DIGITAL</div>
+            <div class="sub">Bukti Pembayaran & Kwitansi Resmi Elektronik</div>
+          </div>
+          <div>
+            <div class="title">KWITANSI LUNAS</div>
+            <div class="trx">No: ${noKwitansi}</div>
+            <div class="trx">Tanggal: ${tglBayarStr}</div>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div>
+            <strong>Diterima Dari:</strong><br>
+            ${esc(currentClient.nama)}<br>
+            ID: ${esc(currentClient.customer_id)}<br>
+            Alamat: ${esc(currentClient.alamat)} (${esc(currentClient.wilayah)})
+          </div>
+          <div style="text-align: right;">
+            <strong>Rincian Layanan:</strong><br>
+            Paket: ${esc(currentClient.paket)}<br>
+            Bulan: ${esc(periodeStr)}<br>
+            Status: <span style="color: #059669; font-weight: bold;">LUNAS</span>
+          </div>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Deskripsi Layanan</th>
+              <th>Periode</th>
+              <th style="text-align: right;">Jumlah</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Langganan Akses Internet RT/RW.net (${esc(currentClient.paket)})</td>
+              <td>${esc(periodeStr)}</td>
+              <td style="text-align: right;">${rupiah(inv.nominal)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="total-box">
+          <span>TOTAL PEMBAYARAN:</span>
+          <span class="total-val">${rupiah(inv.nominal)}</span>
+        </div>
+
+        <div class="footer-sign">
+          <div style="font-size: 11px; color: #64748b;">
+            Pelanggan,<br><br><br>
+            <strong>${esc(currentClient.nama)}</strong><br>
+            ID: ${esc(currentClient.customer_id)}
+          </div>
+          <div class="stamp">
+            ★ LUNAS - VERIFIED ★<br>
+            <span style="font-size: 10px; font-weight: normal; color: #475569;">SISTEM BILLING RT/RW.NET</span><br>
+            <span style="font-size: 9px; color: #64748b;">${tglBayarStr}</span>
+          </div>
+        </div>
+      </div>
+      <script>
+        window.onload = function() { window.print(); };
+      <\/script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// Delegasi Event Klik Tombol Unduh Kwitansi PDF di Tabel Riwayat
+$('clientHistoryRows').addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-download-pdf');
+  if (!btn || !currentClient) return;
+  const periode = btn.dataset.periode;
+  const inv = (currentClient.invoices || []).find((i) => i.periode === periode);
+  if (inv) {
+    downloadKwitansiPDF(inv);
+  }
+});
+
+// Helper Badge Bank
+function getBankBadgeClass(bankName) {
+  const b = String(bankName || '').toUpperCase();
+  if (b.includes('BCA')) return 'bg-blue-600 text-white';
+  if (b.includes('MANDIRI')) return 'bg-amber-500 text-slate-900';
+  if (b.includes('BRI')) return 'bg-blue-800 text-white';
+  if (b.includes('BNI')) return 'bg-orange-600 text-white';
+  if (b.includes('BSI')) return 'bg-teal-700 text-white';
+  if (b.includes('SEABANK')) return 'bg-orange-500 text-white';
+  if (b.includes('JAGO')) return 'bg-amber-400 text-slate-900';
+  if (b.includes('DANA')) return 'bg-sky-500 text-white';
+  if (b.includes('GOPAY')) return 'bg-emerald-600 text-white';
+  if (b.includes('OVO')) return 'bg-purple-700 text-white';
+  return 'bg-slate-700 text-white';
+}
+
+// Render Daftar Rekening Bank Transfer Manual untuk Pelanggan
+async function renderClientBankAccounts(accounts = []) {
+  const container = $('clientBankAccountsList');
+  if (!container) return;
+
+  let list = accounts;
+  if (!list || list.length === 0) {
+    try {
+      const res = await fetch('/api/bank-accounts?active_only=true');
+      if (res.ok) list = await res.json();
+    } catch (e) {}
+  }
+
+  if (!list || list.length === 0) {
+    container.innerHTML = `
+      <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs text-slate-400">
+        Belum ada nomor rekening terdaftar. Silakan hubungi admin RT/RW.net.
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(b => {
+    const badgeColor = getBankBadgeClass(b.nama_bank);
+    return `
+      <div class="p-3 bg-slate-50/80 hover:bg-slate-50 border border-slate-200/90 rounded-xl transition flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div class="flex items-start gap-2.5">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-black tracking-wide shrink-0 ${badgeColor}">
+            ${esc(b.nama_bank)}
+          </span>
+          <div>
+            <div class="font-mono font-extrabold text-slate-900 text-sm tracking-wide">${esc(b.nomor_rekening)}</div>
+            <div class="text-xs text-slate-700 font-semibold mt-0.5">a/n ${esc(b.atas_nama)}</div>
+            ${b.keterangan ? `<div class="text-[10px] text-slate-400 mt-0.5">${esc(b.keterangan)}</div>` : ''}
+          </div>
+        </div>
+        <button type="button" class="btn-copy-client-acc shrink-0 px-3 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-700 transition flex items-center justify-center gap-1 shadow-2xs" data-no="${esc(b.nomor_rekening)}">
+          <span>📋</span> Salin No. Rekening
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+// Copy Nomor Rekening di Portal Pelanggan
+if ($('clientBankAccountsList')) {
+  $('clientBankAccountsList').addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-copy-client-acc');
+    if (!btn) return;
+    const no = btn.dataset.no;
+    if (no) {
+      navigator.clipboard.writeText(no).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span>✅</span> Tersalin!';
+        btn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-300');
+        setTimeout(() => {
+          btn.innerHTML = orig;
+          btn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-300');
+        }, 2000);
+        toast(`Nomor rekening ${no} berhasil disalin!`);
+      }).catch(() => {
+        toast(`Nomor rekening: ${no}`);
+      });
+    }
+  });
+}
+
+// Tombol WhatsApp Konfirmasi Bukti Transfer Bank
+if ($('btnConfirmBankTransferWA')) {
+  $('btnConfirmBankTransferWA').addEventListener('click', () => {
+    if (!currentClient) return;
+    const periode = periodeLabel((currentClient.jatuh_tempo || '').slice(0, 7));
+    const msg = `Halo Admin RT/RW.net, saya *${currentClient.nama}* (ID: *${currentClient.customer_id}*) ingin konfirmasi pembayaran tagihan internet periode *${periode}* sebesar *${rupiah(currentClient.harga)}* via transfer bank manual.\n\nBerikut saya lampirkan bukti transfernya.`;
+    const targetPhone = currentClient.admin_phone || '6281234567890';
+    const url = `https://wa.me/${targetPhone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  });
+}
+
+// 6. Cek Session Login Tersimpan Otomatis
+window.addEventListener('DOMContentLoaded', async () => {
+  const savedId = localStorage.getItem('client_session_id');
+  if (savedId) {
+    try {
+      const res = await fetch(`/api/client/profile/${savedId}`);
+      if (res.ok) {
+        const client = await res.json();
+        renderClientDashboard(client);
+      } else {
+        localStorage.removeItem('client_session_id');
+      }
+    } catch (e) {
+      localStorage.removeItem('client_session_id');
+    }
+  }
+});
+</script>
+</body>
+</html>
+
