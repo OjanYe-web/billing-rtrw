@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Billing RT/RW.net - Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      body { background: white !important; color: black !important; font-size: 11pt; }
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      .shadow, .shadow-xl { box-shadow: none !important; border: 1px solid #ddd !important; }
+      table { width: 100% !important; border-collapse: collapse !important; }
+      th, td { border: 1px solid #ccc !important; padding: 6px 8px !important; }
+      thead { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+    .print-only { display: none; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+  <!-- Header Nav (Hidden in print) -->
+  <header class="bg-indigo-700 text-white shadow no-print">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">📡</span>
+        <div>
+          <h1 class="text-lg font-bold leading-tight">Billing RT/RW.net</h1>
+          <p class="text-xs text-indigo-200">Sistem Manajemen Operasional & Penagihan</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnSettings" class="bg-white/15 hover:bg-white/25 text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+          <span>⚙️</span> Pengaturan WA
+        </button>
+        <button id="btnGenerate" class="bg-white/15 hover:bg-white/25 text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+          <span>🔄</span> Generate Tagihan
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner Header Khusus Cetak -->
+  <div class="print-only p-6 border-b border-slate-300 mb-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900">LAPORAN KEUANGAN & PENAGIHAN RT/RW.net</h1>
+        <p class="text-sm text-slate-600 mt-1">Sistem Manajemen Operasional Jaringan Internet Komunitas</p>
+      </div>
+      <div class="text-right text-xs text-slate-500">
+        <p id="printDate"></p>
+        <p>Status Data: Sinkronisasi Terkini</p>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <!-- Ringkasan Statistik Keuangan -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4" id="stats"></section>
+
+    <!-- Toolbar & Tabel Pelanggan -->
+    <section class="bg-white rounded-xl shadow">
+      <!-- Toolbar Atas (No Print) -->
+      <div class="p-4 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between border-b no-print">
+        <div class="flex items-center gap-2">
+          <h2 class="font-bold text-slate-800 text-base">Daftar Pelanggan</h2>
+          <span id="badgeCount" class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">0</span>
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-2">
+          <input id="search" type="search" placeholder="Cari nama, alamat, paket..." class="border rounded-lg px-3 py-2 text-sm w-full sm:w-48 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          
+          <select id="filterWilayah" class="border rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none">
+            <option value="">Semua Wilayah</option>
+          </select>
+          
+          <select id="filter" class="border rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none">
+            <option value="">Status Bayar: Semua</option>
+            <option value="Lunas">Lunas</option>
+            <option value="Belum Lunas">Belum Lunas</option>
+          </select>
+
+          <select id="filterJaringan" class="border rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none">
+            <option value="">Status Jaringan: Semua</option>
+            <option value="Aktif">Aktif</option>
+            <option value="Terisolir / Gangguan">Terisolir / Gangguan</option>
+          </select>
+
+          <div class="flex items-center gap-1.5 ml-auto sm:ml-0">
+            <!-- Tombol Tambah Pelanggan -->
+            <button id="btnAdd" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-3.5 py-2 rounded-lg flex items-center gap-1 transition">
+              <span>+</span> Pelanggan
+            </button>
+
+            <!-- Export Dropdown / Buttons -->
+            <div class="flex items-center gap-1 bg-slate-50 border rounded-lg p-1">
+              <a href="/api/export/csv" id="btnExportCsv" class="px-2.5 py-1 text-xs font-medium text-slate-700 hover:text-indigo-600 hover:bg-white rounded transition flex items-center gap-1" title="Download Excel / CSV">
+                <span>📊</span> CSV
+              </a>
+              <span class="text-slate-300">|</span>
+              <button id="btnPrint" class="px-2.5 py-1 text-xs font-medium text-slate-700 hover:text-indigo-600 hover:bg-white rounded transition flex items-center gap-1" title="Cetak Rekap Laporan">
+                <span>🖨️</span> Cetak
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel Data -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-left text-slate-600 border-b">
+            <tr>
+              <th class="px-4 py-3">Nama & Kontak</th>
+              <th class="px-4 py-3">Alamat & Wilayah</th>
+              <th class="px-4 py-3">Paket & Harga</th>
+              <th class="px-4 py-3">Jatuh Tempo</th>
+              <th class="px-4 py-3">Status Tagihan</th>
+              <th class="px-4 py-3">Status Jaringan & Log</th>
+              <th class="px-4 py-3 text-right no-print">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="rows" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Tambah / Edit Pelanggan -->
+  <div id="modalForm" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 no-print">
+    <form id="form" class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+      <div class="px-5 py-4 border-b flex items-center justify-between shrink-0">
+        <h3 id="formTitle" class="font-bold text-slate-800 text-lg"></h3>
+        <button type="button" data-close class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+      </div>
+      <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm overflow-y-auto">
+        <label class="sm:col-span-2 block font-medium text-slate-700">Nama Pelanggan <span class="text-red-500">*</span>
+          <input name="nama" required class="mt-1 w-full border rounded-lg px-3 py-2 font-normal focus:ring-2 focus:ring-indigo-500 focus:outline-none"></label>
+        
+        <label class="block font-medium text-slate-700">Nomor WhatsApp <span class="text-red-500">*</span>
+          <input name="whatsapp" required inputmode="numeric" placeholder="62812xxxxxxx" class="mt-1 w-full border rounded-lg px-3 py-2 font-normal focus:ring-2 focus:ring-indigo-500 focus:outline-none"></label>
+        
+        <label class="block font-medium text-slate-700">Wilayah / Cluster <span class="text-red-500">*</span>
+          <input name="wilayah" required list="wilayahList" placeholder="mis. Kel. Kebayoran Baru" class="mt-1 w-full border rounded-lg px-3 py-2 font-normal focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <datalist id="wilayahList"></datalist>
+        </label>
+        
+        <label class="sm:col-span-2 block font-medium text-slate-700">Alamat Lengkap <span class="text-red-500">*</span>
+          <input name="alamat" required class="mt-1 w-full border rounded-lg px-3 py-2 font-normal focus:ring-2 focus:ring-indigo-500 focus:outline-none"></label>
+        
+        <label class="block font-medium text-slate-700">Paket Internet <span class="text-red-500">*</span>
+          <input name="paket" required list="paketList" placeholder="mis. Paket Warga 10 Mbps" class="mt-1 w-full border rounded-lg px-3 py-2 font-normal focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <datalist id="paketList"></datalist>
+        </label>
+        
+        <label class="block font-medium text-slate-700">Harga (Rp) <span class="text-red-500">*</span>
+          <input name="harga" type="number" min="1" step="1000" required class="mt-1 w-full border rounded-lg px-3 py-2 font-normal focus:ring-2 focus:ring-indigo-500 focus:outline-none"></label>
+        
+        <label class="block font-medium text-slate-700">Jatuh Tempo <span class="text-red-500">*</span>
+          <input name="jatuh_tempo" type="date" required class="mt-1 w-full border rounded-lg px-3 py-2 font-normal focus:ring-2 focus:ring-indigo-500 focus:outline-none"></label>
+
+        <label class="block font-medium text-slate-700">Status Jaringan
+          <select name="status_jaringan" class="mt-1 w-full border rounded-lg px-3 py-2 font-normal bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="Aktif">Aktif</option>
+            <option value="Terisolir / Gangguan">Terisolir / Gangguan</option>
+          </select>
+        </label>
+
+        <label class="sm:col-span-2 block font-medium text-slate-700">Catatan Kendala Teknis (Opsional)
+          <input name="catatan_kendala" placeholder="Contoh: Kabel fiber putus di tiang 4, ONU mati" class="mt-1 w-full border rounded-lg px-3 py-2 font-normal focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </label>
+
+        <p id="formError" class="sm:col-span-2 text-red-600 text-xs hidden"></p>
+      </div>
+      <div class="px-5 py-4 border-t flex justify-end gap-2 shrink-0">
+        <button type="button" data-close class="px-4 py-2 text-sm rounded-lg border hover:bg-slate-50">Batal</button>
+        <button type="submit" class="px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700">Simpan Data</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Modal Konfirmasi Pelunasan & Input Tanggal Bayar -->
+  <div id="modalPay" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-sm">
+      <div class="px-5 py-4 border-b flex items-center justify-between">
+        <h3 class="font-bold text-lg text-slate-800">Pelunasan Tagihan</h3>
+        <button type="button" data-close class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+      </div>
+      <form id="formPay" class="p-5 space-y-4 text-sm">
+        <input type="hidden" id="payCustomerId">
+        <div class="bg-slate-50 p-3 rounded-lg border space-y-1">
+          <p class="text-slate-600">Pelanggan: <span id="payCustomerName" class="font-bold text-slate-900"></span></p>
+          <p class="text-slate-600">Total Tagihan: <span id="payAmount" class="font-bold text-indigo-600"></span></p>
+        </div>
+        <div>
+          <label for="payDate" class="block font-medium text-slate-700 mb-1">Tanggal Pembayaran <span class="text-red-500">*</span></label>
+          <input type="date" id="payDate" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none">
+          <p class="text-xs text-slate-500 mt-1">Default terisi tanggal hari ini.</p>
+        </div>
+        <p id="payError" class="text-red-600 text-xs hidden"></p>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" data-close class="px-4 py-2 text-sm rounded-lg border hover:bg-slate-50">Batal</button>
+          <button type="submit" class="px-4 py-2 text-sm rounded-lg bg-green-600 text-white font-medium hover:bg-green-700">Konfirmasi Lunas</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Catat Gangguan Real-Time (DOWN / UP) -->
+  <div id="modalLogGangguan" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+      <div class="px-5 py-4 border-b flex items-center justify-between">
+        <h3 class="font-bold text-lg text-slate-800">Catat Status Gangguan Real-Time</h3>
+        <button type="button" data-close class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+      </div>
+      <form id="formGangguan" class="p-5 space-y-4 text-sm">
+        <input type="hidden" id="gangguanCustomerId">
+        <div class="bg-slate-50 p-3 rounded-lg border">
+          <p class="text-slate-600">Pelanggan: <span id="gangguanCustomerName" class="font-bold text-slate-900"></span></p>
+          <p class="text-slate-500 text-xs mt-0.5" id="gangguanCustomerInfo"></p>
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Status Gangguan Real-Time:</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-red-50/50 has-[:checked]:border-red-500 has-[:checked]:bg-red-50">
+              <input type="radio" name="gangguan_status" value="DOWN" class="text-red-600 focus:ring-red-500">
+              <div>
+                <span class="font-bold text-red-600 text-sm">🔴 DOWN</span>
+                <p class="text-xs text-slate-500">Internet putus / isolir</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-emerald-50/50 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+              <input type="radio" name="gangguan_status" value="UP" checked class="text-emerald-600 focus:ring-emerald-500">
+              <div>
+                <span class="font-bold text-emerald-600 text-sm">🟢 UP</span>
+                <p class="text-xs text-slate-500">Internet normal kembali</p>
+              </div>
+            </label>
+          </div>
+        </div>
+        <div>
+          <label for="gangguanWaktu" class="block font-medium text-slate-700 mb-1">Waktu Kejadian (Real-Time):</label>
+          <div class="flex gap-2">
+            <input type="text" id="gangguanWaktu" required placeholder="Contoh: 11 Oktober 2026, 20:00 WIB" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <button type="button" id="btnNowGangguan" class="px-2.5 py-2 text-xs font-medium border bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-700 whitespace-nowrap">⏱️ Sekarang</button>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">Dapat disesuaikan jika mencatat kejadian yang telah lewat.</p>
+        </div>
+        <div>
+          <label for="gangguanKet" class="block font-medium text-slate-700 mb-1">Keterangan / Kendala Teknis:</label>
+          <input type="text" id="gangguanKet" placeholder="Misal: Kabel FO putus tiang 2 / ONU mati / Normal kembali" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+        <p id="gangguanError" class="text-red-600 text-xs hidden"></p>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" data-close class="px-4 py-2 text-sm rounded-lg border hover:bg-slate-50">Batal</button>
+          <button type="submit" class="px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700">Simpan Log Gangguan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Riwayat (Gabungan Invoice & Tab Log Gangguan Real-Time) -->
+  <div id="modalHistory" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[88vh] flex flex-col">
+      <div class="px-5 py-4 border-b flex items-center justify-between shrink-0">
+        <div>
+          <h3 id="historyTitle" class="font-bold text-lg text-slate-800"></h3>
+          <p class="text-xs text-slate-500" id="historySubTitle">Detail Pelanggan</p>
+        </div>
+        <button type="button" data-close class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="px-5 pt-3 border-b flex gap-4 text-sm font-medium shrink-0">
+        <button type="button" id="tabInvoices" class="tab-btn pb-2.5 border-b-2 border-indigo-600 text-indigo-700 flex items-center gap-1.5">
+          <span>💳</span> Riwayat Pembayaran
+        </button>
+        <button type="button" id="tabLogs" class="tab-btn pb-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5">
+          <span>🚨</span> Log Riwayat Gangguan (UP / DOWN)
+          <span id="badgeLogsCount" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600">0</span>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto flex-1">
+        <!-- Panel 1: Riwayat Invoice -->
+        <div id="panelInvoices" class="space-y-3">
+          <table class="w-full text-sm">
+            <thead class="text-left text-slate-500 border-b">
+              <tr>
+                <th class="py-2.5">Periode</th>
+                <th class="py-2.5">Nominal</th>
+                <th class="py-2.5">Status</th>
+                <th class="py-2.5">Tgl Bayar</th>
+              </tr>
+            </thead>
+            <tbody id="historyRows" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+
+        <!-- Panel 2: Log Riwayat Gangguan (UP/DOWN) -->
+        <div id="panelLogs" class="hidden space-y-4">
+          <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg border">
+            <span class="text-xs text-slate-600">Rekam jejak kestabilan koneksi & downtime pelanggan.</span>
+            <button type="button" id="btnAddLogFromHistory" class="text-xs font-semibold px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-1 transition">
+              <span>+</span> Catat Gangguan Baru
+            </button>
+          </div>
+
+          <div id="networkLogsList" class="space-y-2.5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal WhatsApp Sender & Pilihan Template -->
+  <div id="modalWa" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+      <div class="px-5 py-4 border-b flex items-center justify-between shrink-0">
+        <div>
+          <h3 class="font-bold text-lg text-slate-800">Kirim Pengingat WhatsApp</h3>
+          <p class="text-xs text-slate-500" id="waTargetInfo"></p>
+        </div>
+        <button type="button" data-close class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+      </div>
+      <div class="p-5 space-y-4 text-sm overflow-y-auto">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Pilih Template Pesan:</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <button type="button" data-tpl="general" class="btn-tpl border px-2.5 py-1.5 rounded-lg bg-indigo-50 border-indigo-300 text-indigo-700 font-medium">Umum</button>
+            <button type="button" data-tpl="h3" class="btn-tpl border px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700">H-3 Tempo</button>
+            <button type="button" data-tpl="due" class="btn-tpl border px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700">Hari Ini (Due)</button>
+            <button type="button" data-tpl="overdue" class="btn-tpl border px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 text-red-600">Lewat Tempo</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Pratinjau / Sesuaikan Pesan:</label>
+          <textarea id="waMessageText" rows="7" class="w-full border rounded-lg p-3 text-xs sm:text-sm font-mono text-slate-800 focus:ring-2 focus:ring-green-500 focus:outline-none"></textarea>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-lg border text-xs text-slate-600 flex items-center justify-between">
+          <div>
+            <span>Metode Pengiriman: </span>
+            <span id="waMethodBadge" class="font-semibold text-slate-800"></span>
+          </div>
+          <button type="button" id="btnConfigFromModal" class="text-indigo-600 hover:underline">Ubah Gateway</button>
+        </div>
+      </div>
+      <div class="px-5 py-4 border-t flex justify-end gap-2 shrink-0">
+        <button type="button" data-close class="px-4 py-2 text-sm rounded-lg border hover:bg-slate-50">Batal</button>
+        <button type="button" id="btnSendWaExec" class="px-4 py-2 text-sm rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 flex items-center gap-1.5">
+          <span>📲</span> Kirim Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Pengaturan WhatsApp Gateway & Template -->
+  <div id="modalSettings" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 no-print">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col">
+      <div class="px-5 py-4 border-b flex items-center justify-between shrink-0">
+        <h3 class="font-bold text-lg text-slate-800">Pengaturan WhatsApp Gateway</h3>
+        <button type="button" data-close class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+      </div>
+      <form id="formSettings" class="p-5 space-y-4 text-sm overflow-y-auto">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Provider WhatsApp:</label>
+          <select id="settingProvider" class="w-full border rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="manual">Manual / Web WhatsApp (wa.me) - Gratis Tanpa Token</option>
+            <option value="fonnte">Fonnte (Direct API Gateway)</option>
+            <option value="wablas">Wablas (Direct API Gateway)</option>
+          </select>
+          <p class="text-xs text-slate-500 mt-1">Jika memilih Fonnte/Wablas, pesan dikirim otomatis via server backend menggunakan API Token.</p>
+        </div>
+
+        <div id="tokenGroup" class="hidden">
+          <label class="block font-medium text-slate-700 mb-1">API Token / API Key:</label>
+          <input type="password" id="settingToken" placeholder="Masukkan token API Fonnte / Wablas Anda" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <p class="text-xs text-slate-500 mt-1">Token tersimpan aman di settings server lokal.</p>
+        </div>
+
+        <div class="pt-2 border-t">
+          <h4 class="font-semibold text-slate-800 mb-2">Template Pesan Dinamis</h4>
+          <p class="text-xs text-slate-500 mb-3">Variabel tersedia: <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-700">{nama}</code>, <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-700">{paket}</code>, <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-700">{total_tagihan}</code>, <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-700">{jatuh_tempo}</code>, <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-700">{periode}</code>, <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-700">{status_jaringan}</code></p>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Template Umum (Pengingat Standar):</label>
+              <textarea id="tplGeneral" rows="3" class="w-full border rounded-lg p-2 text-xs font-mono"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Template H-3 Jatuh Tempo:</label>
+              <textarea id="tplH3" rows="3" class="w-full border rounded-lg p-2 text-xs font-mono"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Template Jatuh Tempo (Hari H):</label>
+              <textarea id="tplDue" rows="3" class="w-full border rounded-lg p-2 text-xs font-mono"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Template Melewati Jatuh Tempo (Overdue / Peringatan Isolir):</label>
+              <textarea id="tplOverdue" rows="3" class="w-full border rounded-lg p-2 text-xs font-mono"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" data-close class="px-4 py-2 text-sm rounded-lg border hover:bg-slate-50">Batal</button>
+          <button type="submit" class="px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700">Simpan Pengaturan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-slate-900 text-white text-sm px-4 py-2.5 rounded-lg shadow-lg hidden z-50 no-print"></div>
+
+<script>
+const rupiah = (n) => 'Rp ' + Number(n).toLocaleString('id-ID');
+const tgl = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+const periodeLabel = (p) => p ? new Date(p + '-01T00:00:00').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : '-';
+const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $ = (id) => document.getElementById(id);
+
+let customers = [];
+let appSettings = {};
+let editingId = null;
+let currentWaCustomer = null;
+let historyCustomer = null;
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 2800);
+}
+
+const todayStr = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const pad2 = (n) => String(n).padStart(2, '0');
+const formatWaktuIndoRealtime = (d = new Date()) => {
+  const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}, ${pad2(d.getHours())}:${pad2(d.getMinutes())} WIB`;
+};
+
+// Format teks pesan dinamis berdasarkan template
+function compileMessage(template, c) {
+  if (!template) return '';
+  return template
+    .replace(/{nama}/g, c.nama || '')
+    .replace(/{whatsapp}/g, c.whatsapp || '')
+    .replace(/{alamat}/g, c.alamat || '')
+    .replace(/{wilayah}/g, c.wilayah || '')
+    .replace(/{paket}/g, c.paket || '')
+    .replace(/{total_tagihan}/g, rupiah(c.harga))
+    .replace(/{jatuh_tempo}/g, tgl(c.jatuh_tempo))
+    .replace(/{periode}/g, periodeLabel((c.jatuh_tempo || '').slice(0, 7)))
+    .replace(/{status_tagihan}/g, c.status_tagihan || '')
+    .replace(/{status_jaringan}/g, c.status_jaringan || 'Aktif')
+    .replace(/{catatan_kendala}/g, c.catatan_kendala || '-');
+}
+
+// ---- Render Tampilan Dashboard & Statistik ----
+function render() {
+  const q = $('search').value.toLowerCase();
+  const fStatus = $('filter').value;
+  const fWilayah = $('filterWilayah').value;
+  const fJaringan = $('filterJaringan').value;
+
+  const list = customers.filter((c) =>
+    (!fStatus || c.status_tagihan === fStatus) &&
+    (!fWilayah || c.wilayah === fWilayah) &&
+    (!fJaringan || (c.status_jaringan || 'Aktif') === fJaringan) &&
+    (c.nama + ' ' + c.alamat + ' ' + (c.wilayah || '') + ' ' + (c.paket || '') + ' ' + (c.catatan_kendala || '')).toLowerCase().includes(q)
+  );
+
+  $('badgeCount').textContent = `${list.length} dari ${customers.length}`;
+
+  const belum = customers.filter((c) => c.status_tagihan !== 'Lunas');
+  const terisolir = customers.filter((c) => (c.status_jaringan || 'Aktif') !== 'Aktif');
+
+  const card = (label, val, sub, color) => `
+    <div class="bg-white rounded-xl shadow p-4">
+      <div class="text-xs font-medium text-slate-500 uppercase tracking-wide">${label}</div>
+      <div class="text-2xl font-bold mt-1 ${color}">${val}</div>
+      <div class="text-xs text-slate-400 mt-1">${sub}</div>
+    </div>`;
+
+  $('stats').innerHTML =
+    card('Total Pelanggan', customers.length, `${terisolir.length} Bermasalah/Isolir`, 'text-slate-800') +
+    card('Lunas', customers.length - belum.length, rupiah(customers.filter(c => c.status_tagihan === 'Lunas').reduce((a, c) => a + c.harga, 0)), 'text-green-600') +
+    card('Belum Lunas', belum.length, `${belum.length} Pelanggan Menunggak`, 'text-red-600') +
+    card('Total Tunggakan', rupiah(belum.reduce((a, c) => a + c.harga, 0)), 'Estimasi Piutang', 'text-amber-600');
+
+  $('rows').innerHTML = list.map((c) => {
+    const lunas = c.status_tagihan === 'Lunas';
+    const aktif = (c.status_jaringan || 'Aktif') === 'Aktif';
+    const logCount = (c.network_logs || []).length;
+
+    return `<tr class="hover:bg-slate-50/80 transition">
+      <!-- Nama & Kontak -->
+      <td class="px-4 py-3">
+        <div class="font-bold text-slate-900">${esc(c.nama)}</div>
+        <div class="text-xs text-slate-500 flex items-center gap-1">
+          <span>📱</span> ${esc(c.whatsapp)}
+        </div>
+      </td>
+
+      <!-- Alamat & Wilayah -->
+      <td class="px-4 py-3">
+        <div class="text-slate-800">${esc(c.alamat)}</div>
+        <div class="mt-1">
+          <span class="inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-medium">📍 ${esc(c.wilayah || '-')}</span>
+        </div>
+      </td>
+
+      <!-- Paket & Harga -->
+      <td class="px-4 py-3">
+        <div class="font-medium text-slate-800">${esc(c.paket)}</div>
+        <div class="text-xs text-slate-500">${rupiah(c.harga)} / bln</div>
+      </td>
+
+      <!-- Jatuh Tempo -->
+      <td class="px-4 py-3">
+        <span class="text-slate-700">${tgl(c.jatuh_tempo)}</span>
+      </td>
+
+      <!-- Status Tagihan -->
+      <td class="px-4 py-3">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${lunas ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+          ${lunas ? '● Lunas' : '○ Belum Lunas'}
+        </span>
+      </td>
+
+      <!-- Status Jaringan & Tombol Catat Gangguan -->
+      <td class="px-4 py-3">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${aktif ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+            ${aktif ? '🟢 Aktif' : '🔴 Terisolir / Gangguan'}
+          </span>
+          <button data-id="${c.id}" class="catat-gangguan text-xs px-2 py-0.5 rounded border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1 font-medium" title="Catat Gangguan DOWN/UP Real-Time">
+            <span>⚡</span> Catat Gangguan
+          </button>
+        </div>
+        ${c.catatan_kendala ? `<div class="text-xs text-amber-700 mt-1 flex items-start gap-1">⚠️ <span>${esc(c.catatan_kendala)}</span></div>` : ''}
+        ${logCount > 0 ? `<div class="text-[11px] text-slate-400 mt-0.5 cursor-pointer hover:underline history-to-logs" data-id="${c.id}">⏱️ ${logCount} log riwayat gangguan</div>` : ''}
+      </td>
+
+      <!-- Aksi -->
+      <td class="px-4 py-3 text-right whitespace-nowrap space-x-1 no-print">
+        <button data-id="${c.id}" class="toggle text-xs px-2.5 py-1.5 rounded-lg border font-medium transition ${lunas ? 'border-slate-300 text-slate-600 hover:bg-slate-100' : 'border-green-600 text-green-700 hover:bg-green-50'}">
+          ${lunas ? 'Batalkan Lunas' : 'Tandai Lunas'}
+        </button>
+        <button data-id="${c.id}" class="history text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 font-medium">Riwayat</button>
+        <button data-id="${c.id}" class="edit text-xs px-2.5 py-1.5 rounded-lg border border-indigo-300 text-indigo-700 hover:bg-indigo-50 font-medium">Edit</button>
+        <button data-id="${c.id}" class="open-wa text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 shadow-sm flex-inline items-center gap-1 ${lunas ? 'opacity-60' : ''}">
+          <span>💬</span> Kirim WA
+        </button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Tidak ada data pelanggan yang cocok</td></tr>';
+}
+
+function fillOptions() {
+  const uniq = (key) => [...new Set(customers.map((c) => c[key]).filter(Boolean))].sort();
+  const opts = (arr) => arr.map((v) => `<option value="${esc(v)}">`).join('');
+  const sel = $('filterWilayah');
+  const current = sel.value;
+  const names = uniq('wilayah');
+  sel.innerHTML = '<option value="">Semua Wilayah</option>' +
+    names.map((w) => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
+  if (names.includes(current)) sel.value = current;
+  $('wilayahList').innerHTML = opts(names);
+  $('paketList').innerHTML = opts(uniq('paket'));
+}
+
+async function loadSettings() {
+  try {
+    appSettings = await (await fetch('/api/settings')).json();
+  } catch (e) {
+    appSettings = {};
+  }
+}
+
+async function load() {
+  await loadSettings();
+  customers = await (await fetch('/api/customers')).json();
+  fillOptions();
+  render();
+}
+
+// ---- Modal Management ----
+const allModals = ['modalForm', 'modalHistory', 'modalPay', 'modalWa', 'modalSettings', 'modalLogGangguan'];
+const openModal = (id) => { $(id).classList.remove('hidden'); $(id).classList.add('flex'); };
+const closeModals = () => allModals.forEach((id) => { $(id).classList.add('hidden'); $(id).classList.remove('flex'); });
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-close]') || allModals.includes(e.target.id)) closeModals();
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModals(); });
+
+// ---- Form Customer (Tambah / Edit) ----
+function openForm(c) {
+  editingId = c ? c.id : null;
+  $('form').reset();
+  $('formError').classList.add('hidden');
+  $('formTitle').textContent = c ? `Edit Pelanggan: ${c.nama}` : 'Tambah Pelanggan Baru';
+  if (c) {
+    for (const k of ['nama', 'whatsapp', 'alamat', 'wilayah', 'paket', 'harga', 'jatuh_tempo', 'status_jaringan', 'catatan_kendala']) {
+      if ($('form').elements[k]) $('form').elements[k].value = c[k] || '';
+    }
+  } else {
+    $('form').elements.status_jaringan.value = 'Aktif';
+  }
+  openModal('modalForm');
+  $('form').elements.nama.focus();
+}
+
+$('btnAdd').addEventListener('click', () => openForm(null));
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const body = Object.fromEntries(new FormData(e.target));
+  const res = await fetch(editingId ? `/api/customers/${editingId}` : '/api/customers', {
+    method: editingId ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    $('formError').textContent = data.error || 'Gagal menyimpan data';
+    return $('formError').classList.remove('hidden');
+  }
+  closeModals();
+  toast(editingId ? 'Data pelanggan berhasil diperbarui' : 'Pelanggan baru berhasil ditambahkan');
+  load();
+});
+
+// ---- Pelunasan Tagihan ----
+function openPay(c) {
+  $('payCustomerId').value = c.id;
+  $('payCustomerName').textContent = c.nama;
+  $('payAmount').textContent = rupiah(c.harga);
+  $('payDate').value = todayStr();
+  $('payError').classList.add('hidden');
+  openModal('modalPay');
+  $('payDate').focus();
+}
+
+$('formPay').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('payCustomerId').value;
+  const tanggal_bayar = $('payDate').value;
+  if (!tanggal_bayar) {
+    $('payError').textContent = 'Tanggal pembayaran wajib diisi';
+    return $('payError').classList.remove('hidden');
+  }
+
+  const res = await fetch(`/api/customers/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'Lunas', tanggal_bayar }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    $('payError').textContent = data.error || 'Gagal mengubah status pelunasan';
+    return $('payError').classList.remove('hidden');
+  }
+
+  customers = customers.map((x) => (x.id === data.id ? data : x));
+  closeModals();
+  render();
+  toast(`${data.nama}: Lunas (${tgl(tanggal_bayar)})`);
+});
+
+// ---- Modal Catat Gangguan Real-Time ----
+function openLogGangguan(c) {
+  $('gangguanCustomerId').value = c.id;
+  $('gangguanCustomerName').textContent = c.nama;
+  $('gangguanCustomerInfo').textContent = `${c.paket} • ${c.alamat} (${c.wilayah})`;
+  $('gangguanWaktu').value = formatWaktuIndoRealtime();
+  $('gangguanKet').value = c.catatan_kendala || '';
+  $('gangguanError').classList.add('hidden');
+
+  // Pilih radio button DOWN jika saat ini belum DOWN, atau UP sebaliknya
+  const isCurrentlyDown = (c.status_jaringan || 'Aktif') !== 'Aktif';
+  const targetRadio = document.querySelector(`input[name="gangguan_status"][value="${isCurrentlyDown ? 'UP' : 'DOWN'}"]`);
+  if (targetRadio) targetRadio.checked = true;
+
+  openModal('modalLogGangguan');
+}
+
+$('btnNowGangguan').addEventListener('click', () => {
+  $('gangguanWaktu').value = formatWaktuIndoRealtime();
+});
+
+$('formGangguan').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('gangguanCustomerId').value;
+  const status = document.querySelector('input[name="gangguan_status"]:checked').value;
+  const waktu = $('gangguanWaktu').value.trim();
+  const keterangan = $('gangguanKet').value.trim();
+
+  if (!waktu) {
+    $('gangguanError').textContent = 'Waktu kejadian wajib diisi';
+    return $('gangguanError').classList.remove('hidden');
+  }
+
+  const res = await fetch(`/api/customers/${id}/network-logs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status, waktu, keterangan })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    $('gangguanError').textContent = data.error || 'Gagal menyimpan log gangguan';
+    return $('gangguanError').classList.remove('hidden');
+  }
+
+  customers = customers.map((x) => (x.id === data.customer.id ? data.customer : x));
+  closeModals();
+  render();
+  toast(`Log gangguan dicatat: ${data.customer.nama} (${status})`);
+
+  // Jika modal history sedang aktif untuk pelanggan ini, perbarui tampilan lognya
+  if (historyCustomer && historyCustomer.id === data.customer.id) {
+    historyCustomer = data.customer;
+    renderHistoryModal(historyCustomer, 'logs');
+  }
+});
+
+// ---- Modal Riwayat (Invoices + Log Gangguan) ----
+function renderHistoryModal(c, defaultTab = 'invoices') {
+  historyCustomer = c;
+  $('historyTitle').textContent = `Riwayat: ${c.nama}`;
+  $('historySubTitle').textContent = `${c.paket} • ${c.alamat} • Status: ${c.status_jaringan || 'Aktif'}`;
+
+  // Invoices list
+  const inv = [...(c.invoices || [])].sort((a, b) => b.periode.localeCompare(a.periode));
+  $('historyRows').innerHTML = inv.map((i) => `<tr>
+    <td class="py-2.5 font-medium">${periodeLabel(i.periode)}</td>
+    <td class="py-2.5">${rupiah(i.nominal)}</td>
+    <td class="py-2.5">
+      <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${i.status === 'Lunas' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${i.status}</span>
+    </td>
+    <td class="py-2.5 text-slate-600">${tgl(i.tanggal_bayar)}</td></tr>`).join('') ||
+    '<tr><td colspan="4" class="py-6 text-center text-slate-400">Belum ada riwayat tagihan</td></tr>';
+
+  // Network logs list
+  const logs = c.network_logs || [];
+  $('badgeLogsCount').textContent = logs.length;
+
+  $('networkLogsList').innerHTML = logs.map((log) => {
+    const isDown = log.status === 'DOWN';
+    return `
+      <div class="p-3 rounded-lg border ${isDown ? 'bg-red-50/60 border-red-200' : 'bg-emerald-50/60 border-emerald-200'} flex items-start justify-between gap-3">
+        <div class="flex items-start gap-2.5">
+          <span class="text-base">${isDown ? '🔴' : '🟢'}</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-xs px-2 py-0.5 rounded ${isDown ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}">
+                ${log.status}
+              </span>
+              <span class="text-xs font-medium text-slate-700">${esc(log.waktu)}</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-1 font-normal">${esc(log.keterangan || (isDown ? 'Koneksi terputus' : 'Koneksi normal kembali'))}</p>
+          </div>
+        </div>
+        <button type="button" data-del-log="${log.id}" class="text-slate-400 hover:text-red-600 text-xs px-1.5 py-0.5 rounded hover:bg-white" title="Hapus catatan log ini">&times;</button>
+      </div>`;
+  }).join('') || '<div class="py-8 text-center text-slate-400 text-xs">Belum ada catatan log gangguan (UP / DOWN) untuk pelanggan ini.</div>';
+
+  // Switch Tab
+  switchHistoryTab(defaultTab);
+  openModal('modalHistory');
+}
+
+function switchHistoryTab(tab) {
+  if (tab === 'invoices') {
+    $('tabInvoices').classList.add('border-indigo-600', 'text-indigo-700');
+    $('tabInvoices').classList.remove('border-transparent', 'text-slate-500');
+    $('tabLogs').classList.remove('border-indigo-600', 'text-indigo-700');
+    $('tabLogs').classList.add('border-transparent', 'text-slate-500');
+    $('panelInvoices').classList.remove('hidden');
+    $('panelLogs').classList.add('hidden');
+  } else {
+    $('tabLogs').classList.add('border-indigo-600', 'text-indigo-700');
+    $('tabLogs').classList.remove('border-transparent', 'text-slate-500');
+    $('tabInvoices').classList.remove('border-indigo-600', 'text-indigo-700');
+    $('tabInvoices').classList.add('border-transparent', 'text-slate-500');
+    $('panelLogs').classList.remove('hidden');
+    $('panelInvoices').classList.add('hidden');
+  }
+}
+
+$('tabInvoices').addEventListener('click', () => switchHistoryTab('invoices'));
+$('tabLogs').addEventListener('click', () => switchHistoryTab('logs'));
+
+$('btnAddLogFromHistory').addEventListener('click', () => {
+  if (!historyCustomer) return;
+  openLogGangguan(historyCustomer);
+});
+
+// Hapus log gangguan delegation
+$('networkLogsList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-del-log]');
+  if (!btn || !historyCustomer) return;
+  const logId = btn.dataset.delLog;
+  if (!confirm('Hapus entri riwayat log gangguan ini?')) return;
+
+  const res = await fetch(`/api/customers/${historyCustomer.id}/network-logs/${logId}`, {
+    method: 'DELETE'
+  });
+  if (res.ok) {
+    const updated = await res.json();
+    customers = customers.map((x) => (x.id === updated.id ? updated : x));
+    render();
+    renderHistoryModal(updated, 'logs');
+    toast('Log gangguan dihapus');
+  }
+});
+
+// ---- Modal WhatsApp & Template ----
+function openWaModal(c) {
+  currentWaCustomer = c;
+  $('waTargetInfo').textContent = `${c.nama} • ${c.whatsapp} • ${c.paket}`;
+  
+  const tpl = (appSettings.templates && appSettings.templates.general) || '';
+  $('waMessageText').value = compileMessage(tpl, c);
+
+  const prov = appSettings.wa_provider || 'manual';
+  $('waMethodBadge').textContent = prov === 'manual' ? 'WhatsApp Web / wa.me' : `API Gateway (${prov.toUpperCase()})`;
+
+  document.querySelectorAll('.btn-tpl').forEach(btn => {
+    btn.classList.remove('bg-indigo-50', 'border-indigo-300', 'text-indigo-700', 'font-medium');
+  });
+  const btnGen = document.querySelector('.btn-tpl[data-tpl="general"]');
+  if (btnGen) btnGen.classList.add('bg-indigo-50', 'border-indigo-300', 'text-indigo-700', 'font-medium');
+
+  openModal('modalWa');
+}
+
+document.querySelectorAll('.btn-tpl').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.btn-tpl').forEach(b => b.classList.remove('bg-indigo-50', 'border-indigo-300', 'text-indigo-700', 'font-medium'));
+    btn.classList.add('bg-indigo-50', 'border-indigo-300', 'text-indigo-700', 'font-medium');
+
+    const key = btn.dataset.tpl;
+    const rawTpl = (appSettings.templates && appSettings.templates[key]) || '';
+    if (currentWaCustomer) {
+      $('waMessageText').value = compileMessage(rawTpl, currentWaCustomer);
+    }
+  });
+});
+
+$('btnSendWaExec').addEventListener('click', async () => {
+  if (!currentWaCustomer) return;
+  const msg = $('waMessageText').value.trim();
+  if (!msg) return toast('Pesan tidak boleh kosong');
+
+  const prov = appSettings.wa_provider || 'manual';
+  if (prov === 'manual') {
+    const url = `https://wa.me/${currentWaCustomer.whatsapp}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank', 'noopener');
+    closeModals();
+    toast(`Membuka WhatsApp Web untuk ${currentWaCustomer.nama}`);
+  } else {
+    $('btnSendWaExec').disabled = true;
+    $('btnSendWaExec').textContent = 'Mengirim...';
+    try {
+      const res = await fetch('/api/send-wa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: currentWaCustomer.whatsapp,
+          message: msg,
+          customer_id: currentWaCustomer.id
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert('Gagal mengirim WhatsApp: ' + (data.error || 'Terjadi kesalahan'));
+      } else {
+        closeModals();
+        toast(`Pesan berhasil dikirim via ${prov.toUpperCase()} ke ${currentWaCustomer.nama}!`);
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      $('btnSendWaExec').disabled = false;
+      $('btnSendWaExec').innerHTML = '<span>📲</span> Kirim Sekarang';
+    }
+  }
+});
+
+// ---- Pengaturan WA Modal ----
+function openSettings() {
+  $('settingProvider').value = appSettings.wa_provider || 'manual';
+  $('settingToken').value = appSettings.api_token || '';
+  $('tplGeneral').value = (appSettings.templates && appSettings.templates.general) || '';
+  $('tplH3').value = (appSettings.templates && appSettings.templates.h3) || '';
+  $('tplDue').value = (appSettings.templates && appSettings.templates.due) || '';
+  $('tplOverdue').value = (appSettings.templates && appSettings.templates.overdue) || '';
+  
+  $('tokenGroup').classList.toggle('hidden', $('settingProvider').value === 'manual');
+  openModal('modalSettings');
+}
+
+$('btnSettings').addEventListener('click', openSettings);
+$('btnConfigFromModal').addEventListener('click', () => {
+  closeModals();
+  openSettings();
+});
+
+$('settingProvider').addEventListener('change', (e) => {
+  $('tokenGroup').classList.toggle('hidden', e.target.value === 'manual');
+});
+
+$('formSettings').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = {
+    wa_provider: $('settingProvider').value,
+    api_token: $('settingToken').value,
+    templates: {
+      general: $('tplGeneral').value,
+      h3: $('tplH3').value,
+      due: $('tplDue').value,
+      overdue: $('tplOverdue').value,
+    }
+  };
+  const res = await fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (res.ok) {
+    appSettings = await res.json();
+    closeModals();
+    toast('Pengaturan WhatsApp berhasil disimpan');
+  } else {
+    toast('Gagal menyimpan pengaturan');
+  }
+});
+
+// ---- Tabel Actions Delegation ----
+$('rows').addEventListener('click', async (e) => {
+  // Buka log langsung dari shortcut text link
+  const linkLogs = e.target.closest('.history-to-logs');
+  if (linkLogs) {
+    const c = customers.find((x) => x.id === Number(linkLogs.dataset.id));
+    if (c) return renderHistoryModal(c, 'logs');
+  }
+
+  const btn = e.target.closest('button[data-id]');
+  if (!btn) return;
+  const c = customers.find((x) => x.id === Number(btn.dataset.id));
+  if (!c) return;
+
+  if (btn.classList.contains('edit')) return openForm(c);
+  if (btn.classList.contains('history')) return renderHistoryModal(c, 'invoices');
+  if (btn.classList.contains('open-wa')) return openWaModal(c);
+  if (btn.classList.contains('catat-gangguan')) return openLogGangguan(c);
+
+  // Toggle Pelunasan
+  if (btn.classList.contains('toggle')) {
+    if (c.status_tagihan !== 'Lunas') {
+      return openPay(c);
+    }
+    if (!confirm(`Batalkan status lunas untuk ${c.nama}? Riwayat tanggal bayar periode berjalan akan dihapus.`)) return;
+    const res = await fetch(`/api/customers/${c.id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'Belum Lunas' }),
+    });
+    if (!res.ok) return toast('Gagal mengubah status');
+    const updated = await res.json();
+    customers = customers.map((x) => (x.id === updated.id ? updated : x));
+    render();
+    toast(`${updated.nama}: Belum Lunas`);
+  }
+});
+
+// ---- Tombol Print Friendly ----
+$('btnPrint').addEventListener('click', () => {
+  $('printDate').textContent = `Dicetak pada: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+  window.print();
+});
+
+// ---- Generate Tagihan ----
+$('btnGenerate').addEventListener('click', async () => {
+  if (!confirm('Generate tagihan baru? Pelanggan Lunas yang jatuh temponya sudah masuk bulan ini akan dimajukan 1 bulan dan di-set Belum Lunas.')) return;
+  const { generated } = await (await fetch('/api/generate-tagihan', { method: 'POST' })).json();
+  toast(`${generated} tagihan baru dibuat`);
+  load();
+});
+
+// Filter & Search Events
+$('search').addEventListener('input', render);
+$('filter').addEventListener('change', render);
+$('filterWilayah').addEventListener('change', render);
+$('filterJaringan').addEventListener('change', render);
+
+load();
+</script>
+</body>
+</html>
