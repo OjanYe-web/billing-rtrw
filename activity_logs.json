@@ -1,5 +1,38 @@
 [
   {
+    "id": 1791700405438,
+    "aksi": "UBAH_PAKET",
+    "kategori": "Sistem",
+    "keterangan": "Memperbarui paket internet: Paket Warga 10 Mbps (10 Mbps - Rp 100.000)",
+    "admin": "Admin Utama",
+    "waktu": "11 Oktober 2026, 13:33 WIB",
+    "timestamp": 1791700404636,
+    "target_id": "PKG-01",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1791700354239,
+    "aksi": "HAPUS_PAKET",
+    "kategori": "Sistem",
+    "keterangan": "Menghapus paket internet: Paket Uji Coba Formatter (PKG-05)",
+    "admin": "Admin Utama",
+    "waktu": "11 Oktober 2026, 13:32 WIB",
+    "timestamp": 1791700353565,
+    "target_id": "PKG-05",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1791700353600,
+    "aksi": "TAMBAH_PAKET",
+    "kategori": "Sistem",
+    "keterangan": "Menambahkan paket internet baru: Paket Uji Coba Formatter (50 Mbps - Rp 175.000)",
+    "admin": "Admin Utama",
+    "waktu": "11 Oktober 2026, 13:32 WIB",
+    "timestamp": 1791700353534,
+    "target_id": "PKG-05",
+    "ip": "127.0.0.1"
+  },
+  {
     "id": 1791674490677,
     "aksi": "MIKROTIK_SYNC_MASSAL",
     "kategori": "Jaringan",

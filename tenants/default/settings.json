@@ -1,0 +1,24 @@
+{
+  "wa_provider": "manual",
+  "api_token": "",
+  "sender_phone": "",
+  "qris_info": "DANA Bisnis (Workshop JanYe, NMID: ID1026610426227)",
+  "mikrotik": {
+    "enabled": true,
+    "host": "192.168.88.1",
+    "port": 8728,
+    "username": "admin",
+    "password": "",
+    "identity": "MikroTik-CCR1009-Billing",
+    "model": "CCR1009-7G-1C-1S+",
+    "version": "RouterOS v7.14.3",
+    "profile_isolir": "profile-ISOLIR",
+    "last_sync": "11 Oktober 2026, 06:21 WIB"
+  },
+  "templates": {
+    "h3": "Assalamualaikum / Halo {nama},\n\nPengingat: Tagihan internet RT/RW.net Anda untuk periode {periode} akan jatuh tempo 3 hari lagi pada {jatuh_tempo}.\n• Paket: {paket}\n• Total Tagihan: {total_tagihan}\n\nMohon lakukan pembayaran sebelum tanggal jatuh tempo agar koneksi tetap lancar. Terima kasih! 🙏",
+    "due": "Assalamualaikum / Halo {nama},\n\nHari ini adalah batas akhir (Jatuh Tempo: {jatuh_tempo}) pembayaran tagihan internet RT/RW.net periode {periode}.\n• Paket: {paket}\n• Total Tagihan: {total_tagihan}\n\nSilakan konfirmasi jika sudah melakukan transfer/pembayaran. Terima kasih! 🙏",
+    "overdue": "Pemberitahuan Tagihan Melewati Jatuh Tempo\n\nKepada Yth. {nama},\nTagihan internet RT/RW.net Anda periode {periode} telah MELEWATI jatuh tempo ({jatuh_tempo}).\n• Paket: {paket}\n• Total Tagihan: {total_tagihan}\n• Status Jaringan: {status_jaringan}\n\nHarap segera menyelesaikan pembayaran hari ini untuk menghindari isolir / pemutusan sementara jaringan internet. Hubungi admin jika membutuhkan bantuan.",
+    "general": "Assalamualaikum / Selamat pagi Bapak/Ibu {nama},\n\nKami dari RT/RW.net menginformasikan rincian tagihan internet Anda:\n• Periode: {periode}\n• Paket: {paket}\n• Status Jaringan: {status_jaringan}\n• Total Tagihan: {total_tagihan}\n• Batas Pembayaran: {jatuh_tempo}\n\nMohon melakukan pembayaran sebelum batas jatuh tempo. Abaikan pesan ini jika sudah melakukan pembayaran. Terima kasih! 🙏"
+  }
+}

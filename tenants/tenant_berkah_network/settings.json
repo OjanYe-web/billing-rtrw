@@ -1,0 +1,26 @@
+{
+  "wa_provider": "manual",
+  "api_token": "",
+  "sender_phone": "",
+  "qris_info": "DANA Bisnis (Workshop JanYe, NMID: ID1026610426227)",
+  "mikrotik": {
+    "enabled": true,
+    "host": "192.168.88.1",
+    "port": 8728,
+    "username": "admin",
+    "password": "",
+    "identity": "MikroTik-CCR1009-Billing",
+    "model": "CCR1009-7G-1C-1S+",
+    "version": "RouterOS v7.14.3",
+    "profile_isolir": "profile-ISOLIR",
+    "last_sync": null
+  },
+  "templates": {
+    "h3": "Assalamualaikum / Halo {nama},\n\nPengingat Tagihan Internet RT/RW.net:\nTagihan periode {periode} Anda akan jatuh tempo 3 hari lagi pada {jatuh_tempo}.\n• Paket: {paket}\n• Total Tagihan: {total_tagihan}\n• Cara Bayar (QRIS): Scan QRIS {qris_info} atau transfer ke admin.\n\nMohon lakukan pembayaran sebelum batas jatuh tempo agar koneksi tetap lancar. Terima kasih! 🙏",
+    "due": "Assalamualaikum / Halo {nama},\n\nHari ini adalah BATAS AKHIR (Jatuh Tempo: {jatuh_tempo}) pembayaran tagihan internet RT/RW.net periode {periode}.\n• Paket: {paket}\n• Total Tagihan: {total_tagihan}\n• Pembayaran QRIS: {qris_info}\n\nSilakan konfirmasi jika sudah melakukan transfer/scan QRIS. Terima kasih! 🙏",
+    "overdue": "PEMBERITAHUAN TAGIHAN MELEWATI JATUH TEMPO (MENUNGGAK)\n\nKepada Yth. {nama},\nTagihan internet RT/RW.net Anda periode {periode} telah MELEWATI jatuh tempo ({jatuh_tempo}).\n• Paket: {paket}\n• Total Tagihan: {total_tagihan}\n• Status Jaringan: {status_jaringan}\n• Metode Bayar: QRIS {qris_info}\n\nHarap segera menyelesaikan pembayaran hari ini untuk menghindari isolir/pemutusan jaringan internet. Hubungi admin jika butuh bantuan.",
+    "general": "Assalamualaikum / Selamat pagi Bapak/Ibu {nama},\n\nKami dari RT/RW.net menginformasikan rincian tagihan internet Anda:\n• Periode: {periode}\n• Paket: {paket}\n• Status Jaringan: {status_jaringan}\n• Total Tagihan: {total_tagihan}\n• Batas Pembayaran: {jatuh_tempo}\n• Pembayaran QRIS: {qris_info}\n\nMohon melakukan pembayaran sebelum batas jatuh tempo. Abaikan pesan ini jika sudah membayar. Terima kasih! 🙏"
+  },
+  "app_title": "Billing Berkah Network",
+  "owner_name": "Haji Slamet"
+}

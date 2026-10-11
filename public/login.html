@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Masuk - Sistem Billing RT/RW.net Multi-Tenant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+
+  <!-- Background Glow & Shapes -->
+  <div class="fixed top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="fixed bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+  <main class="w-full max-w-md relative z-10">
+    <!-- Card Kontainer -->
+    <div class="bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
+      
+      <!-- Brand & Header -->
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white shadow-lg shadow-indigo-500/30 text-2xl mb-1">
+          📡
+        </div>
+        <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Billing RT/RW.net</h1>
+        <p class="text-xs sm:text-sm text-slate-400">Sistem Manajemen Tagihan & Multi-Tenant Cloud</p>
+      </div>
+
+      <!-- Pesan Error -->
+      <div id="errorAlert" class="hidden bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs sm:text-sm p-3 rounded-xl flex items-center gap-2.5 transition">
+        <span>⚠️</span>
+        <span id="errorMessage" class="flex-1">Kredensial tidak valid</span>
+      </div>
+
+      <!-- Form Login -->
+      <form id="formLogin" class="space-y-4">
+        <div>
+          <label for="username" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">👤</span>
+            <input type="text" id="username" required autocomplete="username" placeholder="Masukkan username admin..."
+              class="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+          </div>
+        </div>
+
+        <div>
+          <label for="password" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Kata Sandi (Password)</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">🔒</span>
+            <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••"
+              class="w-full pl-10 pr-10 py-2.5 bg-slate-950/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+            <button type="button" id="btnTogglePassword" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 text-sm focus:outline-none" title="Lihat/Sembunyikan Sandi">
+              <span id="eyeIcon">👁️</span>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="btnSubmit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 active:scale-[0.99] text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+          <span>🚀 Masuk ke Dashboard</span>
+        </button>
+      </form>
+
+      <!-- Kredensial Uji Coba Cepat (Demo Access) -->
+      <div class="pt-2 border-t border-slate-800 space-y-2.5">
+        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-center">Akses Cepat (Demo / Pengujian):</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <button type="button" onclick="fillCredential('superadmin', 'superadmin123')" class="p-2.5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/80 rounded-xl text-left transition flex items-center gap-2 group">
+            <span class="text-base group-hover:scale-110 transition">👑</span>
+            <div>
+              <p class="font-bold text-amber-400">Super Admin</p>
+              <p class="text-[10px] text-slate-400">Hak Akses Pusat</p>
+            </div>
+          </button>
+          <button type="button" onclick="fillCredential('admin', 'admin123')" class="p-2.5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/80 rounded-xl text-left transition flex items-center gap-2 group">
+            <span class="text-base group-hover:scale-110 transition">🏢</span>
+            <div>
+              <p class="font-bold text-indigo-400">Tenant Admin</p>
+              <p class="text-[10px] text-slate-400">Pengusaha RT/RW</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="text-center pt-1 text-[11px] text-slate-500">
+        &copy; 2026 Billing RT/RW.net • Multi-Tenant Architecture
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('formLogin');
+    const inputUser = document.getElementById('username');
+    const inputPass = document.getElementById('password');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const errorAlert = document.getElementById('errorAlert');
+    const errorMessage = document.getElementById('errorMessage');
+    const btnTogglePassword = document.getElementById('btnTogglePassword');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    // Toggle lihat kata sandi
+    btnTogglePassword.addEventListener('click', () => {
+      const isPass = inputPass.type === 'password';
+      inputPass.type = isPass ? 'text' : 'password';
+      eyeIcon.textContent = isPass ? '🙈' : '👁️';
+    });
+
+    // Helper isi otomatis kredensial
+    function fillCredential(user, pass) {
+      inputUser.value = user;
+      inputPass.value = pass;
+      inputUser.focus();
+    }
+
+    // Submit handler
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorAlert.classList.add('hidden');
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span>Memverifikasi Akun...</span>';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: inputUser.value.trim(),
+            password: inputPass.value
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Username atau password salah.');
+        }
+
+        // Simpan sesi autentikasi ke localStorage
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('auth_user', JSON.stringify(data.user));
+        if (data.user.tenant_id) {
+          localStorage.setItem('active_tenant_id', data.user.tenant_id);
+        } else {
+          localStorage.setItem('active_tenant_id', 'default');
+        }
+
+        // Berhasil, alihkan ke dashboard
+        btnSubmit.innerHTML = '<span>✅ Berhasil! Mengalihkan...</span>';
+        setTimeout(() => {
+          window.location.href = '/index.html';
+        }, 300);
+
+      } catch (err) {
+        errorMessage.textContent = err.message;
+        errorAlert.classList.remove('hidden');
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '<span>🚀 Masuk ke Dashboard</span>';
+      }
+    });
+  </script>
+</body>
+</html>
+

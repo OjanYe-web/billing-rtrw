@@ -275,6 +275,19 @@ const rupiah = (n) => 'Rp ' + Number(n).toLocaleString('id-ID');
 const tgl = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
 const periodeLabel = (p) => p ? new Date(p + '-01T00:00:00').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : '-';
 const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const formatDateTimeWIB = (dtStr) => {
+  if (!dtStr) return '-';
+  if (typeof dtStr === 'string' && dtStr.includes('WIB')) return dtStr;
+  try {
+    const d = new Date(dtStr);
+    if (!isNaN(d.getTime())) {
+      const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())} WIB`;
+    }
+  } catch (_) {}
+  return String(dtStr);
+};
 
 let currentClient = null;
 
@@ -373,18 +386,45 @@ function renderClientDashboard(client) {
     const isProses = log.status_penanganan === 'Sedang Dikerjakan';
     let badgeText = log.status_penanganan || (isDown ? 'Pending' : 'Selesai');
     let badgeColor = isSelesai ? 'bg-emerald-100 text-emerald-800' : (isProses ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800');
+    
+    const downtimeStr = formatDateTimeWIB(log.waktu);
+    const uptimeStr = isSelesai ? formatDateTimeWIB(log.waktu_selesai || log.waktu) : '';
+
     return `<div class="p-3.5 rounded-xl border ${isDown ? 'bg-red-50/60 border-red-200' : 'bg-emerald-50/60 border-emerald-200'} flex items-start gap-3">
       <span class="text-base">${isDown ? '🔴' : '🟢'}</span>
-      <div class="flex-1">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-bold text-xs px-2 py-0.5 rounded ${badgeColor}">${badgeText}</span>
-          <span class="font-bold text-xs px-2 py-0.5 rounded ${isDown ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}">${log.status}</span>
-          <span class="text-xs text-slate-600 font-medium">${esc(log.waktu)}</span>
+      <div class="flex-1 space-y-2">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-bold text-xs px-2 py-0.5 rounded ${badgeColor}">${badgeText}</span>
+            <span class="font-bold text-xs px-2 py-0.5 rounded ${isDown ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}">${log.status}</span>
+          </div>
+          <!-- Label Downtime & Uptime Otomatis -->
+          <div class="flex items-center gap-1.5 flex-wrap text-xs">
+            <span class="inline-flex items-center gap-1 font-semibold text-rose-700 bg-white px-2.5 py-0.5 rounded-md border border-rose-200 shadow-sm" title="Waktu awal gangguan dilaporkan">
+              🔴 Downtime: ${esc(downtimeStr)}
+            </span>
+            ${isSelesai ? `
+              <span class="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-white px-2.5 py-0.5 rounded-md border border-emerald-200 shadow-sm" title="Waktu internet normal kembali">
+                🟢 Uptime: ${esc(uptimeStr)}
+              </span>
+            ` : `
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-white/80 px-2 py-0.5 rounded-md border border-amber-200 italic" title="Internet belum kembali normal">
+                ⏳ Belum Uptime (Dalam Penanganan)
+              </span>
+            `}
+          </div>
         </div>
-        <p class="text-xs text-slate-800 font-bold mt-1">⚡ ${esc(log.jenis_kendala || log.keterangan || '-')}</p>
-        ${log.teknisi && log.teknisi !== 'Menunggu Penugasan' ? `<p class="text-[11px] text-indigo-700 mt-0.5">👷‍♂️ Teknisi: ${esc(log.teknisi)}</p>` : ''}
-        ${log.catatan_perbaikan ? `<p class="text-[11px] text-slate-600 mt-0.5">Catatan: ${esc(log.catatan_perbaikan)}</p>` : ''}
-        ${isSelesai && log.durasi ? `<p class="text-[11px] text-emerald-700 mt-0.5 font-medium">⏱️ Durasi Penyelesaian: ${esc(log.durasi)}</p>` : ''}
+
+        <div>
+          <p class="text-xs text-slate-800 font-bold">⚡ ${esc(log.jenis_kendala || log.keterangan || '-')}</p>
+          ${log.teknisi && log.teknisi !== 'Menunggu Penugasan' ? `<p class="text-[11px] text-indigo-700 mt-0.5 font-medium">👷‍♂️ Teknisi: ${esc(log.teknisi)}</p>` : ''}
+          ${log.catatan_perbaikan ? `<p class="text-[11px] text-slate-600 mt-0.5">Catatan: ${esc(log.catatan_perbaikan)}</p>` : ''}
+          ${isSelesai ? `
+            <p class="text-[11px] text-emerald-700 mt-1 font-semibold flex items-center gap-1">
+              <span>🟢</span> Waktu Akses Normal (Uptime): ${esc(uptimeStr)}
+            </p>
+          ` : ''}
+        </div>
       </div>
     </div>`;
   }).join('') || '<div class="p-6 text-center text-slate-400 text-xs">Belum ada riwayat gangguan atau pengaduan. Koneksi Anda berjalan normal.</div>';

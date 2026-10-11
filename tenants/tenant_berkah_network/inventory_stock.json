@@ -1,0 +1,72 @@
+[
+  {
+    "id": "STK-01",
+    "nama_barang": "Modem ONT ZTE F609 V3",
+    "kategori": "Perangkat",
+    "jumlah_stok": 25,
+    "satuan": "Pcs",
+    "harga_satuan": 165000,
+    "keterangan": "GPON ONT 4 Port LAN + Wi-Fi, support PPPoE & Bridge",
+    "min_stok": 5
+  },
+  {
+    "id": "STK-02",
+    "nama_barang": "Modem ONT Huawei HG8245H5",
+    "kategori": "Perangkat",
+    "jumlah_stok": 18,
+    "satuan": "Pcs",
+    "harga_satuan": 220000,
+    "keterangan": "Dual Band GPON ONT 2.4G & 5G AC untuk paket Gamer/Bisnis",
+    "min_stok": 5
+  },
+  {
+    "id": "STK-03",
+    "nama_barang": "Kabel Drop Core FO 1 Core 3 Sling",
+    "kategori": "Kabel",
+    "jumlah_stok": 1450,
+    "satuan": "Meter",
+    "harga_satuan": 850,
+    "keterangan": "Kabel FO 1 Core dengan 3 kawat seling baja untuk tarikan tiang luar",
+    "min_stok": 200
+  },
+  {
+    "id": "STK-04",
+    "nama_barang": "Fast Connector SC/UPC (Biru)",
+    "kategori": "Aksesoris",
+    "jumlah_stok": 120,
+    "satuan": "Pcs",
+    "harga_satuan": 3500,
+    "keterangan": "Konektor mekanik cepat terminasi kabel drop core ke ONT",
+    "min_stok": 20
+  },
+  {
+    "id": "STK-05",
+    "nama_barang": "Patch Cord SC-UPC to SC-UPC 3 Meter",
+    "kategori": "Aksesoris",
+    "jumlah_stok": 45,
+    "satuan": "Pcs",
+    "harga_satuan": 12000,
+    "keterangan": "Kabel jumper penghubung Roset/ODP ke port PON modem",
+    "min_stok": 10
+  },
+  {
+    "id": "STK-06",
+    "nama_barang": "Optical Distribution Point (ODP) 8 Port",
+    "kategori": "Aksesoris",
+    "jumlah_stok": 8,
+    "satuan": "Box",
+    "harga_satuan": 85000,
+    "keterangan": "Box splitter tiang luar ruangan komplit adapter SC/UPC",
+    "min_stok": 2
+  },
+  {
+    "id": "STK-07",
+    "nama_barang": "Router AP Totolink N200RE",
+    "kategori": "Perangkat",
+    "jumlah_stok": 12,
+    "satuan": "Pcs",
+    "harga_satuan": 135000,
+    "keterangan": "Router access point tambahan untuk perluasan jangkauan Wi-Fi",
+    "min_stok": 3
+  }
+]

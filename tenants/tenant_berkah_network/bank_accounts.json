@@ -1,0 +1,34 @@
+[
+  {
+    "id": "BANK-01",
+    "nama_bank": "BCA",
+    "nomor_rekening": "8830123456",
+    "atas_nama": "MOHAMMAD FAHER",
+    "keterangan": "Rekening Utama (Bebas Admin via BI-FAST)",
+    "is_active": true
+  },
+  {
+    "id": "BANK-02",
+    "nama_bank": "Mandiri",
+    "nomor_rekening": "1370019876543",
+    "atas_nama": "MOHAMMAD FAHER",
+    "keterangan": "Bank Mandiri Operasional RT/RW.net",
+    "is_active": true
+  },
+  {
+    "id": "BANK-03",
+    "nama_bank": "BRI",
+    "nomor_rekening": "012301098765501",
+    "atas_nama": "MOHAMMAD FAHER",
+    "keterangan": "Bisa setor tunai/transfer via Agen BRILink terdekat",
+    "is_active": true
+  },
+  {
+    "id": "BANK-04",
+    "nama_bank": "SeaBank",
+    "nomor_rekening": "901234567890",
+    "atas_nama": "MOHAMMAD FAHER",
+    "keterangan": "Gratis transfer dari ShopeePay / Bank Lain",
+    "is_active": true
+  }
+]

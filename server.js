@@ -2,14 +2,61 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
+const crypto = require('crypto');
+const { AsyncLocalStorage } = require('async_hooks');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'customers.json');
-const SETTINGS_FILE = path.join(__dirname, 'settings.json');
-const PACKAGES_FILE = path.join(__dirname, 'packages.json');
-const BANK_ACCOUNTS_FILE = path.join(__dirname, 'bank_accounts.json');
-const INVENTORY_STOCK_FILE = path.join(__dirname, 'inventory_stock.json');
+
+// =========================================================================
+// MULTI-TENANT & ISOLASI DATA ARSITEKTUR
+// =========================================================================
+const tenantStorage = new AsyncLocalStorage();
+const TENANTS_DIR = path.join(__dirname, 'tenants');
+const TENANTS_FILE = path.join(__dirname, 'tenants.json');
+const USERS_FILE = path.join(__dirname, 'users.json');
+
+const hashPassword = (pwd) => crypto.createHash('sha256').update(String(pwd)).digest('hex');
+
+const readTenants = () => {
+  if (!fs.existsSync(TENANTS_FILE)) return [];
+  try { return JSON.parse(fs.readFileSync(TENANTS_FILE, 'utf8')); } catch (_) { return []; }
+};
+const writeTenants = (data) => safeWriteJSON(TENANTS_FILE, data);
+
+const readUsers = () => {
+  if (!fs.existsSync(USERS_FILE)) return [];
+  try { return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8')); } catch (_) { return []; }
+};
+const writeUsers = (data) => safeWriteJSON(USERS_FILE, data);
+
+function getCurrentTenantId() {
+  const store = tenantStorage.getStore();
+  return (store && store.tenantId) || 'default';
+}
+
+function getTenantDir(tenantId) {
+  const safeId = String(tenantId || getCurrentTenantId() || 'default').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const dir = path.join(TENANTS_DIR, safeId);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function getTenantFilePath(filename, overrideTenantId) {
+  const tenantId = overrideTenantId || getCurrentTenantId();
+  const dir = getTenantDir(tenantId);
+  const tFile = path.join(dir, filename);
+  if (!fs.existsSync(tFile)) {
+    const rootFile = path.join(__dirname, filename);
+    if (tenantId === 'default' && fs.existsSync(rootFile)) {
+      try { fs.copyFileSync(rootFile, tFile); } catch (_) {}
+    }
+  }
+  return tFile;
+}
+
+// In-Memory Token Sessions
+const SESSIONS = new Map();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -23,7 +70,6 @@ const safeWriteJSON = (filePath, data) => {
     try {
       fs.renameSync(tmp, filePath);
     } catch (renameErr) {
-      // Fallback untuk Windows jika renameSync terkena lock EPERM/EBUSY
       fs.writeFileSync(filePath, str, 'utf8');
       if (fs.existsSync(tmp)) {
         try { fs.unlinkSync(tmp); } catch (_) {}
@@ -34,12 +80,13 @@ const safeWriteJSON = (filePath, data) => {
   }
 };
 
-const readDB = () => {
-  if (!fs.existsSync(DB_FILE)) {
+const readDB = (overrideTenantId) => {
+  const filePath = getTenantFilePath('customers.json', overrideTenantId);
+  if (!fs.existsSync(filePath)) {
     return [];
   }
   try {
-    const raw = fs.readFileSync(DB_FILE, 'utf8');
+    const raw = fs.readFileSync(filePath, 'utf8');
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
@@ -48,7 +95,7 @@ const readDB = () => {
   }
 };
 
-const writeDB = (data) => safeWriteJSON(DB_FILE, data);
+const writeDB = (data, overrideTenantId) => safeWriteJSON(getTenantFilePath('customers.json', overrideTenantId), data);
 
 // ---- Helper Paket Internet (packages.json) ----
 const defaultPackages = [
@@ -86,19 +133,20 @@ const defaultPackages = [
   }
 ];
 
-const readPackages = () => {
-  if (!fs.existsSync(PACKAGES_FILE)) {
-    fs.writeFileSync(PACKAGES_FILE, JSON.stringify(defaultPackages, null, 2));
+const readPackages = (overrideTenantId) => {
+  const filePath = getTenantFilePath('packages.json', overrideTenantId);
+  if (!fs.existsSync(filePath)) {
+    safeWriteJSON(filePath, defaultPackages);
     return defaultPackages;
   }
   try {
-    return JSON.parse(fs.readFileSync(PACKAGES_FILE, 'utf8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch (e) {
     return defaultPackages;
   }
 };
 
-const writePackages = (data) => safeWriteJSON(PACKAGES_FILE, data);
+const writePackages = (data, overrideTenantId) => safeWriteJSON(getTenantFilePath('packages.json', overrideTenantId), data);
 
 // ---- Helper Rekening Bank (bank_accounts.json) ----
 const defaultBankAccounts = [
@@ -136,19 +184,20 @@ const defaultBankAccounts = [
   }
 ];
 
-const readBankAccounts = () => {
-  if (!fs.existsSync(BANK_ACCOUNTS_FILE)) {
-    fs.writeFileSync(BANK_ACCOUNTS_FILE, JSON.stringify(defaultBankAccounts, null, 2));
+const readBankAccounts = (overrideTenantId) => {
+  const filePath = getTenantFilePath('bank_accounts.json', overrideTenantId);
+  if (!fs.existsSync(filePath)) {
+    safeWriteJSON(filePath, defaultBankAccounts);
     return defaultBankAccounts;
   }
   try {
-    return JSON.parse(fs.readFileSync(BANK_ACCOUNTS_FILE, 'utf8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch (e) {
     return defaultBankAccounts;
   }
 };
 
-const writeBankAccounts = (data) => safeWriteJSON(BANK_ACCOUNTS_FILE, data);
+const writeBankAccounts = (data, overrideTenantId) => safeWriteJSON(getTenantFilePath('bank_accounts.json', overrideTenantId), data);
 
 // ---- Helper Manajemen Stok & Inventaris Material (inventory_stock.json) ----
 const defaultInventoryStock = [
@@ -224,19 +273,20 @@ const defaultInventoryStock = [
   }
 ];
 
-const readInventoryStock = () => {
-  if (!fs.existsSync(INVENTORY_STOCK_FILE)) {
-    fs.writeFileSync(INVENTORY_STOCK_FILE, JSON.stringify(defaultInventoryStock, null, 2));
+const readInventoryStock = (overrideTenantId) => {
+  const filePath = getTenantFilePath('inventory_stock.json', overrideTenantId);
+  if (!fs.existsSync(filePath)) {
+    safeWriteJSON(filePath, defaultInventoryStock);
     return defaultInventoryStock;
   }
   try {
-    return JSON.parse(fs.readFileSync(INVENTORY_STOCK_FILE, 'utf8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch (e) {
     return defaultInventoryStock;
   }
 };
 
-const writeInventoryStock = (data) => safeWriteJSON(INVENTORY_STOCK_FILE, data);
+const writeInventoryStock = (data, overrideTenantId) => safeWriteJSON(getTenantFilePath('inventory_stock.json', overrideTenantId), data);
 
 // Fungsi Pengurangan Stok Otomatis saat Pemakaian Material di Lapangan
 function deductInventoryStock(itemNameOrKeyword, quantity = 1, contextInfo = '') {
@@ -302,13 +352,14 @@ const defaultSettings = {
   }
 };
 
-const readSettings = () => {
-  if (!fs.existsSync(SETTINGS_FILE)) {
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(defaultSettings, null, 2));
+const readSettings = (overrideTenantId) => {
+  const filePath = getTenantFilePath('settings.json', overrideTenantId);
+  if (!fs.existsSync(filePath)) {
+    safeWriteJSON(filePath, defaultSettings);
     return defaultSettings;
   }
   try {
-    const s = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+    const s = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     return {
       ...defaultSettings,
       ...s,
@@ -320,7 +371,7 @@ const readSettings = () => {
   }
 };
 
-const writeSettings = (s) => safeWriteJSON(SETTINGS_FILE, s);
+const writeSettings = (s, overrideTenantId) => safeWriteJSON(getTenantFilePath('settings.json', overrideTenantId), s);
 
 const STATUS = ['Lunas', 'Belum Lunas'];
 const STATUS_JARINGAN = ['Aktif', 'Terisolir', 'Terisolir / Gangguan', 'Gangguan'];
@@ -376,6 +427,13 @@ const formatWaktuIndo = (d = new Date()) => {
 const rupiah = (n) => 'Rp ' + Number(n).toLocaleString('id-ID');
 const periodeLabel = (p) => p ? new Date(p + '-01T00:00:00').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : '-';
 const tgl = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+const cleanNumber = (val) => {
+  if (val === null || val === undefined || val === '') return 0;
+  if (typeof val === 'number') return isNaN(val) ? 0 : val;
+  const digits = String(val).replace(/\./g, '').replace(/,/g, '').replace(/[^\d-]/g, '').trim();
+  const num = Number(digits);
+  return isNaN(num) ? 0 : num;
+};
 
 function addMonth(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);
@@ -428,23 +486,24 @@ const defaultActivityLogs = [
   }
 ];
 
-const readActivityLogs = () => {
-  if (!fs.existsSync(ACTIVITY_LOGS_FILE)) {
-    fs.writeFileSync(ACTIVITY_LOGS_FILE, JSON.stringify(defaultActivityLogs, null, 2));
+const readActivityLogs = (overrideTenantId) => {
+  const filePath = getTenantFilePath('activity_logs.json', overrideTenantId);
+  if (!fs.existsSync(filePath)) {
+    safeWriteJSON(filePath, defaultActivityLogs);
     return defaultActivityLogs;
   }
   try {
-    return JSON.parse(fs.readFileSync(ACTIVITY_LOGS_FILE, 'utf8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch (e) {
     return defaultActivityLogs;
   }
 };
 
-const writeActivityLogs = (logs) => safeWriteJSON(ACTIVITY_LOGS_FILE, logs);
+const writeActivityLogs = (logs, overrideTenantId) => safeWriteJSON(getTenantFilePath('activity_logs.json', overrideTenantId), logs);
 
-function logActivity(aksi, keterangan, opts = {}) {
+function logActivity(aksi, keterangan, opts = {}, overrideTenantId) {
   try {
-    const logs = readActivityLogs();
+    const logs = readActivityLogs(overrideTenantId);
     const now = new Date();
     const entry = {
       id: Date.now() + Math.floor(Math.random() * 1000),
@@ -459,7 +518,7 @@ function logActivity(aksi, keterangan, opts = {}) {
     };
     logs.unshift(entry);
     if (logs.length > 500) logs.length = 500;
-    writeActivityLogs(logs);
+    writeActivityLogs(logs, overrideTenantId);
     return entry;
   } catch (err) {
     console.error('Error saat mencatat audit log:', err.message);
@@ -467,7 +526,6 @@ function logActivity(aksi, keterangan, opts = {}) {
 }
 
 // ---- EXPENSE TRACKER / PENGELUARAN KAS OPERASIONAL HELPER ----
-const EXPENSES_FILE = path.join(__dirname, 'expenses.json');
 const defaultExpenses = [
   {
     id: 1,
@@ -511,19 +569,20 @@ const defaultExpenses = [
   }
 ];
 
-const readExpenses = () => {
-  if (!fs.existsSync(EXPENSES_FILE)) {
-    fs.writeFileSync(EXPENSES_FILE, JSON.stringify(defaultExpenses, null, 2));
+const readExpenses = (overrideTenantId) => {
+  const filePath = getTenantFilePath('expenses.json', overrideTenantId);
+  if (!fs.existsSync(filePath)) {
+    safeWriteJSON(filePath, defaultExpenses);
     return defaultExpenses;
   }
   try {
-    return JSON.parse(fs.readFileSync(EXPENSES_FILE, 'utf8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch (e) {
     return defaultExpenses;
   }
 };
 
-const writeExpenses = (data) => safeWriteJSON(EXPENSES_FILE, data);
+const writeExpenses = (data, overrideTenantId) => safeWriteJSON(getTenantFilePath('expenses.json', overrideTenantId), data);
 
 function defaultDevice(c, idx = 0) {
   const models = [
@@ -670,7 +729,7 @@ function parseCustomer(body = {}, existingId = null, allData = []) {
     alamat: str(body.alamat),
     wilayah: str(body.wilayah),
     paket: str(body.paket),
-    harga: Number(body.harga),
+    harga: cleanNumber(body.harga),
     jatuh_tempo: str(body.jatuh_tempo),
     status_jaringan: STATUS_JARINGAN.includes(body.status_jaringan) ? body.status_jaringan : 'Aktif',
     catatan_kendala: str(body.catatan_kendala),
@@ -813,6 +872,280 @@ async function dispatchWaMessage(phone, message, settings) {
 }
 
 // =========================================================================
+// MIDDLEWARE AUTHENTICATION & MULTI-TENANT CONTEXT
+// =========================================================================
+app.use((req, res, next) => {
+  // Rute aset statis publik dan portal mandiri pelanggan (tidak perlu auth admin)
+  const isStatic = req.method === 'GET' && !req.path.startsWith('/api/');
+  const isPublicApi = [
+    '/api/auth/login',
+    '/api/client/login',
+    '/api/client/portal-data',
+    '/api/client/lapor-gangguan'
+  ].includes(req.path);
+
+  if (isStatic || isPublicApi) {
+    req.tenantId = req.query.tenant || req.headers['x-tenant-override'] || 'default';
+    return tenantStorage.run({ tenantId: req.tenantId, user: null }, () => next());
+  }
+
+  // Verifikasi Bearer Token
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.startsWith('Bearer ') 
+    ? authHeader.slice(7).trim() 
+    : (req.query.token || req.headers['x-auth-token']);
+
+  if (token && SESSIONS.has(token)) {
+    const session = SESSIONS.get(token);
+    req.user = session;
+    // Jika Super Admin mengirimkan X-Tenant-Override, beralih konteks data ke tenant tersebut
+    if (session.role === 'superadmin' && req.headers['x-tenant-override']) {
+      req.tenantId = req.headers['x-tenant-override'];
+    } else {
+      req.tenantId = session.tenant_id || 'default';
+    }
+    return tenantStorage.run({ tenantId: req.tenantId, user: req.user }, () => next());
+  }
+
+  // Tolak akses endpoint API admin jika belum terautentikasi
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({ error: 'Sesi login tidak valid atau telah berakhir. Silakan login kembali.', code: 'UNAUTHORIZED' });
+  }
+
+  tenantStorage.run({ tenantId: 'default', user: null }, () => next());
+});
+
+// =========================================================================
+// RUTE AUTENTIKASI (LOGIN & LOGOUT)
+// =========================================================================
+
+// 1. POST /api/auth/login
+app.post('/api/auth/login', (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username dan kata sandi wajib diisi.' });
+  }
+
+  const users = readUsers();
+  const pwdHash = hashPassword(password);
+
+  const user = users.find(u => 
+    u.username.toLowerCase() === String(username).toLowerCase().trim() && 
+    (u.password_hash === pwdHash || u.password === password)
+  );
+
+  if (!user) {
+    return res.status(401).json({ error: 'Username atau kata sandi tidak cocok.' });
+  }
+
+  const tenants = readTenants();
+  let tenant = null;
+  if (user.tenant_id) {
+    tenant = tenants.find(t => t.id === user.tenant_id);
+    if (!tenant) {
+      return res.status(403).json({ error: 'Data tenant tidak ditemukan untuk akun ini.' });
+    }
+    if (tenant.status === 'suspended') {
+      return res.status(403).json({ error: 'Akun usaha Anda dinonaktifkan sementara. Hubungi Super Admin Pusat.' });
+    }
+    if (tenant.status === 'expired') {
+      return res.status(403).json({ error: 'Masa aktif langganan aplikasi telah berakhir. Silakan perpanjang lisensi Anda.' });
+    }
+  }
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const sessionData = {
+    userId: user.id,
+    username: user.username,
+    nama: user.nama,
+    role: user.role, // 'superadmin' | 'admin'
+    tenant_id: user.tenant_id || 'default',
+    tenant_name: tenant ? tenant.nama_usaha : 'Pusat (Super Admin)',
+    login_time: Date.now()
+  };
+
+  SESSIONS.set(token, sessionData);
+
+  res.json({
+    success: true,
+    message: 'Login berhasil.',
+    token,
+    user: {
+      id: user.id,
+      username: user.username,
+      nama: user.nama,
+      role: user.role,
+      tenant_id: user.tenant_id,
+      tenant_name: sessionData.tenant_name
+    }
+  });
+});
+
+// 2. POST /api/auth/logout
+app.post('/api/auth/logout', (req, res) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+  if (token) SESSIONS.delete(token);
+  res.json({ success: true, message: 'Berhasil keluar.' });
+});
+
+// 3. GET /api/auth/me - Cek identitas & tenant aktif
+app.get('/api/auth/me', (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Belum login.' });
+  }
+
+  const tenants = readTenants();
+  const currentTenant = tenants.find(t => t.id === req.tenantId) || {
+    id: req.tenantId,
+    nama_usaha: req.user.role === 'superadmin' ? 'Pusat (Super Admin)' : 'RT/RW Net Nusantara',
+    owner: '-',
+    status: 'active',
+    plan: 'Enterprise Pro'
+  };
+
+  res.json({
+    success: true,
+    user: req.user,
+    active_tenant: {
+      id: req.tenantId,
+      nama_usaha: currentTenant.nama_usaha,
+      owner: currentTenant.owner || '-',
+      status: currentTenant.status || 'active',
+      plan: currentTenant.plan || 'Standard'
+    }
+  });
+});
+
+// =========================================================================
+// RUTE KHUSUS SUPER ADMIN PUSAT (TENANT MANAGEMENT & SAAS PROVISIONING)
+// =========================================================================
+
+// 1. GET /api/superadmin/tenants - Ambil seluruh daftar tenant & statistik
+app.get('/api/superadmin/tenants', (req, res) => {
+  if (!req.user || req.user.role !== 'superadmin') {
+    return res.status(403).json({ error: 'Hak akses ditolak. Khusus Super Admin Pusat.' });
+  }
+
+  const tenants = readTenants();
+  const users = readUsers();
+
+  const result = tenants.map(t => {
+    const customers = readDB(t.id);
+    const adminUser = users.find(u => u.tenant_id === t.id);
+    return {
+      id: t.id,
+      nama_usaha: t.nama_usaha,
+      owner: t.owner,
+      whatsapp: t.whatsapp || '-',
+      status: t.status || 'active',
+      plan: t.plan || 'Standard',
+      expired_at: t.expired_at || '-',
+      created_at: t.created_at || '-',
+      total_pelanggan: customers.length,
+      total_lunas: customers.filter(c => c.status_tagihan === 'Lunas').length,
+      admin_username: adminUser ? adminUser.username : '-'
+    };
+  });
+
+  res.json({ success: true, tenants: result });
+});
+
+// 2. POST /api/superadmin/tenants - Buat tenant baru & inisialisasi folder terisolasi
+app.post('/api/superadmin/tenants', (req, res) => {
+  if (!req.user || req.user.role !== 'superadmin') {
+    return res.status(403).json({ error: 'Hak akses ditolak. Khusus Super Admin Pusat.' });
+  }
+
+  const { nama_usaha, owner, whatsapp, username, password, plan, expired_at } = req.body || {};
+  if (!nama_usaha || !username || !password) {
+    return res.status(400).json({ error: 'Nama usaha, username, dan kata sandi wajib diisi.' });
+  }
+
+  const cleanUser = String(username).toLowerCase().trim();
+  const users = readUsers();
+  if (users.some(u => u.username.toLowerCase() === cleanUser)) {
+    return res.status(400).json({ error: `Username "${cleanUser}" sudah terdaftar.` });
+  }
+
+  const tenantSlug = 'tenant_' + (nama_usaha.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') || String(Date.now()).slice(-6));
+  const tenants = readTenants();
+  if (tenants.some(t => t.id === tenantSlug)) {
+    return res.status(400).json({ error: 'ID Tenant serupa sudah terdaftar. Gunakan nama usaha yang berbeda.' });
+  }
+
+  // 1. Buat folder tenant & inisialisasi file konfigurasi awal
+  const tDir = getTenantDir(tenantSlug);
+  safeWriteJSON(path.join(tDir, 'customers.json'), []);
+  safeWriteJSON(path.join(tDir, 'settings.json'), { ...defaultSettings, app_title: `Billing ${nama_usaha}`, owner_name: owner || nama_usaha });
+  safeWriteJSON(path.join(tDir, 'packages.json'), defaultPackages);
+  safeWriteJSON(path.join(tDir, 'bank_accounts.json'), defaultBankAccounts);
+  safeWriteJSON(path.join(tDir, 'inventory_stock.json'), defaultInventoryStock);
+  safeWriteJSON(path.join(tDir, 'expenses.json'), []);
+  safeWriteJSON(path.join(tDir, 'activity_logs.json'), [{
+    id: Date.now(),
+    waktu: formatWaktuIndo(),
+    aksi: 'PEMBUATAN_TENANT',
+    keterangan: `Tenant "${nama_usaha}" berhasil dibuat oleh Super Admin Pusat`,
+    admin: req.user.nama || 'Super Admin',
+    kategori: 'Sistem'
+  }]);
+
+  // 2. Simpan tenant ke tenants.json
+  const newTenant = {
+    id: tenantSlug,
+    nama_usaha: String(nama_usaha).trim(),
+    owner: String(owner || nama_usaha).trim(),
+    whatsapp: String(whatsapp || '').trim(),
+    status: 'active',
+    plan: plan || 'Standard Cloud',
+    expired_at: expired_at || '2028-12-31',
+    created_at: formatWaktuIndo()
+  };
+  tenants.push(newTenant);
+  writeTenants(tenants);
+
+  // 3. Simpan akun admin tenant ke users.json
+  const newUserId = users.reduce((max, u) => Math.max(max, u.id || 0), 0) + 1;
+  const newUser = {
+    id: newUserId,
+    username: cleanUser,
+    password_hash: hashPassword(password),
+    nama: `Admin ${nama_usaha}`,
+    role: 'admin',
+    tenant_id: tenantSlug
+  };
+  users.push(newUser);
+  writeUsers(users);
+
+  res.json({
+    success: true,
+    message: `Tenant "${nama_usaha}" dan akun admin "${cleanUser}" berhasil dibuat!`,
+    tenant: newTenant,
+    user: { id: newUser.id, username: newUser.username, nama: newUser.nama, role: newUser.role, tenant_id: newUser.tenant_id }
+  });
+});
+
+// 3. PUT /api/superadmin/tenants/:id/status - Update status aktif / suspensi tenant
+app.put('/api/superadmin/tenants/:id/status', (req, res) => {
+  if (!req.user || req.user.role !== 'superadmin') {
+    return res.status(403).json({ error: 'Hak akses ditolak. Khusus Super Admin Pusat.' });
+  }
+
+  const tenantId = req.params.id;
+  const { status, expired_at } = req.body || {};
+  const tenants = readTenants();
+  const t = tenants.find(x => x.id === tenantId);
+  if (!t) return res.status(404).json({ error: 'Tenant tidak ditemukan.' });
+
+  if (status) t.status = status;
+  if (expired_at) t.expired_at = expired_at;
+
+  writeTenants(tenants);
+  res.json({ success: true, message: `Status tenant "${t.nama_usaha}" diperbarui menjadi "${t.status}".`, tenant: t });
+});
+
+// =========================================================================
 // API MANAJEMEN PAKET INTERNET (PACKAGES)
 // =========================================================================
 
@@ -835,7 +1168,7 @@ app.post('/api/packages', (req, res) => {
   const { nama, kecepatan, harga, mikrotik_profile, deskripsi } = req.body || {};
   if (!nama || !nama.trim()) return res.status(400).json({ error: 'Nama paket wajib diisi' });
   if (!kecepatan || !kecepatan.trim()) return res.status(400).json({ error: 'Kecepatan bandwidth wajib diisi' });
-  const hargaNum = Number(harga);
+  const hargaNum = cleanNumber(harga);
   if (isNaN(hargaNum) || hargaNum <= 0) return res.status(400).json({ error: 'Harga bulanan harus angka lebih besar dari 0' });
 
   const packages = readPackages();
@@ -879,7 +1212,7 @@ app.put('/api/packages/:id', (req, res) => {
 
   if (!nama || !nama.trim()) return res.status(400).json({ error: 'Nama paket wajib diisi' });
   if (!kecepatan || !kecepatan.trim()) return res.status(400).json({ error: 'Kecepatan bandwidth wajib diisi' });
-  const hargaNum = Number(harga);
+  const hargaNum = cleanNumber(harga);
   if (isNaN(hargaNum) || hargaNum <= 0) return res.status(400).json({ error: 'Harga bulanan harus angka lebih besar dari 0' });
 
   if (packages.some(p => p.id !== pkg.id && p.nama.toLowerCase() === nama.trim().toLowerCase())) {

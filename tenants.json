@@ -1,0 +1,22 @@
+[
+  {
+    "id": "default",
+    "nama_usaha": "RT/RW Net Nusantara (Utama)",
+    "owner": "Budi Santoso",
+    "whatsapp": "081234567890",
+    "status": "active",
+    "plan": "Enterprise Pro",
+    "expired_at": "2029-12-31",
+    "created_at": "2026-01-01"
+  },
+  {
+    "id": "tenant_berkah_network",
+    "nama_usaha": "Berkah Network",
+    "owner": "Haji Slamet",
+    "whatsapp": "081299887766",
+    "status": "active",
+    "plan": "Pro Cloud",
+    "expired_at": "2028-12-31",
+    "created_at": "11 Oktober 2026, 14:15 WIB"
+  }
+]
