@@ -1,5 +1,38 @@
 [
   {
+    "id": 1791704418694,
+    "aksi": "UPDATE_KREDENSIAL_ADMIN",
+    "kategori": "Keamanan",
+    "keterangan": "Kredensial login admin diperbarui oleh Super Admin Pusat (Username: admin)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "waktu": "11 Oktober 2026, 14:40 WIB",
+    "timestamp": 1791704418525,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1791704250047,
+    "aksi": "UPDATE_KREDENSIAL_ADMIN",
+    "kategori": "Keamanan",
+    "keterangan": "Kredensial login admin diperbarui oleh Super Admin Pusat (Username: admin)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "waktu": "11 Oktober 2026, 14:37 WIB",
+    "timestamp": 1791704249470,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1791704078476,
+    "aksi": "UPDATE_KREDENSIAL_ADMIN",
+    "kategori": "Keamanan",
+    "keterangan": "Kredensial login admin diperbarui oleh Super Admin Pusat (Username: admin)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "waktu": "11 Oktober 2026, 14:34 WIB",
+    "timestamp": 1791704078164,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
     "id": 1791700405438,
     "aksi": "UBAH_PAKET",
     "kategori": "Sistem",

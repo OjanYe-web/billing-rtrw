@@ -501,9 +501,44 @@ const readActivityLogs = (overrideTenantId) => {
 
 const writeActivityLogs = (logs, overrideTenantId) => safeWriteJSON(getTenantFilePath('activity_logs.json', overrideTenantId), logs);
 
-function logActivity(aksi, keterangan, opts = {}, overrideTenantId) {
+// ---- LOG AKTIVITAS PUSAT / CENTRAL AUDIT TRAIL LINTAS TENANT ----
+const CENTRAL_LOGS_FILE = path.join(__dirname, 'central_activity_logs.json');
+const readCentralLogs = () => {
+  if (!fs.existsSync(CENTRAL_LOGS_FILE)) return [];
+  try { return JSON.parse(fs.readFileSync(CENTRAL_LOGS_FILE, 'utf8')); } catch (_) { return []; }
+};
+const writeCentralLogs = (logs) => safeWriteJSON(CENTRAL_LOGS_FILE, logs);
+
+function logCentralActivity(aksi, keterangan, opts = {}) {
   try {
-    const logs = readActivityLogs(overrideTenantId);
+    const logs = readCentralLogs();
+    const now = new Date();
+    const entry = {
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      aksi: aksi || 'AKTIVITAS',
+      kategori: opts.kategori || 'Sistem',
+      keterangan: keterangan || '',
+      admin: opts.admin || 'Super Admin',
+      tenant_id: opts.tenant_id || 'default',
+      tenant_name: opts.tenant_name || 'Pusat (Super Admin)',
+      waktu: formatWaktuIndo(now),
+      timestamp: now.getTime(),
+      target_id: opts.target_id || null,
+      ip: opts.ip || '127.0.0.1',
+    };
+    logs.unshift(entry);
+    if (logs.length > 1000) logs.length = 1000;
+    writeCentralLogs(logs);
+    return entry;
+  } catch (err) {
+    console.error('Error saat mencatat central audit log:', err.message);
+  }
+}
+
+function logActivity(aksi, keterangan, opts = {}, overrideTenantId) {
+  const tId = overrideTenantId || getCurrentTenantId();
+  try {
+    const logs = readActivityLogs(tId);
     const now = new Date();
     const entry = {
       id: Date.now() + Math.floor(Math.random() * 1000),
@@ -518,7 +553,20 @@ function logActivity(aksi, keterangan, opts = {}, overrideTenantId) {
     };
     logs.unshift(entry);
     if (logs.length > 500) logs.length = 500;
-    writeActivityLogs(logs, overrideTenantId);
+    writeActivityLogs(logs, tId);
+
+    // Salin juga ke log aktivitas pusat (central log) lintas tenant
+    const tenants = readTenants();
+    const t = tenants.find(x => x.id === tId);
+    logCentralActivity(aksi, keterangan, {
+      ...opts,
+      admin: entry.admin,
+      tenant_id: tId,
+      tenant_name: t ? t.nama_usaha : tId,
+      ip: entry.ip,
+      target_id: entry.target_id
+    });
+
     return entry;
   } catch (err) {
     console.error('Error saat mencatat audit log:', err.message);
@@ -1044,7 +1092,8 @@ app.get('/api/superadmin/tenants', (req, res) => {
       created_at: t.created_at || '-',
       total_pelanggan: customers.length,
       total_lunas: customers.filter(c => c.status_tagihan === 'Lunas').length,
-      admin_username: adminUser ? adminUser.username : '-'
+      admin_username: adminUser ? adminUser.username : '-',
+      admin_name: adminUser ? (adminUser.nama || adminUser.username) : (t.owner || '-')
     };
   });
 
@@ -1143,6 +1192,118 @@ app.put('/api/superadmin/tenants/:id/status', (req, res) => {
 
   writeTenants(tenants);
   res.json({ success: true, message: `Status tenant "${t.nama_usaha}" diperbarui menjadi "${t.status}".`, tenant: t });
+});
+
+// 4. PUT /api/superadmin/tenants/:id/credentials - Edit kredensial login admin tenant
+app.put('/api/superadmin/tenants/:id/credentials', (req, res) => {
+  if (!req.user || req.user.role !== 'superadmin') {
+    return res.status(403).json({ error: 'Hak akses ditolak. Khusus Super Admin Pusat.' });
+  }
+
+  const tenantId = req.params.id;
+  const { username, password, nama, admin_name } = req.body || {};
+  const displayName = admin_name || nama;
+
+  const tenants = readTenants();
+  const t = tenants.find(x => x.id === tenantId);
+  if (!t) return res.status(404).json({ error: 'Tenant tidak ditemukan.' });
+
+  const users = readUsers();
+  let adminUser = users.find(u => u.tenant_id === tenantId);
+
+  if (!adminUser) {
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username dan kata sandi wajib diisi.' });
+    }
+    const newUserId = users.reduce((max, u) => Math.max(max, u.id || 0), 0) + 1;
+    adminUser = {
+      id: newUserId,
+      username: String(username).toLowerCase().trim(),
+      password_hash: hashPassword(password),
+      nama: displayName || `Admin ${t.nama_usaha}`,
+      role: 'admin',
+      tenant_id: tenantId
+    };
+    users.push(adminUser);
+  } else {
+    if (username) {
+      const cleanUser = String(username).toLowerCase().trim();
+      const duplicate = users.find(u => u.id !== adminUser.id && u.username.toLowerCase() === cleanUser);
+      if (duplicate) {
+        return res.status(400).json({ error: `Username "${cleanUser}" sudah digunakan oleh akun lain.` });
+      }
+      adminUser.username = cleanUser;
+    }
+    if (password && String(password).trim()) {
+      adminUser.password_hash = hashPassword(password);
+    }
+    if (displayName && String(displayName).trim()) {
+      adminUser.nama = String(displayName).trim();
+    }
+  }
+
+  writeUsers(users);
+
+  // Catat log aktivitas ke log pusat & tenant
+  logCentralActivity('EDIT_KREDENSIAL_TENANT', `Mengubah kredensial login admin tenant "${t.nama_usaha}" (Username: ${adminUser.username})`, {
+    admin: req.user.nama || 'Super Admin',
+    tenant_id: tenantId,
+    tenant_name: t.nama_usaha,
+    kategori: 'Keamanan'
+  });
+
+  logActivity('UPDATE_KREDENSIAL_ADMIN', `Kredensial login admin diperbarui oleh Super Admin Pusat (Username: ${adminUser.username})`, {
+    admin: req.user.nama || 'Super Admin',
+    kategori: 'Keamanan'
+  }, tenantId);
+
+  res.json({
+    success: true,
+    message: `Kredensial login tenant "${t.nama_usaha}" berhasil diperbarui.`,
+    user: {
+      id: adminUser.id,
+      username: adminUser.username,
+      nama: adminUser.nama,
+      tenant_id: adminUser.tenant_id
+    }
+  });
+});
+
+// 5. GET /api/superadmin/activity-logs - Log aktivitas lintas tenant
+app.get('/api/superadmin/activity-logs', (req, res) => {
+  if (!req.user || req.user.role !== 'superadmin') {
+    return res.status(403).json({ error: 'Hak akses ditolak. Khusus Super Admin Pusat.' });
+  }
+
+  const tenants = readTenants();
+  const centralLogs = readCentralLogs();
+
+  const allLogs = centralLogs.map(cl => ({
+    ...cl,
+    admin_user: cl.admin_user || cl.admin || 'Admin'
+  }));
+  const seenIds = new Set(centralLogs.map(l => l.id));
+
+  tenants.forEach(t => {
+    try {
+      const tLogs = readActivityLogs(t.id);
+      tLogs.forEach(tl => {
+        if (!seenIds.has(tl.id)) {
+          seenIds.add(tl.id);
+          allLogs.push({
+            ...tl,
+            admin_user: tl.admin_user || tl.admin || 'Admin',
+            tenant_id: t.id,
+            tenant_name: t.nama_usaha || t.id
+          });
+        }
+      });
+    } catch (_) {}
+  });
+
+  allLogs.sort((a, b) => (b.timestamp || b.id || 0) - (a.timestamp || a.id || 0));
+
+  res.json({ success: true, logs: allLogs.slice(0, 300) });
 });
 
 // =========================================================================

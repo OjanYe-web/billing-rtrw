@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1791704419399,
+    "aksi": "UPDATE_KREDENSIAL_ADMIN",
+    "kategori": "Keamanan",
+    "keterangan": "Kredensial login admin diperbarui oleh Super Admin Pusat (Username: admin)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "11 Oktober 2026, 14:40 WIB",
+    "timestamp": 1791704418531,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1791704419444,
+    "aksi": "EDIT_KREDENSIAL_TENANT",
+    "kategori": "Keamanan",
+    "keterangan": "Mengubah kredensial login admin tenant \"RT/RW Net Nusantara (Utama)\" (Username: admin)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "11 Oktober 2026, 14:40 WIB",
+    "timestamp": 1791704418518,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1791704249644,
+    "aksi": "UPDATE_KREDENSIAL_ADMIN",
+    "kategori": "Keamanan",
+    "keterangan": "Kredensial login admin diperbarui oleh Super Admin Pusat (Username: admin)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "11 Oktober 2026, 14:37 WIB",
+    "timestamp": 1791704249477,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1791704250299,
+    "aksi": "EDIT_KREDENSIAL_TENANT",
+    "kategori": "Keamanan",
+    "keterangan": "Mengubah kredensial login admin tenant \"RT/RW Net Nusantara (Utama)\" (Username: admin)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "11 Oktober 2026, 14:37 WIB",
+    "timestamp": 1791704249431,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1791704079006,
+    "aksi": "UPDATE_KREDENSIAL_ADMIN",
+    "kategori": "Keamanan",
+    "keterangan": "Kredensial login admin diperbarui oleh Super Admin Pusat (Username: admin)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "11 Oktober 2026, 14:34 WIB",
+    "timestamp": 1791704078170,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1791704079055,
+    "aksi": "EDIT_KREDENSIAL_TENANT",
+    "kategori": "Keamanan",
+    "keterangan": "Mengubah kredensial login admin tenant \"RT/RW Net Nusantara (Utama)\" (Username: admin)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "11 Oktober 2026, 14:34 WIB",
+    "timestamp": 1791704078131,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  }
+]

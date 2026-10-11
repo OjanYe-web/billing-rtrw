@@ -2055,7 +2055,10 @@
       <!-- Tab Navigasi Super Admin -->
       <div class="flex border-b bg-slate-50 px-5 pt-3 gap-2 shrink-0">
         <button type="button" id="tabBtnTenantsList" class="px-4 py-2 text-xs sm:text-sm font-semibold border-b-2 border-amber-600 text-amber-800 bg-white rounded-t-lg transition flex items-center gap-1.5">
-          <span>🏢</span> Daftar Tenant Terdaftar
+          <span>🏢</span> Tenant Terdaftar
+        </button>
+        <button type="button" id="tabBtnTenantLogs" class="px-4 py-2 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-600 hover:text-amber-800 rounded-t-lg transition flex items-center gap-1.5">
+          <span>📜</span> Log Aktivitas Tenant
         </button>
         <button type="button" id="tabBtnNewTenant" class="px-4 py-2 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-600 hover:text-amber-800 rounded-t-lg transition flex items-center gap-1.5">
           <span>➕</span> Daftarkan Tenant Baru
@@ -2106,7 +2109,43 @@
           </div>
         </div>
 
-        <!-- View 2: Form Create Tenant Baru -->
+        <!-- View 2: Log Aktivitas Tenant (Lintas Tenant) -->
+        <div id="viewTenantLogs" class="hidden space-y-4">
+          <!-- Filter Kontrol Log -->
+          <div class="p-3 bg-slate-50 border rounded-xl flex flex-col sm:flex-row gap-2.5 items-center justify-between">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <select id="filterLogTenantSelect" class="border rounded-lg px-3 py-1.5 text-xs bg-white text-slate-800 font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                <option value="">Semua Tenant (Global)</option>
+              </select>
+              <input type="search" id="searchLogTenantInput" placeholder="Cari aksi, admin, keterangan..." class="border rounded-lg px-3 py-1.5 text-xs bg-white text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none w-full sm:w-64">
+            </div>
+            <button type="button" id="btnRefreshTenantLogs" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition">
+              <span>🔄</span> Segarkan Log
+            </button>
+          </div>
+
+          <!-- Tabel Log -->
+          <div class="border rounded-xl overflow-hidden shadow-sm">
+            <div class="max-h-[46vh] overflow-y-auto custom-scroll">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-slate-50 text-slate-600 border-b font-bold uppercase tracking-wider sticky top-0 z-10">
+                  <tr>
+                    <th class="p-3 whitespace-nowrap">Waktu</th>
+                    <th class="p-3 whitespace-nowrap">Tenant / Usaha</th>
+                    <th class="p-3 whitespace-nowrap">Petugas / Admin</th>
+                    <th class="p-3 whitespace-nowrap">Aksi & Kategori</th>
+                    <th class="p-3">Rincian Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="tenantLogsTableRows" class="divide-y divide-slate-100">
+                  <tr><td colspan="5" class="p-4 text-center text-slate-400">Memuat log aktivitas tenant...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 3: Form Create Tenant Baru -->
         <div id="viewNewTenant" class="hidden space-y-4">
           <form id="formNewTenant" class="space-y-4 bg-slate-50/60 p-4 rounded-xl border border-slate-200">
             <h4 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
@@ -2159,6 +2198,49 @@
         </span>
         <button type="button" data-close class="px-4 py-1.5 rounded-lg border hover:bg-slate-200 text-slate-700 font-medium">Tutup</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal Edit Kredensial Tenant Admin -->
+  <div id="modalEditTenantCredentials" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden z-50 items-center justify-center p-3 sm:p-4 no-print">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden animate-in">
+      <div class="bg-gradient-to-r from-amber-600 to-amber-700 text-white px-5 py-4 flex justify-between items-center shrink-0">
+        <h3 class="font-bold text-sm sm:text-base flex items-center gap-2">
+          <span>✏️</span> Edit Kredensial Login Tenant
+        </h3>
+        <button type="button" data-close class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 text-xl font-bold transition">&times;</button>
+      </div>
+      <form id="formEditTenantCredentials" class="p-5 space-y-4 text-xs">
+        <input type="hidden" id="editCredTenantId">
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Nama Usaha:</label>
+          <input type="text" id="editCredTenantName" readonly class="w-full border rounded-lg p-2.5 bg-slate-100 text-slate-600 font-semibold cursor-not-allowed">
+        </div>
+        <div>
+          <label for="editCredUsername" class="block font-semibold text-slate-700 mb-1">Username Login Admin:</label>
+          <input type="text" id="editCredUsername" required class="w-full border rounded-lg p-2.5 bg-white font-mono text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+        </div>
+        <div>
+          <label for="editCredPassword" class="block font-semibold text-slate-700 mb-1">Password Baru:</label>
+          <div class="relative">
+            <input type="password" id="editCredPassword" placeholder="Kosongkan jika tidak ingin mengubah password..." class="w-full border rounded-lg p-2.5 pr-10 bg-white font-mono text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            <button type="button" id="btnToggleEditCredPass" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+              <span id="eyeEditCredIcon">👁️</span>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1 italic">Hanya isi jika ingin mereset/mengganti kata sandi admin tenant.</p>
+        </div>
+        <div>
+          <label for="editCredAdminName" class="block font-semibold text-slate-700 mb-1">Nama Tampilan Admin:</label>
+          <input type="text" id="editCredAdminName" placeholder="Misal: Admin Berkah Network" class="w-full border rounded-lg p-2.5 bg-white text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+        </div>
+        <div class="pt-2 flex justify-end gap-2 border-t">
+          <button type="button" data-close class="px-4 py-2 border rounded-xl hover:bg-slate-50 font-medium text-slate-700">Batal</button>
+          <button type="submit" id="btnSaveCredTenant" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl shadow transition flex items-center gap-1.5">
+            <span>💾</span> Simpan Perubahan
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -2891,7 +2973,7 @@ function setBtnLoading(btn, isLoading, loadingText = 'Memproses...') {
 }
 
 // ---- Modal Management (Multi-Layer / Nested Modal Stack System) ----
-const allModals = ['modalForm', 'modalHistory', 'modalPay', 'modalQris', 'modalBulkReminder', 'modalWa', 'modalSettings', 'modalLogGangguan', 'modalBroadcast', 'modalExpenses', 'modalActivityLogs', 'modalMikrotik', 'modalPackages', 'modalBankAccounts', 'modalInventoryStock', 'modalSuperAdmin'];
+const allModals = ['modalForm', 'modalHistory', 'modalPay', 'modalQris', 'modalBulkReminder', 'modalWa', 'modalSettings', 'modalLogGangguan', 'modalBroadcast', 'modalExpenses', 'modalActivityLogs', 'modalMikrotik', 'modalPackages', 'modalBankAccounts', 'modalInventoryStock', 'modalSuperAdmin', 'modalEditTenantCredentials'];
 let activeModalStack = [];
 
 function openModal(id) {
@@ -5989,8 +6071,11 @@ function renderTenantsList() {
           </td>
           <td class="p-3 text-right whitespace-nowrap">
             <div class="flex items-center justify-end gap-1.5">
-              <button type="button" class="btn-switch-tenant px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200" data-tenant-id="${esc(t.id)}">
+              <button type="button" class="btn-switch-tenant px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200" data-tenant-id="${esc(t.id)}" title="Beralih dan kelola data tenant ini">
                 Masuk ➔
+              </button>
+              <button type="button" class="btn-edit-tenant px-2 py-1 text-xs font-semibold rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300" data-tenant-id="${esc(t.id)}" title="Edit Username & Password Admin Tenant">
+                ✏️ Edit
               </button>
               ${t.id !== 'default' ? `
                 <button type="button" class="btn-toggle-tenant px-2 py-1 text-xs rounded-lg border text-slate-600 hover:bg-slate-100" data-tenant-id="${esc(t.id)}" data-next-status="${isActive ? 'suspended' : 'active'}">
@@ -6008,31 +6093,159 @@ function renderTenantsList() {
 if ($('btnSuperAdmin')) {
   $('btnSuperAdmin').addEventListener('click', () => {
     loadTenantsForSuperAdmin();
+    switchSuperAdminTab('tabBtnTenantsList');
     openModal('modalSuperAdmin');
   });
 }
 
 // Tab switcher di modal super admin
-if ($('tabBtnTenantsList')) {
-  $('tabBtnTenantsList').addEventListener('click', () => {
-    $('viewTenantsList').classList.remove('hidden');
-    $('viewNewTenant').classList.add('hidden');
-    $('tabBtnTenantsList').classList.add('border-amber-600', 'text-amber-800', 'bg-white');
-    $('tabBtnTenantsList').classList.remove('border-transparent', 'text-slate-600');
-    $('tabBtnNewTenant').classList.remove('border-amber-600', 'text-amber-800', 'bg-white');
-    $('tabBtnNewTenant').classList.add('border-transparent', 'text-slate-600');
+function switchSuperAdminTab(activeTab) {
+  const tabs = [
+    { btn: $('tabBtnTenantsList'), view: $('viewTenantsList') },
+    { btn: $('tabBtnTenantLogs'), view: $('viewTenantLogs') },
+    { btn: $('tabBtnNewTenant'), view: $('viewNewTenant') }
+  ];
+
+  tabs.forEach(t => {
+    if (!t.btn || !t.view) return;
+    if (t.btn.id === activeTab) {
+      t.view.classList.remove('hidden');
+      t.btn.classList.add('border-amber-600', 'text-amber-800', 'bg-white');
+      t.btn.classList.remove('border-transparent', 'text-slate-600');
+    } else {
+      t.view.classList.add('hidden');
+      t.btn.classList.remove('border-amber-600', 'text-amber-800', 'bg-white');
+      t.btn.classList.add('border-transparent', 'text-slate-600');
+    }
   });
+
+  if (activeTab === 'tabBtnTenantLogs') {
+    loadTenantLogsForSuperAdmin();
+  } else if (activeTab === 'tabBtnTenantsList') {
+    loadTenantsForSuperAdmin();
+  }
 }
 
+if ($('tabBtnTenantsList')) {
+  $('tabBtnTenantsList').addEventListener('click', () => switchSuperAdminTab('tabBtnTenantsList'));
+}
+if ($('tabBtnTenantLogs')) {
+  $('tabBtnTenantLogs').addEventListener('click', () => switchSuperAdminTab('tabBtnTenantLogs'));
+}
 if ($('tabBtnNewTenant')) {
-  $('tabBtnNewTenant').addEventListener('click', () => {
-    $('viewNewTenant').classList.remove('hidden');
-    $('viewTenantsList').classList.add('hidden');
-    $('tabBtnNewTenant').classList.add('border-amber-600', 'text-amber-800', 'bg-white');
-    $('tabBtnNewTenant').classList.remove('border-transparent', 'text-slate-600');
-    $('tabBtnTenantsList').classList.remove('border-amber-600', 'text-amber-800', 'bg-white');
-    $('tabBtnTenantsList').classList.add('border-transparent', 'text-slate-600');
+  $('tabBtnNewTenant').addEventListener('click', () => switchSuperAdminTab('tabBtnNewTenant'));
+}
+
+// Log Aktivitas Tenant (Lintas Tenant)
+let allTenantLogsData = [];
+async function loadTenantLogsForSuperAdmin() {
+  const tbody = $('tenantLogsTableRows');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Memuat log aktivitas tenant...</td></tr>';
+  try {
+    const res = await fetch('/api/superadmin/activity-logs');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Gagal memuat log aktivitas tenant');
+
+    allTenantLogsData = data.logs || [];
+
+    // Update filter dropdown tenant
+    if ($('filterLogTenantSelect')) {
+      const currentVal = $('filterLogTenantSelect').value;
+      const tenantMap = new Map();
+      allTenantsData.forEach(t => tenantMap.set(t.id, t.nama_usaha));
+      allTenantLogsData.forEach(l => {
+        if (l.tenant_id && !tenantMap.has(l.tenant_id)) {
+          tenantMap.set(l.tenant_id, l.tenant_name || l.tenant_id);
+        }
+      });
+
+      let opts = '<option value="">Semua Tenant (Global)</option>';
+      for (const [id, name] of tenantMap.entries()) {
+        opts += `<option value="${esc(id)}">${esc(name)} (${esc(id)})</option>`;
+      }
+      $('filterLogTenantSelect').innerHTML = opts;
+      if (currentVal) $('filterLogTenantSelect').value = currentVal;
+    }
+
+    renderTenantLogsTable();
+  } catch (err) {
+    console.error('Gagal memuat log:', err);
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-500">Gagal memuat log: ${esc(err.message)}</td></tr>`;
+  }
+}
+
+function renderTenantLogsTable() {
+  const tbody = $('tenantLogsTableRows');
+  if (!tbody) return;
+
+  const filterTenant = $('filterLogTenantSelect') ? $('filterLogTenantSelect').value.toLowerCase() : '';
+  const query = $('searchLogTenantInput') ? $('searchLogTenantInput').value.trim().toLowerCase() : '';
+
+  const filtered = allTenantLogsData.filter(log => {
+    if (filterTenant && (log.tenant_id || 'default').toLowerCase() !== filterTenant) return false;
+    if (query) {
+      const match = (log.aksi || '').toLowerCase().includes(query) ||
+                    (log.keterangan || '').toLowerCase().includes(query) ||
+                    (log.admin_user || '').toLowerCase().includes(query) ||
+                    (log.tenant_name || '').toLowerCase().includes(query) ||
+                    (log.tenant_id || '').toLowerCase().includes(query);
+      if (!match) return false;
+    }
+    return true;
   });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">Tidak ada log aktivitas tenant yang cocok.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(log => {
+    const tglFormatted = log.waktu ? new Date(log.waktu).toLocaleString('id-ID', {
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }) : '-';
+
+    let badgeClass = 'bg-slate-100 text-slate-700';
+    const aksiUpper = (log.aksi || '').toUpperCase();
+    if (aksiUpper.includes('LOGIN') || aksiUpper.includes('AUTH')) badgeClass = 'bg-sky-100 text-sky-800';
+    else if (aksiUpper.includes('BAYAR') || aksiUpper.includes('LUNAS') || aksiUpper.includes('TAGIHAN')) badgeClass = 'bg-emerald-100 text-emerald-800';
+    else if (aksiUpper.includes('HAPUS') || aksiUpper.includes('DELETE') || aksiUpper.includes('ISOLIR')) badgeClass = 'bg-rose-100 text-rose-800';
+    else if (aksiUpper.includes('EDIT') || aksiUpper.includes('UPDATE') || aksiUpper.includes('UBAH')) badgeClass = 'bg-amber-100 text-amber-800';
+    else if (aksiUpper.includes('TAMBAH') || aksiUpper.includes('CREATE') || aksiUpper.includes('DAFTAR')) badgeClass = 'bg-indigo-100 text-indigo-800';
+
+    return `
+      <tr class="hover:bg-slate-50/80 transition">
+        <td class="p-3 whitespace-nowrap text-slate-500 font-mono text-[11px]">${tglFormatted}</td>
+        <td class="p-3 whitespace-nowrap font-semibold text-slate-800">
+          ${esc(log.tenant_name || log.tenant_id || 'RT/RW Net')}
+          <span class="block text-[10px] font-mono text-slate-400 font-normal">ID: ${esc(log.tenant_id || 'default')}</span>
+        </td>
+        <td class="p-3 whitespace-nowrap text-slate-600">
+          <span class="inline-flex items-center gap-1 font-mono font-medium text-slate-700">
+            <span>👤</span> ${esc(log.admin_user || 'Admin')}
+          </span>
+          ${log.role ? `<span class="block text-[10px] text-slate-400 capitalize">${esc(log.role)}</span>` : ''}
+        </td>
+        <td class="p-3 whitespace-nowrap">
+          <span class="inline-block px-2 py-0.5 rounded text-[11px] font-bold ${badgeClass}">
+            ${esc(log.aksi || 'Aktivitas')}
+          </span>
+        </td>
+        <td class="p-3 text-slate-600 break-words max-w-xs sm:max-w-md">
+          ${esc(log.keterangan || '-')}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+if ($('btnRefreshTenantLogs')) {
+  $('btnRefreshTenantLogs').addEventListener('click', () => loadTenantLogsForSuperAdmin());
+}
+if ($('filterLogTenantSelect')) {
+  $('filterLogTenantSelect').addEventListener('change', () => renderTenantLogsTable());
+}
+if ($('searchLogTenantInput')) {
+  $('searchLogTenantInput').addEventListener('input', () => renderTenantLogsTable());
 }
 
 // Switch tenant actions
@@ -6056,6 +6269,21 @@ if ($('tenantsTableRows')) {
       return;
     }
 
+    const btnEdit = e.target.closest('.btn-edit-tenant');
+    if (btnEdit) {
+      const tId = btnEdit.dataset.tenantId;
+      const t = allTenantsData.find(item => item.id === tId);
+      if (t) {
+        if ($('editCredTenantId')) $('editCredTenantId').value = t.id;
+        if ($('editCredTenantName')) $('editCredTenantName').value = t.nama_usaha;
+        if ($('editCredUsername')) $('editCredUsername').value = t.admin_username || '';
+        if ($('editCredPassword')) $('editCredPassword').value = '';
+        if ($('editCredAdminName')) $('editCredAdminName').value = t.admin_name || t.owner || '';
+        openModal('modalEditTenantCredentials');
+      }
+      return;
+    }
+
     const btnToggle = e.target.closest('.btn-toggle-tenant');
     if (btnToggle) {
       const tId = btnToggle.dataset.tenantId;
@@ -6071,6 +6299,50 @@ if ($('tenantsTableRows')) {
         toast('Status tenant berhasil diubah');
         loadTenantsForSuperAdmin();
       }
+    }
+  });
+}
+
+// Modal Edit Kredensial Tenant
+if ($('btnToggleEditCredPass')) {
+  $('btnToggleEditCredPass').addEventListener('click', () => {
+    const inp = $('editCredPassword');
+    if (!inp) return;
+    const isPass = inp.type === 'password';
+    inp.type = isPass ? 'text' : 'password';
+    if ($('eyeEditCredIcon')) $('eyeEditCredIcon').textContent = isPass ? '🙈' : '👁️';
+  });
+}
+
+if ($('formEditTenantCredentials')) {
+  $('formEditTenantCredentials').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const tId = $('editCredTenantId').value;
+    const btn = $('btnSaveCredTenant');
+    setBtnLoading(btn, true, 'Menyimpan...');
+
+    const payload = {
+      username: $('editCredUsername').value.trim(),
+      password: $('editCredPassword').value.trim(),
+      admin_name: $('editCredAdminName').value.trim()
+    };
+
+    try {
+      const res = await fetch(`/api/superadmin/tenants/${tId}/credentials`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Gagal memperbarui kredensial');
+
+      toast(`✅ Kredensial tenant "${$('editCredTenantName').value}" berhasil diperbarui!`);
+      closeModal('modalEditTenantCredentials');
+      await loadTenantsForSuperAdmin();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      setBtnLoading(btn, false);
     }
   });
 }
