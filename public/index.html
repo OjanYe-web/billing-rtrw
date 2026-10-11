@@ -112,6 +112,8 @@
         <button id="btnGenerate" class="bg-white/15 hover:bg-white/25 text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
           <span>🔄</span> Generate Tagihan
         </button>
+      </div>
+    </div>
   </header>
 
   <!-- Status Bar & Indikator Koneksi Router MikroTik (No Print) -->
@@ -716,6 +718,8 @@
         </button>
       </div>
     </div>
+  </div>
+
   <!-- Modal Broadcast WhatsApp & Pengumuman Massal -->
   <div id="modalBroadcast" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 no-print">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden">
@@ -1591,6 +1595,8 @@
         <button type="button" data-close class="px-4 py-1.5 rounded-lg border hover:bg-slate-200 text-slate-700 font-medium">Tutup</button>
       </div>
     </div>
+  </div>
+
   <!-- Modal Manajemen Paket Internet -->
   <div id="modalPackages" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 no-print">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
@@ -1695,6 +1701,8 @@
         <button type="button" data-close class="px-4 py-1.5 rounded-lg border hover:bg-slate-200 text-slate-700 font-medium">Tutup</button>
       </div>
     </div>
+  </div>
+
   <!-- Modal Manajemen Rekening Bank Manual -->
   <div id="modalBankAccounts" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 no-print">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
@@ -3853,38 +3861,55 @@ $('btnPrint').addEventListener('click', () => {
 });
 
 // ---- Eksekusi Isolir Otomatis Pelanggan Menunggak ----
-$('btnAutoIsolir').addEventListener('click', async () => {
-  const inputGrace = prompt('Eksekusi isolir otomatis untuk pelanggan yang belum lunas.\nMasukkan batas toleransi keterlambatan jatuh tempo (dalam hari):', '7');
-  if (inputGrace === null) return;
-  const graceDays = parseInt(inputGrace, 10);
-  if (isNaN(graceDays) || graceDays < 0) {
-    return alert('Batas toleransi hari harus berupa angka 0 atau lebih.');
-  }
-
-  const btn = $('btnAutoIsolir');
-  setBtnLoading(btn, true, 'Memproses...');
-
-  try {
-    const res = await fetch('/api/customers/auto-isolir', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ grace_days: graceDays })
-    });
-    const data = await res.json();
-    if (data.customers) {
-      customers = data.customers;
-    } else {
-      customers = await (await fetch('/api/customers')).json();
+if ($('btnAutoIsolir')) {
+  $('btnAutoIsolir').addEventListener('click', async () => {
+    let graceDays = 7;
+    let inputGrace = null;
+    try {
+      inputGrace = window.prompt('Eksekusi isolir otomatis untuk pelanggan yang belum lunas.\nMasukkan batas toleransi keterlambatan jatuh tempo (dalam hari):', '7');
+    } catch (_) {
+      inputGrace = null;
     }
-    render();
-    alert(data.message || 'Pemeriksaan status isolir selesai.');
-    toast(`Isolir otomatis: ${data.isolated_count || 0} pelanggan terisolir`);
-  } catch (err) {
-    alert('Gagal memproses isolir otomatis: ' + err.message);
-  } finally {
-    setBtnLoading(btn, false);
-  }
-});
+
+    if (inputGrace === null) {
+      // Jika prompt dibatalkan atau diblokir browser, tanyakan konfirmasi langsung toleransi 7 hari
+      const doConfirm = confirm('Jalankan proses isolir otomatis untuk semua pelanggan yang menunggak lebih dari 7 hari?');
+      if (!doConfirm) return;
+      graceDays = 7;
+    } else {
+      const parsed = parseInt(inputGrace, 10);
+      if (isNaN(parsed) || parsed < 0) {
+        return alert('Batas toleransi hari harus berupa angka 0 atau lebih.');
+      }
+      graceDays = parsed;
+    }
+
+    const btn = $('btnAutoIsolir');
+    setBtnLoading(btn, true, 'Memproses...');
+
+    try {
+      const res = await fetch('/api/customers/auto-isolir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grace_days: graceDays })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Gagal memproses isolir otomatis');
+      if (data.customers) {
+        customers = data.customers;
+      } else {
+        customers = await (await fetch('/api/customers')).json();
+      }
+      render();
+      alert(data.message || 'Pemeriksaan status isolir selesai.');
+      toast(`Isolir otomatis: ${data.isolated_count || 0} pelanggan terisolir`);
+    } catch (err) {
+      alert('Gagal memproses isolir otomatis: ' + err.message);
+    } finally {
+      setBtnLoading(btn, false);
+    }
+  });
+}
 
 // ---- Quick Filter Tim Lapangan (Terisolir & Menunggak) ----
 $('btnQuickTerisolir').addEventListener('click', () => {
