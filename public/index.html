@@ -4445,17 +4445,30 @@ async function loadActivityLogs() {
       return;
     }
 
-    tbody.innerHTML = activityLogsData.map(log => `
+    tbody.innerHTML = activityLogsData.map(log => {
+      let subTime = '';
+      if (log.timestamp) {
+        if (typeof log.timestamp === 'number') {
+          const d = new Date(log.timestamp);
+          subTime = !isNaN(d.getTime()) ? d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB' : '';
+        } else if (typeof log.timestamp === 'string') {
+          subTime = log.timestamp.includes('T') ? log.timestamp.slice(11, 19) + ' WIB' : log.timestamp;
+        } else {
+          subTime = String(log.timestamp);
+        }
+      }
+
+      return `
       <tr class="hover:bg-slate-50 transition">
         <td class="px-3.5 py-2.5 font-medium text-slate-700 whitespace-nowrap text-[11px]">
-          <div>${esc(log.waktu)}</div>
-          <div class="text-[10px] text-slate-400 font-mono mt-0.5">${esc(log.timestamp ? log.timestamp.slice(11, 19) : '')}</div>
+          <div>${esc(log.waktu || '-')}</div>
+          ${subTime ? `<div class="text-[10px] text-slate-400 font-mono mt-0.5">${esc(subTime)}</div>` : ''}
         </td>
         <td class="px-3.5 py-2.5 whitespace-nowrap">
           ${getActivityCategoryBadge(log.kategori, log.aksi)}
         </td>
         <td class="px-3.5 py-2.5 text-slate-800 max-w-xs sm:max-w-md">
-          <div class="font-medium text-[11px] leading-relaxed">${esc(log.keterangan)}</div>
+          <div class="font-medium text-[11px] leading-relaxed">${esc(log.keterangan || '-')}</div>
         </td>
         <td class="px-3.5 py-2.5 text-slate-600 whitespace-nowrap">
           <span class="inline-flex items-center gap-1 font-medium text-[11px]">👤 ${esc(log.admin || 'Admin')}</span>
@@ -4464,7 +4477,8 @@ async function loadActivityLogs() {
           ${log.target_id ? `<span class="font-mono text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border font-semibold">${esc(log.target_id)}</span>` : '<span class="text-slate-400">-</span>'}
         </td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
 
   } catch (err) {
     console.error('Error loadActivityLogs:', err);
