@@ -125,6 +125,12 @@
         <button id="btnGenerate" class="bg-white/15 hover:bg-white/25 text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 transition" title="Buat tagihan bulan baru secara otomatis">
           <span>🔄</span> Buat Tagihan Bulan Baru
         </button>
+        <!-- Tombol Toggle Auto-Refresh 1 Menit -->
+        <button id="btnToggleAutoRefresh" type="button" class="bg-indigo-900/80 hover:bg-indigo-900 border border-indigo-400/40 text-white text-xs sm:text-sm px-2.5 py-2 rounded-lg flex items-center gap-1.5 transition select-none shadow-xs" title="Auto-Refresh Aktif (setiap 1 menit). Klik untuk mengaktifkan / menonaktifkan">
+          <span id="autoRefreshDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="autoRefreshLabel" class="font-medium">Auto-Refresh: <strong class="text-emerald-300 font-bold">ON</strong></span>
+          <span id="autoRefreshCountdown" class="text-[11px] font-mono text-indigo-200 hidden sm:inline">(60s)</span>
+        </button>
         <!-- Profil Pengguna & Tombol Keluar (Logout) -->
         <div class="flex items-center gap-2 bg-black/25 px-2.5 py-1.5 rounded-lg border border-white/15 text-xs">
           <span id="headerUserLabel" class="font-medium text-white flex items-center gap-1">
@@ -6384,9 +6390,139 @@ if ($('formNewTenant')) {
   });
 }
 
+// ---- Fitur Auto-Refresh Dashboard (1 Menit / 60.000 milidetik) ----
+let autoRefreshTimerId = null;
+let autoRefreshCountdownId = null;
+const AUTO_REFRESH_INTERVAL_MS = 60000; // 60 detik = 1 menit
+let autoRefreshRemainingSec = 60;
+
+function isAutoRefreshEnabled() {
+  const saved = localStorage.getItem('auto_refresh_enabled');
+  return saved === null ? true : saved === 'true'; // Default: ON (aktif)
+}
+
+function updateAutoRefreshUI(enabled) {
+  const btn = $('btnToggleAutoRefresh');
+  const dot = $('autoRefreshDot');
+  const label = $('autoRefreshLabel');
+  const countdown = $('autoRefreshCountdown');
+
+  if (!btn || !label) return;
+
+  if (enabled) {
+    btn.classList.add('bg-indigo-900/80', 'border-indigo-400/50');
+    btn.classList.remove('bg-indigo-950/60', 'border-indigo-500/20', 'opacity-70');
+    if (dot) {
+      dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+    }
+    label.innerHTML = 'Auto-Refresh: <strong class="text-emerald-300 font-bold">ON</strong>';
+    if (countdown) {
+      countdown.classList.remove('hidden');
+      countdown.textContent = `(${autoRefreshRemainingSec}s)`;
+    }
+    btn.setAttribute('title', 'Auto-Refresh Aktif (setiap 1 menit). Klik untuk menonaktifkan.');
+  } else {
+    btn.classList.remove('bg-indigo-900/80', 'border-indigo-400/50');
+    btn.classList.add('bg-indigo-950/60', 'border-indigo-500/20', 'opacity-70');
+    if (dot) {
+      dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+    }
+    label.innerHTML = 'Auto-Refresh: <strong class="text-slate-300 font-bold">OFF</strong>';
+    if (countdown) {
+      countdown.textContent = '(Mati)';
+    }
+    btn.setAttribute('title', 'Auto-Refresh Nonaktif. Klik untuk mengaktifkan pembaruan otomatis.');
+  }
+}
+
+async function triggerDashboardRefresh() {
+  try {
+    const dot = $('autoRefreshDot');
+    if (dot) {
+      dot.classList.add('scale-125');
+    }
+
+    // Panggil fungsi utama pemuat data (pelanggan, keuangan, mikrotik, paket, stok, dll.)
+    await load();
+
+    setTimeout(() => {
+      if (dot) dot.classList.remove('scale-125');
+    }, 600);
+  } catch (err) {
+    console.error('Auto-refresh load error:', err);
+  }
+}
+
+function startAutoRefresh() {
+  stopAutoRefresh();
+  autoRefreshRemainingSec = 60;
+  updateAutoRefreshUI(true);
+
+  // Hitung mundur visual setiap detik
+  autoRefreshCountdownId = setInterval(() => {
+    if (autoRefreshRemainingSec > 0) {
+      autoRefreshRemainingSec--;
+    }
+    const countdown = $('autoRefreshCountdown');
+    if (countdown) {
+      countdown.textContent = `(${autoRefreshRemainingSec}s)`;
+    }
+  }, 1000);
+
+  // Interval pembaruan data utama setiap 60.000 ms (1 menit)
+  autoRefreshTimerId = setInterval(async () => {
+    autoRefreshRemainingSec = 60;
+    await triggerDashboardRefresh();
+  }, AUTO_REFRESH_INTERVAL_MS);
+}
+
+function stopAutoRefresh() {
+  if (autoRefreshTimerId) {
+    clearInterval(autoRefreshTimerId);
+    autoRefreshTimerId = null;
+  }
+  if (autoRefreshCountdownId) {
+    clearInterval(autoRefreshCountdownId);
+    autoRefreshCountdownId = null;
+  }
+  autoRefreshRemainingSec = 60;
+  updateAutoRefreshUI(false);
+}
+
+function toggleAutoRefresh() {
+  const current = isAutoRefreshEnabled();
+  const next = !current;
+  localStorage.setItem('auto_refresh_enabled', String(next));
+
+  if (next) {
+    startAutoRefresh();
+    toast('🟢 Auto-Refresh diaktifkan (pembaruan data otomatis setiap 1 menit)');
+  } else {
+    stopAutoRefresh();
+    toast('⏸️ Auto-Refresh dinonaktifkan');
+  }
+}
+
+function initAutoRefresh() {
+  const btn = $('btnToggleAutoRefresh');
+  if (btn) {
+    btn.addEventListener('click', toggleAutoRefresh);
+  }
+
+  const enabled = isAutoRefreshEnabled();
+  if (enabled) {
+    startAutoRefresh();
+  } else {
+    stopAutoRefresh();
+  }
+}
+
 // Inisialisasi Auth & Jalankan Aplikasi
 checkAuthSession().then(ok => {
-  if (ok) load();
+  if (ok) {
+    load();
+    initAutoRefresh();
+  }
 });
 </script>
 </body>
