@@ -14,31 +14,35 @@
         "periode": "2026-09",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
         "nominal": 100000,
-        "status": "Lunas",
-        "tanggal_bayar": "2026-10-11"
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-10-05"
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "Transfer Bank BCA"
       }
     ],
     "status_jaringan": "Aktif",
@@ -130,7 +134,8 @@
     "ipAddress": "192.168.88.11",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T21:09:53.570Z",
+    "metode_bayar": "Transfer Bank BCA"
   },
   {
     "id": 2,
@@ -147,31 +152,35 @@
         "periode": "2026-09",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
         "nominal": 150000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-10-05"
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
       }
     ],
     "status_jaringan": "Aktif",
@@ -193,7 +202,8 @@
     "ipAddress": "192.168.88.12",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z",
+    "metode_bayar": "QRIS DANA"
   },
   {
     "id": 3,
@@ -210,31 +220,35 @@
         "periode": "2026-09",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
         "nominal": 100000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-10-05"
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
       }
     ],
     "status_jaringan": "Aktif",
@@ -281,7 +295,8 @@
     "ipAddress": "192.168.88.13",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z",
+    "metode_bayar": "QRIS DANA"
   },
   {
     "id": 4,
@@ -298,31 +313,35 @@
         "periode": "2026-09",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
         "nominal": 250000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-10-05"
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
       }
     ],
     "status_jaringan": "Aktif",
@@ -344,7 +363,8 @@
     "ipAddress": "192.168.88.14",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z",
+    "metode_bayar": "QRIS DANA"
   },
   {
     "id": 5,
@@ -361,19 +381,22 @@
         "periode": "2026-09",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-10",
@@ -414,7 +437,7 @@
     "ipAddress": "192.168.88.15",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "isolated",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
   },
   {
     "id": 6,
@@ -431,19 +454,22 @@
         "periode": "2026-09",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-10",
@@ -471,7 +497,7 @@
     "ipAddress": "192.168.88.16",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
   },
   {
     "id": 7,
@@ -488,31 +514,35 @@
         "periode": "2026-09",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
         "nominal": 250000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-10-05"
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
       }
     ],
     "status_jaringan": "Aktif",
@@ -534,7 +564,8 @@
     "ipAddress": "192.168.88.17",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z",
+    "metode_bayar": "QRIS DANA"
   },
   {
     "id": 8,
@@ -551,19 +582,22 @@
         "periode": "2026-09",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-10",
@@ -628,7 +662,7 @@
     "ipAddress": "192.168.88.18",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "isolated",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
   },
   {
     "id": 9,
@@ -645,31 +679,35 @@
         "periode": "2026-09",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
         "nominal": 150000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-10-05"
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
       }
     ],
     "status_jaringan": "Aktif",
@@ -691,7 +729,8 @@
     "ipAddress": "192.168.88.19",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z",
+    "metode_bayar": "QRIS DANA"
   },
   {
     "id": 10,
@@ -708,19 +747,22 @@
         "periode": "2026-09",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-10",
@@ -748,7 +790,7 @@
     "ipAddress": "192.168.88.20",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
   },
   {
     "id": 11,
@@ -765,19 +807,22 @@
         "periode": "2026-09",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
@@ -811,7 +856,7 @@
     "ipAddress": "192.168.88.21",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
   },
   {
     "id": 12,
@@ -828,31 +873,35 @@
         "periode": "2026-09",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
         "nominal": 150000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-10-05"
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
       }
     ],
     "status_jaringan": "Aktif",
@@ -874,7 +923,8 @@
     "ipAddress": "192.168.88.22",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z",
+    "metode_bayar": "QRIS DANA"
   },
   {
     "id": 13,
@@ -891,19 +941,22 @@
         "periode": "2026-09",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
@@ -937,7 +990,7 @@
     "ipAddress": "192.168.88.23",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
   },
   {
     "id": 14,
@@ -954,31 +1007,35 @@
         "periode": "2026-09",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
         "nominal": 150000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-10-05"
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
       }
     ],
     "status_jaringan": "Aktif",
@@ -1000,7 +1057,8 @@
     "ipAddress": "192.168.88.24",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z",
+    "metode_bayar": "QRIS DANA"
   },
   {
     "id": 15,
@@ -1017,19 +1075,22 @@
         "periode": "2026-09",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
@@ -1063,7 +1124,7 @@
     "ipAddress": "192.168.88.25",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
   },
   {
     "id": 16,
@@ -1080,19 +1141,22 @@
         "periode": "2026-09",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
@@ -1126,7 +1190,7 @@
     "ipAddress": "192.168.88.26",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
   },
   {
     "id": 17,
@@ -1143,31 +1207,35 @@
         "periode": "2026-09",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
         "nominal": 150000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-10-05"
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
       }
     ],
     "status_jaringan": "Aktif",
@@ -1189,7 +1257,8 @@
     "ipAddress": "192.168.88.27",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z",
+    "metode_bayar": "QRIS DANA"
   },
   {
     "id": 18,
@@ -1206,19 +1275,22 @@
         "periode": "2026-09",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 100000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
@@ -1252,7 +1324,7 @@
     "ipAddress": "192.168.88.28",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
   },
   {
     "id": 19,
@@ -1269,31 +1341,35 @@
         "periode": "2026-09",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
         "nominal": 250000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
         "nominal": 250000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-10-05"
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
       }
     ],
     "status_jaringan": "Aktif",
@@ -1315,7 +1391,8 @@
     "ipAddress": "192.168.88.29",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z",
+    "metode_bayar": "QRIS DANA"
   },
   {
     "id": 20,
@@ -1332,19 +1409,22 @@
         "periode": "2026-09",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-09-07"
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-08",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-08-09"
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-07",
         "nominal": 150000,
         "status": "Lunas",
-        "tanggal_bayar": "2026-07-08"
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
       },
       {
         "periode": "2026-11",
@@ -1378,6 +1458,46 @@
     "ipAddress": "192.168.88.30",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "connected",
-    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
+  },
+  {
+    "id": 21,
+    "customer_id": "PLG021",
+    "nama": "Fauzan",
+    "whatsapp": "6281317453074",
+    "alamat": "Jl. Kendongdong RT 01 RW 10 Kel. Jagakarsa Kec. Jagakarsa Jakarta Selatan",
+    "wilayah": "Jagakarsa",
+    "paket": "Paket Bisnis 50 Mbps",
+    "harga": 350000,
+    "jatuh_tempo": "2026-10-13",
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "mikrotikUsername": "Fauzan_123",
+    "mikrotikProfile": "50Mbps",
+    "ipAddress": "192.168.88.31",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": null,
+    "device": {
+      "tipe": "G-010G-Q (ONT 1 Port)",
+      "serial_number": "ALCLFD1A43E4",
+      "mac_address": "E8:C7:4F:27:7D:C0",
+      "status_kepemilikan": "Milik Pribadi (Beli Putus)",
+      "tanggal_pasang": "2026-10-13",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-10-12",
+      "catatan_perangkat": "Hanya kabel optik yang menjadi garansi"
+    },
+    "status_tagihan": "Belum Lunas",
+    "network_logs": [],
+    "invoices": [
+      {
+        "periode": "2026-10",
+        "nominal": 350000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null,
+        "metode_bayar": null
+      }
+    ]
   }
 ]

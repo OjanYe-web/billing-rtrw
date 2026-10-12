@@ -3,74 +3,156 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Masuk - Sistem Billing RT/RW.net Multi-Tenant</title>
+  <title>Login - Billing RT/RW.net Multi-Tenant</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+    html, body { height: 100%; }
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #060b1f;
+      /* Vignette lembut (tanpa tepi keras) di atas gambar sirkuit, agar form menyatu dengan latar */
+      background-image:
+        radial-gradient(ellipse 430px 380px at 50% 50%, rgba(5, 10, 28, 0.58) 0%, rgba(5, 10, 28, 0.32) 50%, rgba(5, 10, 28, 0) 100%),
+        url('/login-bg.jpg');
+      background-position: center center, center center;
+      background-size: 100% 100%, cover;
+      background-repeat: no-repeat, no-repeat;
+      background-attachment: fixed, fixed;
     }
+
+    /* Field kaca (glass) dengan border cyan bercahaya - meniru referensi */
+    .glass-field {
+      height: 52px;
+      border-radius: 18px;
+      border: 2px solid rgba(110, 215, 250, 0.85);
+      background: rgba(130, 150, 185, 0.22);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 16px rgba(80, 200, 245, 0.45), inset 0 0 14px rgba(120, 200, 255, 0.08);
+      transition: box-shadow .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .glass-field:focus-within {
+      border-color: rgba(150, 232, 255, 1);
+      background: rgba(140, 165, 205, 0.28);
+      box-shadow: 0 0 24px rgba(100, 215, 255, 0.7), inset 0 0 16px rgba(120, 200, 255, 0.12);
+    }
+    .glass-field input {
+      background: transparent;
+      outline: none;
+      color: #eef4ff;
+    }
+    .glass-field input::placeholder { color: rgba(203, 213, 225, 0.78); }
+    /* Hilangkan warna autofill kuning/putih browser */
+    .glass-field input:-webkit-autofill {
+      -webkit-text-fill-color: #eef4ff;
+      transition: background-color 9999s ease-in-out 0s;
+    }
+
+    /* Tombol login biru-ungu bercahaya */
+    .btn-login {
+      height: 48px;
+      border-radius: 16px;
+      border: 2px solid rgba(110, 215, 250, 0.85);
+      background: linear-gradient(90deg, #4b46dc 0%, #3f6cea 55%, #3b82f6 100%);
+      box-shadow: 0 0 18px rgba(80, 200, 245, 0.5);
+      transition: filter .2s ease, box-shadow .2s ease, transform .1s ease;
+    }
+    .btn-login:hover:not(:disabled) {
+      filter: brightness(1.12);
+      box-shadow: 0 0 26px rgba(110, 220, 255, 0.75);
+    }
+    .btn-login:active:not(:disabled) { transform: scale(0.99); }
+    .btn-login:disabled { opacity: .85; cursor: wait; }
   </style>
 </head>
-<body class="bg-slate-950 min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen selection:bg-cyan-500 selection:text-white">
 
-  <!-- Background Glow & Shapes -->
-  <div class="fixed top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="fixed bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+  <!-- Satu pembungkus utama, berpusat di tengah layar (tanpa card) -->
+  <div class="min-h-screen w-full flex items-center justify-center px-5 py-8">
+    <main class="w-full max-w-[360px] flex flex-col items-center text-center">
 
-  <main class="w-full max-w-md relative z-10">
-    <!-- Card Kontainer -->
-    <div class="bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
-      
-      <!-- Brand & Header -->
-      <div class="text-center space-y-2">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white shadow-lg shadow-indigo-500/30 text-2xl mb-1">
-          📡
-        </div>
-        <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Billing RT/RW.net</h1>
-        <p class="text-xs sm:text-sm text-slate-400">Sistem Manajemen Tagihan & Multi-Tenant Cloud</p>
-      </div>
+      <!-- LOGO: network tower + cloud -->
+      <svg class="w-[62px] h-[62px] drop-shadow-[0_0_10px_rgba(90,160,255,0.55)]" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="cloudFill" x1="8" y1="30" x2="56" y2="54" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#3b82f6"/>
+            <stop offset="1" stop-color="#7c6cf2"/>
+          </linearGradient>
+          <linearGradient id="towerStroke" x1="32" y1="14" x2="32" y2="52" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#e0f7ff"/>
+            <stop offset="1" stop-color="#7dd3fc"/>
+          </linearGradient>
+        </defs>
+        <!-- Awan -->
+        <path d="M18 54C10 54 7 45 13 41C12 33 22 29 28 34C32 26 46 28 47 37C56 37 59 54 48 54Z" fill="url(#cloudFill)" opacity="0.95"/>
+        <!-- Gelombang sinyal (pink) -->
+        <path d="M38 9a9 9 0 0 1 0 12" stroke="#f472b6" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M43 5a15 15 0 0 1 0 20" stroke="#f472b6" stroke-width="2.2" stroke-linecap="round" opacity="0.75"/>
+        <path d="M26 9a9 9 0 0 0 0 12" stroke="#f472b6" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M21 5a15 15 0 0 0 0 20" stroke="#f472b6" stroke-width="2.2" stroke-linecap="round" opacity="0.75"/>
+        <!-- Tower -->
+        <path d="M32 17L24 52H40Z" stroke="url(#towerStroke)" stroke-width="2.4" stroke-linejoin="round" fill="#0b1437" fill-opacity="0.55"/>
+        <path d="M28.2 34H35.8M26 43H38M29.5 28L36.5 43M34.5 28L27.5 43" stroke="#bae6fd" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="32" cy="15" r="3" fill="#e0f7ff"/>
+        <circle cx="32" cy="15" r="5.5" fill="#67e8f9" opacity="0.35"/>
+      </svg>
 
-      <!-- Pesan Error -->
-      <div id="errorAlert" class="hidden bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs sm:text-sm p-3 rounded-xl flex items-center gap-2.5 transition">
+      <!-- JUDUL & DESKRIPSI -->
+      <h1 class="mt-2.5 text-[27px] leading-tight font-bold text-white tracking-tight">Billing RT/RW.net</h1>
+      <p class="mt-1.5 text-[13px] font-light text-slate-300 tracking-wide">Sistem Manajemen Tagihan &amp; Multi-Tenant Cloud</p>
+
+      <!-- Notifikasi error -->
+      <div id="errorAlert" class="hidden w-full mt-5 px-4 py-2.5 rounded-2xl bg-rose-500/15 border border-rose-400/50 text-rose-200 text-xs flex items-center justify-center gap-2">
         <span>⚠️</span>
-        <span id="errorMessage" class="flex-1">Kredensial tidak valid</span>
+        <span id="errorMessage" class="font-medium">Kredensial tidak valid</span>
       </div>
 
-      <!-- Form Login -->
-      <form id="formLogin" class="space-y-4">
-        <div>
-          <label for="username" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">👤</span>
-            <input type="text" id="username" required autocomplete="username" placeholder="Masukkan username admin..."
-              class="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
-          </div>
-        </div>
+      <!-- FORM -->
+      <form id="formLogin" class="w-full mt-8 space-y-5" novalidate>
 
-        <div>
-          <label for="password" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Kata Sandi (Password)</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">🔒</span>
-            <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••"
-              class="w-full pl-10 pr-10 py-2.5 bg-slate-950/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
-            <button type="button" id="btnTogglePassword" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 text-sm focus:outline-none" title="Lihat/Sembunyikan Sandi">
-              <span id="eyeIcon">👁️</span>
-            </button>
-          </div>
-        </div>
+        <!-- Username -->
+        <label class="glass-field flex items-center gap-3 px-4 cursor-text">
+          <svg class="w-[18px] h-[18px] shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0H3Z"/>
+          </svg>
+          <input type="text" id="username" required autocomplete="username"
+                 placeholder="Masukkan username admin..."
+                 class="flex-1 min-w-0 h-full text-[15px]">
+        </label>
 
-        <button type="submit" id="btnSubmit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 active:scale-[0.99] text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
-          <span>🚀 Masuk ke Dashboard</span>
+        <!-- Password -->
+        <label class="glass-field flex items-center gap-3 px-4 cursor-text">
+          <svg class="w-[18px] h-[18px] shrink-0 text-amber-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0 1 10 0v2a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm8-2v2H7V7a3 3 0 0 1 6 0Z" clip-rule="evenodd"/>
+          </svg>
+          <input type="password" id="password" required autocomplete="current-password"
+                 placeholder="••••••••"
+                 class="flex-1 min-w-0 h-full text-[15px] tracking-wider">
+          <button type="button" id="btnTogglePassword" class="shrink-0 text-pink-400 hover:text-pink-300 focus:outline-none transition-colors" title="Lihat/Sembunyikan Sandi" aria-label="Lihat/Sembunyikan Sandi">
+            <svg id="eyeOpenIcon" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2.5 12s3.6-7 9.5-7 9.5 7 9.5 7-3.6 7-9.5 7-9.5-7-9.5-7Z"/>
+              <circle cx="12" cy="12" r="3" fill="currentColor"/>
+            </svg>
+            <svg id="eyeSlashIcon" class="w-5 h-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.4 10.4 0 0 1 12 19c-5.9 0-9.5-7-9.5-7a17.7 17.7 0 0 1 4.56-5.37M9.9 5.24A9.7 9.7 0 0 1 12 5c5.9 0 9.5 7 9.5 7a17.6 17.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24M3 3l18 18"/>
+            </svg>
+          </button>
+        </label>
+
+        <!-- Tombol -->
+        <button type="submit" id="btnSubmit"
+                class="btn-login !mt-6 w-full flex items-center justify-center gap-2 text-white font-bold text-[15px] cursor-pointer">
+          <span>Login</span>
+          <span>»</span>
         </button>
       </form>
 
-      <!-- Footer Info -->
-      <div class="text-center pt-2 border-t border-slate-800 text-[11px] text-slate-500">
-        &copy; 2026 Billing RT/RW.net • Multi-Tenant Architecture
-      </div>
-    </div>
-  </main>
+      <!-- FOOTER -->
+      <p class="mt-6 text-[11px] text-slate-400">Powered &amp; Developed by OjanYe &copy; 2026</p>
+    </main>
+  </div>
 
   <script>
     const form = document.getElementById('formLogin');
@@ -80,19 +162,35 @@
     const errorAlert = document.getElementById('errorAlert');
     const errorMessage = document.getElementById('errorMessage');
     const btnTogglePassword = document.getElementById('btnTogglePassword');
-    const eyeIcon = document.getElementById('eyeIcon');
+    const eyeOpenIcon = document.getElementById('eyeOpenIcon');
+    const eyeSlashIcon = document.getElementById('eyeSlashIcon');
 
-    // Toggle lihat kata sandi
-    btnTogglePassword.addEventListener('click', () => {
+    const BTN_DEFAULT_HTML = '<span>🚀</span><span>Masuk ke Dashboard</span>';
+
+    // Toggle visibilitas kata sandi
+    btnTogglePassword.addEventListener('click', (e) => {
+      e.preventDefault();
       const isPass = inputPass.type === 'password';
       inputPass.type = isPass ? 'text' : 'password';
-      eyeIcon.textContent = isPass ? '🙈' : '👁️';
+      eyeOpenIcon.classList.toggle('hidden', isPass);
+      eyeSlashIcon.classList.toggle('hidden', !isPass);
     });
 
-    // Submit handler
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorAlert.classList.remove('hidden');
+    }
+
+    // Handler Submit Login
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorAlert.classList.add('hidden');
+
+      if (!inputUser.value.trim() || !inputPass.value) {
+        showError('Username dan password wajib diisi.');
+        return;
+      }
+
       btnSubmit.disabled = true;
       btnSubmit.innerHTML = '<span>Memverifikasi Akun...</span>';
 
@@ -111,14 +209,19 @@
           throw new Error(data.error || 'Username atau password salah.');
         }
 
-        // Simpan sesi autentikasi ke localStorage
-        localStorage.setItem('auth_token', data.token);
-        localStorage.setItem('auth_user', JSON.stringify(data.user));
+        // Simpan sesi autentikasi eksklusif ke sessionStorage (hanya aktif di tab ini)
+        sessionStorage.setItem('auth_token', data.token);
+        sessionStorage.setItem('auth_user', JSON.stringify(data.user));
         if (data.user.tenant_id) {
-          localStorage.setItem('active_tenant_id', data.user.tenant_id);
+          sessionStorage.setItem('active_tenant_id', data.user.tenant_id);
         } else {
-          localStorage.setItem('active_tenant_id', 'default');
+          sessionStorage.setItem('active_tenant_id', 'default');
         }
+
+        // Bersihkan sisa token di localStorage jika sebelumnya pernah tersimpan
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        localStorage.removeItem('active_tenant_id');
 
         // Berhasil, alihkan ke dashboard
         btnSubmit.innerHTML = '<span>✅ Berhasil! Mengalihkan...</span>';
@@ -127,13 +230,11 @@
         }, 300);
 
       } catch (err) {
-        errorMessage.textContent = err.message;
-        errorAlert.classList.remove('hidden');
+        showError(err.message);
         btnSubmit.disabled = false;
-        btnSubmit.innerHTML = '<span>🚀 Masuk ke Dashboard</span>';
+        btnSubmit.innerHTML = BTN_DEFAULT_HTML;
       }
     });
   </script>
 </body>
 </html>
-

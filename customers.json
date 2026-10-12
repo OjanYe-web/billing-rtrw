@@ -31,8 +31,8 @@
       {
         "periode": "2026-11",
         "nominal": 100000,
-        "status": "Lunas",
-        "tanggal_bayar": "2026-10-11"
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
       },
       {
         "periode": "2026-10",
@@ -164,7 +164,7 @@
       {
         "periode": "2026-11",
         "nominal": 150000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
@@ -227,7 +227,7 @@
       {
         "periode": "2026-11",
         "nominal": 100000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
@@ -315,7 +315,7 @@
       {
         "periode": "2026-11",
         "nominal": 250000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
@@ -505,7 +505,7 @@
       {
         "periode": "2026-11",
         "nominal": 250000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
@@ -662,7 +662,7 @@
       {
         "periode": "2026-11",
         "nominal": 150000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
@@ -845,7 +845,7 @@
       {
         "periode": "2026-11",
         "nominal": 150000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
@@ -971,7 +971,7 @@
       {
         "periode": "2026-11",
         "nominal": 150000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
@@ -1160,7 +1160,7 @@
       {
         "periode": "2026-11",
         "nominal": 150000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {
@@ -1286,7 +1286,7 @@
       {
         "periode": "2026-11",
         "nominal": 250000,
-        "status": "Lunas",
+        "status": "Belum Lunas",
         "tanggal_bayar": null
       },
       {

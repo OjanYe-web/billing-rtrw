@@ -1,5 +1,27 @@
 [
   {
+    "id": 1791836167302,
+    "aksi": "UPDATE_KREDENSIAL_ADMIN",
+    "kategori": "Keamanan",
+    "keterangan": "Kredensial login admin diperbarui oleh Super Admin Pusat (Username: adminberkah)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "waktu": "13 Oktober 2026, 03:16 WIB",
+    "timestamp": 1791836166896,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1791836137121,
+    "aksi": "UPDATE_KREDENSIAL_ADMIN",
+    "kategori": "Keamanan",
+    "keterangan": "Kredensial login admin diperbarui oleh Super Admin Pusat (Username: adminberkah)",
+    "admin": "Super Admin Pusat (Pembuat Aplikasi)",
+    "waktu": "13 Oktober 2026, 03:15 WIB",
+    "timestamp": 1791836136749,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
     "id": 1791702911877,
     "waktu": "11 Oktober 2026, 14:15 WIB",
     "aksi": "PEMBUATAN_TENANT",

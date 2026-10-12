@@ -8,12 +8,12 @@
     "host": "192.168.88.1",
     "port": 8728,
     "username": "admin",
-    "password": "",
+    "password": "testPassword123",
     "identity": "MikroTik-CCR1009-Billing",
     "model": "CCR1009-7G-1C-1S+",
     "version": "RouterOS v7.14.3",
     "profile_isolir": "profile-ISOLIR",
-    "last_sync": "11 Oktober 2026, 06:21 WIB"
+    "last_sync": "13 Oktober 2026, 01:47 WIB"
   },
   "templates": {
     "h3": "Assalamualaikum / Halo {nama},\n\nPengingat: Tagihan internet RT/RW.net Anda untuk periode {periode} akan jatuh tempo 3 hari lagi pada {jatuh_tempo}.\n• Paket: {paket}\n• Total Tagihan: {total_tagihan}\n\nMohon lakukan pembayaran sebelum tanggal jatuh tempo agar koneksi tetap lancar. Terima kasih! 🙏",

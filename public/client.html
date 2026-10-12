@@ -38,7 +38,7 @@
         <div class="inline-flex p-3 rounded-2xl bg-indigo-50 text-indigo-700 mb-3 text-3xl">
           📡
         </div>
-        <h2 class="text-xl font-bold text-slate-900">Masuk ke Client Area</h2>
+        <h2 class="text-xl font-bold text-slate-900">Data Customer</h2>
         <p class="text-xs text-slate-500 mt-1">Masukkan ID Pelanggan atau Nomor WhatsApp yang terdaftar untuk melihat tagihan dan masa aktif Anda.</p>
       </div>
 
@@ -60,7 +60,7 @@
 
       <div class="mt-6 pt-5 border-t text-center text-xs text-slate-500">
         Butuh bantuan atau nomor belum terdaftar? <br>
-        <span class="text-indigo-600 font-semibold">Hubungi Pengurus RT/RW.net setempat.</span>
+        <span class="text-indigo-600 font-semibold">Hubungi Pengurus RT/RW.net.</span>
       </div>
     </div>
 
@@ -289,6 +289,75 @@ const formatDateTimeWIB = (dtStr) => {
   return String(dtStr);
 };
 
+// Helper Format Metode Bayar Singkat & Spesifik
+const formatMetodeBayar = (rawMetode, context = {}) => {
+  const str = String(rawMetode || '').trim();
+  const qrisInfo = String((context && context.qris_info) || '').toUpperCase();
+  const bankAccounts = (context && context.bank_accounts) || [];
+
+  // Default nama QRIS spesifik berdasarkan settings
+  let defaultQris = 'QRIS DANA';
+  if (qrisInfo.includes('BCA')) defaultQris = 'QRIS BCA';
+  else if (qrisInfo.includes('BRI')) defaultQris = 'QRIS BRI';
+  else if (qrisInfo.includes('MANDIRI')) defaultQris = 'QRIS Mandiri';
+  else if (qrisInfo.includes('GOPAY') || qrisInfo.includes('GO-PAY')) defaultQris = 'QRIS GoPay';
+  else if (qrisInfo.includes('OVO')) defaultQris = 'QRIS OVO';
+  else if (qrisInfo.includes('SHOPEE')) defaultQris = 'QRIS ShopeePay';
+
+  if (!str) return defaultQris;
+
+  const upper = str.toUpperCase();
+
+  // 1. QRIS: Cukup tampilkan nama spesifiknya (misal: "QRIS DANA")
+  if (upper.includes('QRIS')) {
+    if (upper.includes('DANA')) return 'QRIS DANA';
+    if (upper.includes('BCA')) return 'QRIS BCA';
+    if (upper.includes('BRI')) return 'QRIS BRI';
+    if (upper.includes('MANDIRI')) return 'QRIS Mandiri';
+    if (upper.includes('BNI')) return 'QRIS BNI';
+    if (upper.includes('GOPAY') || upper.includes('GO-PAY')) return 'QRIS GoPay';
+    if (upper.includes('OVO')) return 'QRIS OVO';
+    if (upper.includes('SHOPEE')) return 'QRIS ShopeePay';
+    if (upper.includes('LINKAJA')) return 'QRIS LinkAja';
+    const m = str.match(/QRIS\s+([A-Za-z0-9]+)/i);
+    if (m && m[1]) return `QRIS ${m[1]}`;
+    return defaultQris;
+  }
+
+  // 2. Transfer Bank: Cukup format singkat yang jelas ("Transfer Bank [Nama Bank]")
+  const bankList = [
+    { key: 'BCA', label: 'Transfer Bank BCA' },
+    { key: 'BRI', label: 'Transfer Bank BRI' },
+    { key: 'MANDIRI', label: 'Transfer Bank Mandiri' },
+    { key: 'SEABANK', label: 'Transfer Bank SeaBank' },
+    { key: 'BNI', label: 'Transfer Bank BNI' },
+    { key: 'BSI', label: 'Transfer Bank BSI' },
+    { key: 'JAGO', label: 'Transfer Bank Jago' },
+    { key: 'PERMATA', label: 'Transfer Bank Permata' },
+    { key: 'CIMB', label: 'Transfer Bank CIMB Niaga' },
+    { key: 'BTN', label: 'Transfer Bank BTN' },
+  ];
+
+  for (const b of bankList) {
+    if (upper.includes(b.key)) return b.label;
+  }
+
+  // Cocokkan dengan rekening bank aktif yang diatur oleh admin
+  if (Array.isArray(bankAccounts)) {
+    for (const acc of bankAccounts) {
+      const bName = String(acc.nama_bank || '').trim();
+      if (bName && upper.includes(bName.toUpperCase())) {
+        return `Transfer Bank ${bName}`;
+      }
+    }
+  }
+
+  if (upper.includes('TRANSFER') || upper.includes('BANK')) return 'Transfer Bank';
+  if (upper.includes('TUNAI') || upper.includes('CASH') || upper.includes('KASIR')) return 'Tunai / Kasir';
+
+  return str.length > 25 ? str.slice(0, 25) : str;
+};
+
 let currentClient = null;
 
 function toast(msg) {
@@ -317,7 +386,10 @@ function renderClientDashboard(client) {
   $('dashStatusTagihan').textContent = client.status_tagihan;
   $('dashStatusTagihan').className = `text-lg font-black px-3.5 py-1 rounded-full ${lunas ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
   $('dashHarga').textContent = `${rupiah(client.harga)} / bln`;
-  $('dashTagihanDesc').textContent = lunas ? '✅ Tagihan bulan ini telah selesai terbayar.' : '⚠️ Menunggu pembayaran. Silakan bayar via QRIS.';
+  const currMonth = new Date().toISOString().slice(0, 7);
+  const thisMonthInv = (client.invoices || []).find(i => i.periode === currMonth) || client.invoices?.[0];
+  const metodeText = formatMetodeBayar(thisMonthInv?.metode_bayar || client.metode_bayar, client);
+  $('dashTagihanDesc').textContent = lunas ? `✅ Tagihan telah LUNAS (${metodeText}).` : '⚠️ Menunggu pembayaran. Silakan bayar via QRIS atau Transfer Bank.';
 
   // Kartu 2: Sisa Masa Aktif
   $('dashSisaHari').textContent = client.sisa_hari_text || (client.sisa_hari >= 0 ? `${client.sisa_hari} Hari` : `Lewat ${Math.abs(client.sisa_hari)} Hari`);
@@ -356,23 +428,52 @@ function renderClientDashboard(client) {
   }
 
   // Riwayat Invoices Bulanan
-  const invoices = client.invoices || [];
-  $('clientHistoryRows').innerHTML = invoices.map((inv) => {
+  const todayMonth = new Date().toISOString().slice(0, 7); // Bulan berjalan saat ini (2026-10)
+  const allInvoices = (client.invoices || []).map((inv) => {
+    // Tagihan bulan depan (misal: November 2026 saat ini Oktober 2026) harus berstatus Belum Lunas / Menunggu Pembayaran
+    if (inv.periode > todayMonth && inv.status === 'Lunas') {
+      return { ...inv, status: 'Belum Lunas', tanggal_bayar: null };
+    }
+    return inv;
+  });
+
+  // Filter riwayat: hanya tampilkan bulan yang sudah berjalan (periode <= todayMonth) atau yang sudah lunas
+  const filteredInvoices = allInvoices.filter((inv) => inv.periode <= todayMonth || inv.status === 'Lunas');
+
+  $('clientHistoryRows').innerHTML = filteredInvoices.map((inv) => {
     const isPaid = inv.status === 'Lunas';
+    const isUpcoming = inv.periode > todayMonth;
+    let badgeText = inv.status;
+    let badgeClass = isPaid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+    if (!isPaid && isUpcoming) {
+      badgeText = 'Menunggu Pembayaran';
+      badgeClass = 'bg-amber-100 text-amber-700';
+    }
+
     return `<tr class="hover:bg-slate-50/80 transition">
-      <td class="px-5 py-3 font-semibold text-slate-800">${periodeLabel(inv.periode)}</td>
+      <td class="px-5 py-3 font-semibold text-slate-800">
+        ${periodeLabel(inv.periode)}
+        ${isUpcoming ? '<span class="ml-1.5 text-[10px] font-normal text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">Bulan Depan</span>' : ''}
+      </td>
       <td class="px-5 py-3 font-medium text-slate-700">${rupiah(inv.nominal)}</td>
       <td class="px-5 py-3">
-        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${isPaid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${inv.status}</span>
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${badgeClass}">${badgeText}</span>
       </td>
-      <td class="px-5 py-3 text-slate-600">${tgl(inv.tanggal_bayar)}</td>
+      <td class="px-5 py-3 text-slate-600">
+        ${isPaid ? `
+          <div class="font-semibold text-slate-800">${tgl(inv.tanggal_bayar)}</div>
+          <div class="text-[11px] font-semibold text-indigo-600 mt-0.5 inline-flex items-center gap-1">
+            <span>💳</span> ${esc(formatMetodeBayar(inv.metode_bayar, currentClient))}
+          </div>
+        ` : '-'}
+      </td>
       <td class="px-5 py-3 text-right whitespace-nowrap">
         ${isPaid ? `
           <button type="button" class="btn-download-pdf inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-lg text-xs border border-indigo-200 transition shadow-sm active:scale-95" data-periode="${esc(inv.periode)}" title="Unduh Kwitansi Pembayaran PDF">
             <span>📄</span> Unduh Kwitansi PDF
           </button>
         ` : `
-          <span class="text-xs text-slate-400 italic">Belum Lunas</span>
+          <span class="text-xs text-slate-400 italic">${isUpcoming ? 'Menunggu Pembayaran' : 'Belum Lunas'}</span>
         `}
       </td>
     </tr>`;
@@ -541,6 +642,7 @@ function downloadKwitansiPDF(inv) {
   const periodeStr = periodeLabel(inv.periode);
   const tglBayarStr = tgl(inv.tanggal_bayar);
   const fileName = `Kwitansi-${currentClient.customer_id}-${inv.periode}.pdf`;
+  const tenantBrand = String(currentClient.tenant_name || currentClient.app_title || 'RT/RW.net').toUpperCase();
 
   if (window.jspdf && window.jspdf.jsPDF) {
     try {
@@ -555,16 +657,17 @@ function downloadKwitansiPDF(inv) {
       doc.setFillColor(67, 56, 202); // Indigo 700
       doc.rect(14, 10, 120, 2.5, 'F');
 
-      // 2. Info Kop Brand RT/RW.net (Kiri)
+      // 2. Info Kop Brand Dinamis (Kiri)
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(15);
+      const brandFontSize = tenantBrand.length > 25 ? 12 : (tenantBrand.length > 18 ? 13.5 : 15);
+      doc.setFontSize(brandFontSize);
       doc.setTextColor(30, 27, 75); // Indigo 950
-      doc.text('RT/RW.net DIGITAL', 14, 21);
+      doc.text(tenantBrand, 14, 21);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(100, 116, 139); // Slate 500
-      doc.text('Komunitas Jaringan Internet Berkecepatan Tinggi', 14, 26);
+      doc.text('Layanan Jaringan Internet & Komunikasi Data', 14, 26);
       doc.text('Bukti Pembayaran & Kwitansi Resmi Elektronik', 14, 30);
 
       // 3. Judul & No Kwitansi (Kanan)
@@ -605,7 +708,7 @@ function downloadKwitansiPDF(inv) {
       doc.setFontSize(8);
       doc.setTextColor(71, 85, 105);
       doc.text(`ID Pelanggan : ${currentClient.customer_id}`, 18, 54.5);
-      doc.text(`Alamat        : ${(currentClient.alamat || '-').slice(0, 38)}`, 18, 59.5);
+      doc.text(`Alamat        : ${(currentClient.alamat || '-').slice(0, 36)}`, 18, 59.5);
       doc.text(`Wilayah       : ${currentClient.wilayah || '-'}`, 18, 64.5);
       doc.text(`WhatsApp    : ${currentClient.whatsapp || '-'}`, 18, 69.5);
 
@@ -615,18 +718,20 @@ function downloadKwitansiPDF(inv) {
       doc.setTextColor(148, 163, 184);
       doc.text('RINCIAN TRANSAKSI:', 78, 44);
 
+      const metodeBayarStr = formatMetodeBayar(inv.metode_bayar || currentClient.metode_bayar, currentClient);
+
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(71, 85, 105);
       doc.text(`Bulan Tagihan   : ${periodeStr}`, 78, 49.5);
       doc.text(`Tanggal Bayar   : ${tglBayarStr}`, 78, 54.5);
-      doc.text(`Metode Bayar    : QRIS DANA / Kasir Sistem`, 78, 59.5);
+      doc.text(`Metode Bayar    : ${metodeBayarStr}`, 78, 59.5);
 
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(5, 150, 105);
       doc.text(`Status Tagihan   : LUNAS (Valid)`, 78, 64.5);
 
-      // 6. Tabel Item Rincian Layanan
+      // 6. Tabel Item Rincian Layanan (Perbaikan overlapping)
       doc.setFillColor(241, 245, 249);
       doc.rect(14, 76, 120, 7.5, 'F');
       doc.setDrawColor(226, 232, 240);
@@ -637,89 +742,98 @@ function downloadKwitansiPDF(inv) {
       doc.setTextColor(51, 65, 85);
       doc.text('NO', 18, 81);
       doc.text('DESKRIPSI LAYANAN', 28, 81);
-      doc.text('PERIODE', 82, 81);
+      doc.text('PERIODE', 90, 81);
       doc.text('JUMLAH (RP)', 130, 81, { align: 'right' });
 
       // Baris Item
       doc.setDrawColor(226, 232, 240);
-      doc.line(14, 94, 134, 94);
+      doc.line(14, 95, 134, 95);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(30, 41, 59);
-      doc.text('1.', 18, 88.5);
-      doc.text(`Langganan Akses Internet (${currentClient.paket})`, 28, 88.5);
-      doc.text(periodeStr, 82, 88.5);
-      doc.text(rupiah(inv.nominal), 130, 88.5, { align: 'right' });
+      doc.text('1.', 18, 88);
+
+      // Wrap deskripsi paket agar tidak pernah bertumpuk dengan kolom periode
+      const descLines = doc.splitTextToSize(`Langganan Akses Internet (${currentClient.paket || '-'})`, 58);
+      doc.text(descLines, 28, 88);
+      doc.text(periodeStr, 90, 88);
+      doc.text(rupiah(inv.nominal), 130, 88, { align: 'right' });
 
       // 7. Box Total Pembayaran Lunas
       doc.setFillColor(236, 253, 245);
       doc.setDrawColor(167, 243, 208);
-      doc.roundedRect(14, 97, 120, 13, 2, 2, 'FD');
+      doc.roundedRect(14, 98, 120, 12, 2, 2, 'FD');
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(6, 95, 70);
-      doc.text('TOTAL PEMBAYARAN LUNAS:', 20, 105);
+      doc.text('TOTAL PEMBAYARAN LUNAS:', 20, 105.5);
 
       doc.setFontSize(12);
       doc.setTextColor(4, 120, 87);
-      doc.text(rupiah(inv.nominal), 130, 105, { align: 'right' });
+      doc.text(rupiah(inv.nominal), 130, 105.5, { align: 'right' });
 
       // 8. Keterangan Resmi
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7);
       doc.setTextColor(100, 116, 139);
-      doc.text('Keterangan: Pembayaran telah diterima penuh untuk pemakaian internet periode tersebut.', 14, 115);
-      doc.text('Kwitansi digital ini sah dan diterbitkan secara resmi oleh Sistem Billing RT/RW.net.', 14, 119);
+      doc.text('Keterangan: Pembayaran telah diterima penuh untuk pemakaian internet periode tersebut.', 14, 114.5);
+      doc.text(`Kwitansi digital ini sah dan diterbitkan secara resmi oleh ${tenantBrand}.`, 14, 118.5);
 
-      // 9. Tanda Tangan Pelanggan & Cap Digital Sah
+      // 9. Tanda Tangan Pelanggan & Cap Digital Sah (3 baris proporsional, tanpa nama tenant & tanpa ID Trx)
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(71, 85, 105);
       doc.text('Pelanggan,', 20, 127);
       doc.setFont('helvetica', 'bold');
-      doc.text(currentClient.nama || '-', 20, 146);
+      doc.text(currentClient.nama || '-', 20, 143);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7);
       doc.setTextColor(148, 163, 184);
-      doc.text(`ID: ${currentClient.customer_id}`, 20, 150);
+      doc.text(`ID: ${currentClient.customer_id}`, 20, 147.5);
 
-      // Cap Sah Stempel Digital
-      doc.setDrawColor(5, 150, 105);
+      // Cap Sah Stempel Digital (Dimensi 54mm x 22mm di kanan bawah, rapi, lega & proporsional)
+      const stampX = 80;
+      const stampY = 127;
+      const stampW = 54;
+      const stampH = 22;
+      const stampCenterX = stampX + (stampW / 2); // 107mm
+
+      doc.setDrawColor(5, 150, 105); // Emerald 600
       doc.setLineWidth(0.6);
-      doc.roundedRect(76, 124, 58, 27, 2, 2, 'S');
+      doc.roundedRect(stampX, stampY, stampW, stampH, 2, 2, 'S');
 
-      doc.setFillColor(236, 253, 245);
-      doc.roundedRect(77, 125, 56, 25, 1.5, 1.5, 'F');
+      doc.setFillColor(236, 253, 245); // Emerald 50
+      doc.roundedRect(stampX + 0.5, stampY + 0.5, stampW - 1, stampH - 1, 1.5, 1.5, 'F');
 
+      // Baris 1: Header Badge
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8.5);
-      doc.setTextColor(4, 120, 87);
-      doc.text('★ LUNAS - VERIFIED ★', 105, 130.5, { align: 'center' });
+      doc.setTextColor(4, 120, 87); // Emerald 700
+      doc.text('LUNAS-VERIFIED', stampCenterX, stampY + 6.5, { align: 'center' });
 
-      doc.setFontSize(7);
-      doc.setTextColor(6, 95, 70);
-      doc.text('SISTEM BILLING RT/RW.NET', 105, 135.5, { align: 'center' });
-
+      // Baris 2: Tanggal Bayar
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(6.5);
-      doc.setTextColor(71, 85, 105);
-      doc.text(`Tanggal: ${tglBayarStr}`, 105, 140, { align: 'center' });
-      doc.text(`ID Trx: ${noKwitansi}`, 105, 144, { align: 'center' });
-      doc.setFontSize(6);
-      doc.setTextColor(16, 185, 129);
-      doc.text('DIVERIFIKASI RESMI OLEH SISTEM', 105, 148, { align: 'center' });
+      doc.setFontSize(7);
+      doc.setTextColor(51, 65, 85); // Slate 700
+      doc.text(`Tanggal: ${tglBayarStr}`, stampCenterX, stampY + 12, { align: 'center' });
 
-      // 10. Footer Dokumen
+      // Baris 3: Verifikasi Resmi
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6);
+      doc.setTextColor(5, 150, 105); // Emerald 600
+      doc.text('DIVERIFIKASI RESMI OLEH SISTEM', stampCenterX, stampY + 17, { align: 'center' });
+
+      // 10. Footer Dokumen (Perbaikan typo "oleh pengelola")
       doc.setDrawColor(226, 232, 240);
       doc.setLineWidth(0.3);
-      doc.line(14, 157, 134, 157);
+      doc.line(14, 156, 134, 156);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(6.5);
       doc.setTextColor(148, 163, 184);
-      doc.text('Kwitansi elektronik ini tidak memerlukan tanda tangan basah dan sah di mata pengelola.', 74, 162, { align: 'center' });
+      doc.text('Kwitansi elektronik ini tidak memerlukan tanda tangan basah dan sah oleh pengelola.', 74, 161, { align: 'center' });
 
       // Download file PDF instan
       doc.save(fileName);
@@ -738,6 +852,8 @@ function openPrintableReceiptFallback(inv) {
   const noKwitansi = `KW-${currentClient.customer_id}-${(inv.periode || '').replace('-', '')}`;
   const periodeStr = periodeLabel(inv.periode);
   const tglBayarStr = tgl(inv.tanggal_bayar);
+  const tenantBrand = String(currentClient.tenant_name || currentClient.app_title || 'RT/RW.net').toUpperCase();
+  const metodeBayarStr = formatMetodeBayar(inv.metode_bayar || currentClient.metode_bayar, currentClient);
 
   const printWindow = window.open('', '_blank', 'width=700,height=800');
   if (!printWindow) {
@@ -759,13 +875,14 @@ function openPrintableReceiptFallback(inv) {
         .title { text-align: right; font-size: 18px; font-weight: bold; color: #059669; }
         .trx { text-align: right; font-size: 11px; color: #64748b; margin-top: 2px; }
         .info-grid { display: flex; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 12px; margin-bottom: 16px; }
-        .table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
-        .table th, .table td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        .table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; table-layout: fixed; }
+        .table th, .table td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
         .table th { background: #f1f5f9; font-weight: 700; color: #475569; }
         .total-box { display: flex; justify-content: space-between; align-items: center; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 12px; font-weight: bold; margin-bottom: 20px; }
         .total-val { font-size: 18px; color: #047857; }
         .footer-sign { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; padding-top: 10px; }
-        .stamp { border: 2px dashed #059669; border-radius: 8px; background: #ecfdf5; padding: 8px 16px; text-align: center; color: #047857; font-weight: bold; font-size: 12px; }
+        .stamp { border: 2px dashed #059669; border-radius: 8px; background: #ecfdf5; padding: 10px 18px; text-align: center; min-width: 180px; }
+        .footer-note { text-align: center; margin-top: 18px; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px; }
         @media print { .no-print { display: none; } body { margin: 0; } }
       </style>
     </head>
@@ -773,13 +890,14 @@ function openPrintableReceiptFallback(inv) {
       <div class="receipt-box">
         <div class="header">
           <div>
-            <div class="brand">RT/RW.net DIGITAL</div>
+            <div class="brand">${esc(tenantBrand)}</div>
             <div class="sub">Bukti Pembayaran & Kwitansi Resmi Elektronik</div>
           </div>
           <div>
             <div class="title">KWITANSI LUNAS</div>
             <div class="trx">No: ${noKwitansi}</div>
             <div class="trx">Tanggal: ${tglBayarStr}</div>
+            <div class="trx">Metode: ${esc(metodeBayarStr)}</div>
           </div>
         </div>
 
@@ -794,6 +912,7 @@ function openPrintableReceiptFallback(inv) {
             <strong>Rincian Layanan:</strong><br>
             Paket: ${esc(currentClient.paket)}<br>
             Bulan: ${esc(periodeStr)}<br>
+            Metode: <strong style="color: #4338ca;">${esc(metodeBayarStr)}</strong><br>
             Status: <span style="color: #059669; font-weight: bold;">LUNAS</span>
           </div>
         </div>
@@ -801,14 +920,14 @@ function openPrintableReceiptFallback(inv) {
         <table class="table">
           <thead>
             <tr>
-              <th>Deskripsi Layanan</th>
-              <th>Periode</th>
-              <th style="text-align: right;">Jumlah</th>
+              <th style="width: 50%;">Deskripsi Layanan</th>
+              <th style="width: 25%;">Periode</th>
+              <th style="width: 25%; text-align: right;">Jumlah</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Langganan Akses Internet RT/RW.net (${esc(currentClient.paket)})</td>
+              <td>Langganan Akses Internet (${esc(currentClient.paket)})</td>
               <td>${esc(periodeStr)}</td>
               <td style="text-align: right;">${rupiah(inv.nominal)}</td>
             </tr>
@@ -827,10 +946,14 @@ function openPrintableReceiptFallback(inv) {
             ID: ${esc(currentClient.customer_id)}
           </div>
           <div class="stamp">
-            ★ LUNAS - VERIFIED ★<br>
-            <span style="font-size: 10px; font-weight: normal; color: #475569;">SISTEM BILLING RT/RW.NET</span><br>
-            <span style="font-size: 9px; color: #64748b;">${tglBayarStr}</span>
+            <div style="font-size: 11px; font-weight: bold; color: #047857; margin-bottom: 3px; letter-spacing: 0.5px;">LUNAS-VERIFIED</div>
+            <div style="font-size: 10px; font-weight: normal; color: #334155; margin-bottom: 3px;">Tanggal: ${tglBayarStr}</div>
+            <div style="font-size: 8.5px; font-weight: bold; color: #059669; letter-spacing: 0.3px;">DIVERIFIKASI RESMI OLEH SISTEM</div>
           </div>
+        </div>
+
+        <div class="footer-note">
+          Kwitansi elektronik ini tidak memerlukan tanda tangan basah dan sah oleh pengelola.
         </div>
       </div>
       <script>
