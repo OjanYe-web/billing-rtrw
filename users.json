@@ -2,15 +2,15 @@
   {
     "id": 1,
     "username": "superadmin",
-    "password_hash": "e34f92a20532a873cb3184398070b4b82a8fa29cf48572c203dc5f0fa6158231",
-    "nama": "Super Admin Pusat (Pembuat Aplikasi)",
+    "password": "superadmin1",
+    "nama": "Super Admin Pusat",
     "role": "superadmin",
     "tenant_id": null
   },
   {
     "id": 2,
     "username": "adminnusantara",
-    "password_hash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+    "password": "adminnusantara1",
     "nama": "Admin RT/RW Net Nusantara",
     "role": "admin",
     "tenant_id": "default"
@@ -18,7 +18,7 @@
   {
     "id": 3,
     "username": "adminberkah",
-    "password_hash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+    "password": "adminberkah1",
     "nama": "Admin Berkah Network",
     "role": "admin",
     "tenant_id": "tenant_berkah_network"

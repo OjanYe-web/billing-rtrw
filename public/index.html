@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Billing RT/RW.net - Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -72,6 +72,48 @@
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
+    }
+
+    /* Mobile-First Touch & Responsive Optimizations */
+    @media (max-width: 767.98px) {
+      body {
+        overflow-x: hidden !important;
+      }
+      /* Mencegah auto-zoom form font pada perangkat iOS Safari */
+      input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+        font-size: 14px !important;
+      }
+      /* Peningkatan target sentuh jempol agar nyaman di HP */
+      .touch-target {
+        min-height: 40px;
+      }
+    }
+
+    /* Smooth Momentum Scrolling untuk Tabel Data di Perangkat Layar Sentuh */
+    .overflow-x-auto {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+    }
+    .overflow-x-auto::-webkit-scrollbar {
+      height: 5px;
+    }
+    .overflow-x-auto::-webkit-scrollbar-track {
+      background: rgba(241, 245, 249, 0.7);
+      border-radius: 9999px;
+    }
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    html.dark .overflow-x-auto::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    html.dark .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: #334155;
     }
 
     /* Custom Scrollbar for clean dialogs & panels */
@@ -338,6 +380,7 @@
         left: 0;
         z-index: 50;
         width: 18rem !important;
+        max-width: 85vw !important;
         transform: translateX(-100%);
         transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
       }
@@ -544,38 +587,38 @@
   <div id="contentWrapper" class="flex-1 flex flex-col min-w-0 transition-all duration-300">
     
     <!-- Topbar Header Bersih (Sticky) -->
-    <header id="topNavbar" class="bg-indigo-700 dark:bg-slate-900 text-white shadow-xs px-4 py-3 flex items-center justify-between gap-3 sticky top-0 z-40 no-print border-b border-indigo-800/40 dark:border-slate-800">
+    <header id="topNavbar" class="bg-indigo-700 dark:bg-slate-900 text-white shadow-xs px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 sticky top-0 z-40 no-print border-b border-indigo-800/40 dark:border-slate-800">
       <!-- Sisi Kiri: Tombol Toggle Sidebar & Judul -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0">
         <button id="btnToggleSidebar" type="button" class="px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 active:scale-95 text-white transition cursor-pointer select-none flex items-center gap-1.5 text-base leading-none border border-white/20 shadow-xs shrink-0" title="Buka / Sembunyikan Menu Samping (Sidebar)">
           <span id="sidebarToggleIcon" class="text-lg leading-none font-bold">☰</span>
-          <span id="sidebarToggleLabel" class="text-xs font-semibold">Menu</span>
+          <span id="sidebarToggleLabel" class="text-xs font-semibold hidden sm:inline">Menu</span>
         </button>
-        <div>
-          <h2 class="text-sm sm:text-base font-bold text-white leading-tight flex items-center gap-2">
+        <div class="min-w-0">
+          <h2 class="text-sm sm:text-base font-bold text-white leading-tight flex items-center gap-2 truncate">
             <span>Billing RT/RW.net</span>
           </h2>
-          <p class="text-[11px] text-indigo-200 dark:text-slate-400 hidden sm:block">Sistem Manajemen Operasional &amp; Penagihan</p>
+          <p class="text-[11px] text-indigo-200 dark:text-slate-400 hidden sm:block truncate">Sistem Manajemen Operasional &amp; Penagihan</p>
         </div>
       </div>
 
       <!-- Sisi Kanan: Portal Pelanggan, Auto-Refresh & Tombol Pengalih Tema Transparan -->
-      <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
         <!-- Menu Portal Pelanggan Mandiri -->
-        <a href="/client" target="_blank" rel="noopener noreferrer" id="navClientPortal" class="bg-indigo-900/80 hover:bg-indigo-900 dark:bg-slate-800 dark:hover:bg-slate-700 border border-indigo-400/40 dark:border-slate-700 text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition select-none shadow-xs no-underline font-medium hover:text-white" title="Buka Portal Mandiri Pelanggan (Client Area)">
+        <a href="/client" target="_blank" rel="noopener noreferrer" id="navClientPortal" class="bg-indigo-900/80 hover:bg-indigo-900 dark:bg-slate-800 dark:hover:bg-slate-700 border border-indigo-400/40 dark:border-slate-700 text-white text-xs px-2 sm:px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition select-none shadow-xs no-underline font-medium hover:text-white" title="Buka Portal Mandiri Pelanggan (Client Area)">
           <span class="text-sm leading-none">🌐</span>
           <span class="hidden sm:inline">Portal Pelanggan</span>
         </a>
 
         <!-- Tombol Toggle Auto-Refresh 1 Menit -->
-        <button id="btnToggleAutoRefresh" type="button" class="bg-indigo-900/80 hover:bg-indigo-900 border border-indigo-400/40 text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition select-none shadow-xs" title="Auto-Refresh Aktif (setiap 1 menit). Klik untuk mengaktifkan / menonaktifkan">
-          <span id="autoRefreshDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <button id="btnToggleAutoRefresh" type="button" class="bg-indigo-900/80 hover:bg-indigo-900 border border-indigo-400/40 text-white text-xs px-2 sm:px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition select-none shadow-xs" title="Auto-Refresh Aktif (setiap 1 menit). Klik untuk mengaktifkan / menonaktifkan">
+          <span id="autoRefreshDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
           <span id="autoRefreshLabel" class="font-medium hidden sm:inline">Auto-Refresh: <strong class="text-emerald-300 font-bold">ON</strong></span>
-          <span id="autoRefreshCountdown" class="text-[11px] font-mono text-indigo-200">(60s)</span>
+          <span id="autoRefreshCountdown" class="text-[10px] sm:text-[11px] font-mono text-indigo-200">(60s)</span>
         </button>
 
         <!-- Tombol Pengalih Tema (Dark / Light Mode) - Transparan & Bersih di Sudut Kanan -->
-        <button id="btnToggleTheme" type="button" class="bg-transparent border-0 shadow-none text-white/80 hover:text-white text-xs sm:text-sm px-1.5 py-1 flex items-center gap-1.5 transition cursor-pointer select-none focus:outline-none focus:ring-0" title="Ganti Tema (Gelap / Terang)">
+        <button id="btnToggleTheme" type="button" class="bg-transparent border-0 shadow-none text-white/80 hover:text-white text-xs sm:text-sm px-1.5 py-1 flex items-center gap-1 transition cursor-pointer select-none focus:outline-none focus:ring-0" title="Ganti Tema (Gelap / Terang)">
           <span id="themeIcon" class="text-base leading-none">🌙</span>
           <span id="themeLabel" class="font-medium hidden sm:inline">Mode Gelap</span>
         </button>
@@ -583,23 +626,23 @@
     </header>
 
   <!-- Status Bar & Indikator Koneksi Router MikroTik (No Print) -->
-  <div id="barMikrotik" class="bg-slate-900 text-slate-200 border-b border-slate-800 text-xs px-4 py-2 flex flex-wrap items-center justify-between gap-2.5 no-print">
-    <div class="flex items-center gap-2.5 flex-wrap">
-      <span id="mtStatusBadge" class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+  <div id="barMikrotik" class="bg-slate-900 text-slate-200 border-b border-slate-800 text-xs px-3 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-2.5 no-print">
+    <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap min-w-0">
+      <span id="mtStatusBadge" class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 shrink-0">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         <span id="mtStatusText">MikroTik: Connected</span>
       </span>
-      <span class="font-bold text-white tracking-wide" id="mtIdentity">MikroTik-CCR1009-Billing</span>
+      <span class="font-bold text-white tracking-wide text-xs sm:text-sm truncate" id="mtIdentity">MikroTik-CCR1009-Billing</span>
       <span class="text-slate-500 hidden sm:inline">•</span>
-      <span class="text-slate-300 font-mono text-[11px] hidden sm:inline" id="mtModelVersion">CCR1009-7G-1C-1S+ (RouterOS v7.14)</span>
-      <span class="text-slate-500 hidden md:inline">•</span>
-      <span class="text-slate-400 hidden md:inline" id="mtStatsSummary">20 PPPoE Secrets • CPU 8%</span>
+      <span class="text-slate-300 font-mono text-[11px] hidden md:inline" id="mtModelVersion">CCR1009-7G-1C-1S+ (RouterOS v7.14)</span>
+      <span class="text-slate-500 hidden lg:inline">•</span>
+      <span class="text-slate-400 hidden lg:inline" id="mtStatsSummary">20 PPPoE Secrets • CPU 8%</span>
     </div>
-    <div class="flex items-center gap-2">
-      <button type="button" id="btnSyncMikrotik" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm transition" title="Jalankan sinkronisasi data pelanggan ke Router MikroTik">
+    <div class="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
+      <button type="button" id="btnSyncMikrotik" class="flex-1 sm:flex-initial justify-center bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-semibold text-xs px-3.5 py-2 sm:py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm transition" title="Jalankan sinkronisasi data pelanggan ke Router MikroTik">
         <span>⚡</span> Sync Mikrotik
       </button>
-      <button type="button" id="btnRouterDetail" class="bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 font-semibold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-xs transition cursor-pointer select-none active:scale-95" title="Buka Detail Status & Setting Router MikroTik">
+      <button type="button" id="btnRouterDetail" class="flex-1 sm:flex-initial justify-center bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white border border-slate-700 font-semibold text-xs px-3.5 py-2 sm:py-1.5 rounded-lg flex items-center gap-1.5 shadow-xs transition cursor-pointer select-none" title="Buka Detail Status & Setting Router MikroTik">
         <span>⚙️</span> Detail Router
       </button>
     </div>
@@ -619,14 +662,13 @@
     </div>
   </div>
 
-  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-    <!-- Ringkasan Statistik Keuangan -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-4" id="stats"></section>
+  <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
+    <!-- Ringkasan Statistik Keuangan (Grid 2 Kolom di Mobile, 4 Kolom di Layar Lebar) -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" id="stats"></section>
 
     <!-- Laporan Keuangan & Statistik Pendapatan (Visual Charts & Analytics) -->
-    <!-- Laporan Keuangan & Statistik Pendapatan (Visual Charts & Analytics) -->
-    <section class="bg-white dark:bg-slate-900/80 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-800 p-5 space-y-5 no-print transition-colors" id="sectionAnalytics">
-      <div id="analyticsHeader" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-4">
+    <section class="bg-white dark:bg-slate-900/80 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 space-y-4 sm:space-y-5 no-print transition-colors" id="sectionAnalytics">
+      <div id="analyticsHeader" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-3 sm:pb-4">
         <div>
           <h2 class="font-bold text-slate-800 dark:text-slate-100 text-base sm:text-lg flex items-center gap-2">
             <span>📊</span> Laporan Keuangan & Statistik Pendapatan
@@ -639,11 +681,11 @@
             <select id="chartPeriodFilter" class="border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium transition cursor-pointer">
               <option value="">Periode Berjalan (Bulan Ini)</option>
             </select>
-            <button type="button" id="btnRefreshCharts" class="p-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 transition" title="Muat Ulang Data Grafik">
+            <button type="button" id="btnRefreshCharts" class="p-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 transition active:scale-95" title="Muat Ulang Data Grafik">
               🔄
             </button>
           </div>
-          <button type="button" id="btnToggleAnalytics" class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium flex items-center gap-1.5 shadow-xs transition" title="Sembunyikan / Tampilkan Statistik">
+          <button type="button" id="btnToggleAnalytics" class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium flex items-center gap-1.5 shadow-xs transition active:scale-95" title="Sembunyikan / Tampilkan Statistik">
             <span id="toggleAnalyticsIcon" class="text-[10px] leading-none">▲</span>
             <span id="toggleAnalyticsText">Sembunyikan</span>
           </button>
@@ -651,55 +693,55 @@
       </div>
 
       <!-- Kontainer Konten Analytics (Collapsible) -->
-      <div id="analyticsContent" class="space-y-5">
+      <div id="analyticsContent" class="space-y-4 sm:space-y-5">
       <!-- Ringkasan Metrik Finansial Tambahan (Pendapatan, Pengeluaran & Laba Bersih) -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-xs sm:text-sm">
-        <div class="bg-white dark:bg-slate-900/60 border border-emerald-200/80 dark:border-emerald-500/20 rounded-xl p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-xs flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Total Pendapatan Lunas
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 text-xs sm:text-sm">
+        <div class="bg-white dark:bg-slate-900/60 border border-emerald-200/80 dark:border-emerald-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0"></span> Total Pendapatan Lunas
           </div>
-          <div id="financeIncomeVal" class="text-lg sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1.5 tracking-tight">Rp 0</div>
-          <div id="financeIncomeSub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">0 Pelanggan Lunas</div>
+          <div id="financeIncomeVal" class="text-base sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+          <div id="financeIncomeSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">0 Pelanggan Lunas</div>
         </div>
 
-        <div class="bg-white dark:bg-slate-900/60 border border-amber-200/80 dark:border-amber-500/20 rounded-xl p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-xs flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Pengeluaran Kas
+        <div class="bg-white dark:bg-slate-900/60 border border-amber-200/80 dark:border-amber-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+            <span class="w-2 h-2 rounded-full bg-amber-500 inline-block shrink-0"></span> Pengeluaran Kas
           </div>
-          <div id="financeExpenseVal" class="text-lg sm:text-xl font-extrabold text-amber-600 dark:text-amber-400 mt-1.5 tracking-tight">Rp 0</div>
-          <div id="financeExpenseSub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">0 Pengeluaran</div>
+          <div id="financeExpenseVal" class="text-base sm:text-xl font-extrabold text-amber-600 dark:text-amber-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+          <div id="financeExpenseSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">0 Pengeluaran</div>
         </div>
 
-        <div class="bg-white dark:bg-slate-900/60 border border-teal-200/80 dark:border-teal-500/20 rounded-xl p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-xs flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-teal-500 inline-block"></span> Laba Bersih Operasional
+        <div class="bg-white dark:bg-slate-900/60 border border-teal-200/80 dark:border-teal-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+            <span class="w-2 h-2 rounded-full bg-teal-500 inline-block shrink-0"></span> Laba Bersih Operasional
           </div>
-          <div id="financeNetProfitVal" class="text-lg sm:text-xl font-extrabold text-teal-600 dark:text-teal-400 mt-1.5 tracking-tight">Rp 0</div>
-          <div id="financeNetProfitSub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">Margin: 0%</div>
+          <div id="financeNetProfitVal" class="text-base sm:text-xl font-extrabold text-teal-600 dark:text-teal-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+          <div id="financeNetProfitSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Margin: 0%</div>
         </div>
 
-        <div class="bg-white dark:bg-slate-900/60 border border-rose-200/80 dark:border-rose-500/20 rounded-xl p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-xs flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> Estimasi Piutang
+        <div class="bg-white dark:bg-slate-900/60 border border-rose-200/80 dark:border-rose-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+            <span class="w-2 h-2 rounded-full bg-rose-500 inline-block shrink-0"></span> Estimasi Piutang
           </div>
-          <div id="financeDebtVal" class="text-lg sm:text-xl font-extrabold text-rose-600 dark:text-rose-400 mt-1.5 tracking-tight">Rp 0</div>
-          <div id="financeDebtSub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">0 Pelanggan Belum Bayar</div>
+          <div id="financeDebtVal" class="text-base sm:text-xl font-extrabold text-rose-600 dark:text-rose-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+          <div id="financeDebtSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">0 Pelanggan Belum Bayar</div>
         </div>
 
-        <div class="bg-white dark:bg-slate-900/60 border border-blue-200/80 dark:border-blue-500/20 rounded-xl p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-xs flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> Potensi Omzet Total
+        <div class="bg-white dark:bg-slate-900/60 border border-blue-200/80 dark:border-blue-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+            <span class="w-2 h-2 rounded-full bg-blue-500 inline-block shrink-0"></span> Potensi Omzet Total
           </div>
-          <div id="financePotentialVal" class="text-lg sm:text-xl font-extrabold text-blue-600 dark:text-blue-400 mt-1.5 tracking-tight">Rp 0</div>
-          <div id="financePotentialSub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">Kapasitas billing aktif</div>
+          <div id="financePotentialVal" class="text-base sm:text-xl font-extrabold text-blue-600 dark:text-blue-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+          <div id="financePotentialSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Kapasitas billing aktif</div>
         </div>
 
-        <div class="bg-white dark:bg-slate-900/60 border border-purple-200/80 dark:border-purple-500/20 rounded-xl p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-xs flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-purple-500 inline-block"></span> Collection Rate
+        <div class="bg-white dark:bg-slate-900/60 border border-purple-200/80 dark:border-purple-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+            <span class="w-2 h-2 rounded-full bg-purple-500 inline-block shrink-0"></span> Collection Rate
           </div>
-          <div id="financeRateVal" class="text-lg sm:text-xl font-extrabold text-purple-600 dark:text-purple-400 mt-1.5 tracking-tight">0%</div>
-          <div id="financeRateSub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">Efektivitas penagihan</div>
+          <div id="financeRateVal" class="text-base sm:text-xl font-extrabold text-purple-600 dark:text-purple-400 mt-1.5 tracking-tight truncate">0%</div>
+          <div id="financeRateSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Efektivitas penagihan</div>
         </div>
       </div>
 
@@ -746,35 +788,35 @@
     </section>
 
     <!-- Toolbar & Tabel Pelanggan -->
-    <section class="bg-white rounded-xl shadow">
+    <section class="bg-white dark:bg-slate-900/80 rounded-xl shadow border border-slate-200/80 dark:border-slate-800 overflow-hidden">
       <!-- Toolbar Atas (No Print) -->
-      <div class="p-4 flex flex-col xl:flex-row gap-3 xl:items-center xl:justify-between border-b no-print">
-        <div class="flex items-center gap-3">
-          <!-- Tombol Tambah Pelanggan Baru di sebelah kiri Daftar Pelanggan -->
-          <button id="btnAdd" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-3.5 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition whitespace-nowrap active:scale-95">
-            <span>+</span> Data Pelanggan Baru
+      <div class="p-3.5 sm:p-4 flex flex-col xl:flex-row gap-3 xl:items-center xl:justify-between border-b border-slate-200/80 dark:border-slate-800 no-print">
+        <div class="flex items-center justify-between gap-3 w-full xl:w-auto">
+          <!-- Tombol Tambah Pelanggan Baru -->
+          <button id="btnAdd" class="w-full sm:w-auto justify-center bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold px-4 py-2.5 sm:py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition whitespace-nowrap cursor-pointer">
+            <span class="text-base font-bold leading-none">+</span> Data Pelanggan Baru
           </button>
-          <h2 class="font-bold text-slate-800 text-base whitespace-nowrap">Daftar Pelanggan</h2>
+          <h2 class="font-bold text-slate-800 dark:text-slate-100 text-base whitespace-nowrap hidden sm:block">Daftar Pelanggan</h2>
         </div>
         
         <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
           <!-- 1. Kotak Pencarian -->
-          <input id="search" type="search" placeholder="Cari nama, alamat, paket..." class="border rounded-lg px-3 py-2 text-sm w-full sm:w-52 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <input id="search" type="search" placeholder="Cari nama, alamat, paket..." class="border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm w-full sm:w-52 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
 
           <!-- 2. Dropdown Wilayah -->
-          <select id="filterWilayah" class="border rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none w-full sm:w-auto">
+          <select id="filterWilayah" class="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none w-full sm:w-auto">
             <option value="">Semua Wilayah</option>
           </select>
           
           <!-- 3. Dropdown Status Bayar -->
-          <select id="filter" class="border rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none w-full sm:w-auto">
+          <select id="filter" class="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none w-full sm:w-auto">
             <option value="">Status Bayar: Semua</option>
             <option value="Lunas">Lunas</option>
             <option value="Belum Lunas">Belum Lunas</option>
           </select>
 
           <!-- 4. Dropdown Status Jaringan -->
-          <select id="filterJaringan" class="border rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none w-full sm:w-auto">
+          <select id="filterJaringan" class="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none w-full sm:w-auto">
             <option value="">Status Jaringan: Semua</option>
             <option value="Aktif">🟢 Aktif</option>
             <option value="Menunggak">🟡 Menunggak</option>
@@ -782,41 +824,41 @@
             <option value="Terisolir / Gangguan">⚠️ Terisolir / Gangguan</option>
           </select>
 
-          <!-- 5. Tombol Export CSV & Cetak (Tepat di bawah filter Status Jaringan) -->
-          <div class="flex items-center justify-center gap-1 bg-slate-50 border rounded-lg p-1 shrink-0 w-full sm:w-auto">
-            <a href="/api/export/csv" id="btnExportCsv" class="flex-1 sm:flex-initial px-3 py-1.5 sm:px-2.5 sm:py-1 text-xs font-medium text-slate-700 hover:text-indigo-600 hover:bg-white rounded transition flex items-center justify-center gap-1" title="Download Excel / CSV">
+          <!-- 5. Tombol Export CSV & Cetak -->
+          <div class="flex items-center justify-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shrink-0 w-full sm:w-auto">
+            <a href="/api/export/csv" id="btnExportCsv" class="flex-1 sm:flex-initial px-3 py-1.5 sm:px-2.5 sm:py-1 text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-700 rounded transition flex items-center justify-center gap-1" title="Download Excel / CSV">
               <span>📊</span> CSV
             </a>
-            <span class="text-slate-300">|</span>
-            <button id="btnPrint" class="flex-1 sm:flex-initial px-3 py-1.5 sm:px-2.5 sm:py-1 text-xs font-medium text-slate-700 hover:text-indigo-600 hover:bg-white rounded transition flex items-center justify-center gap-1" title="Cetak Rekap Laporan">
+            <span class="text-slate-300 dark:text-slate-600">|</span>
+            <button id="btnPrint" class="flex-1 sm:flex-initial px-3 py-1.5 sm:px-2.5 sm:py-1 text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-700 rounded transition flex items-center justify-center gap-1" title="Cetak Rekap Laporan">
               <span>🖨️</span> Cetak
             </button>
           </div>
 
-          <!-- 6. Quick Filter Buttons Khusus Tim Lapangan (Terisolir & Menunggak) -->
+          <!-- 6. Quick Filter Buttons Khusus Tim Lapangan -->
           <div class="flex items-center gap-1.5 w-full sm:w-auto">
-            <button type="button" id="btnQuickTerisolir" class="flex-1 sm:flex-initial px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 flex items-center justify-center gap-1 transition shadow-sm whitespace-nowrap" title="Filter langsung pelanggan terisolir untuk tim lapangan">
+            <button type="button" id="btnQuickTerisolir" class="flex-1 sm:flex-initial px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 flex items-center justify-center gap-1 transition shadow-sm whitespace-nowrap active:scale-95" title="Filter langsung pelanggan terisolir untuk tim lapangan">
               <span>🔴</span> Terisolir (<span id="quickTerisolirCount">0</span>)
             </button>
-            <button type="button" id="btnQuickMenunggak" class="flex-1 sm:flex-initial px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center gap-1 transition shadow-sm whitespace-nowrap" title="Filter pelanggan menunggak">
+            <button type="button" id="btnQuickMenunggak" class="flex-1 sm:flex-initial px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center gap-1 transition shadow-sm whitespace-nowrap active:scale-95" title="Filter pelanggan menunggak">
               <span>🟡</span> Menunggak (<span id="quickMenunggakCount">0</span>)
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Tabel Data -->
-      <div class="overflow-x-auto">
+      <!-- Tabel Data dengan Smooth Momentum Scroll -->
+      <div class="overflow-x-auto custom-scroll">
         <table class="w-full text-sm">
-          <thead class="bg-slate-50 text-left text-slate-600 border-b text-xs font-semibold uppercase tracking-wider">
+          <thead class="bg-slate-50 dark:bg-slate-900 text-left text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold uppercase tracking-wider">
             <tr>
-              <th class="px-4 py-3 min-w-[200px]">Nama & Kontak</th>
-              <th class="px-4 py-3 min-w-[150px]">Alamat & Wilayah</th>
-              <th class="px-4 py-3 min-w-[160px]">Paket & Harga</th>
-              <th class="px-4 py-3 min-w-[110px]">Jatuh Tempo</th>
-              <th class="px-4 py-3 min-w-[110px]">Status Tagihan</th>
-              <th class="px-4 py-3 min-w-[240px] max-w-[310px]">Status Jaringan & Log</th>
-              <th class="px-4 py-3 text-right no-print min-w-[220px]">Aksi</th>
+              <th class="px-3 sm:px-4 py-3 min-w-[190px] sm:min-w-[200px]">Nama & Kontak</th>
+              <th class="px-3 sm:px-4 py-3 min-w-[140px] sm:min-w-[150px]">Alamat & Wilayah</th>
+              <th class="px-3 sm:px-4 py-3 min-w-[140px] sm:min-w-[160px]">Paket & Harga</th>
+              <th class="px-3 sm:px-4 py-3 min-w-[100px] sm:min-w-[110px]">Jatuh Tempo</th>
+              <th class="px-3 sm:px-4 py-3 min-w-[100px] sm:min-w-[110px]">Status Tagihan</th>
+              <th class="px-3 sm:px-4 py-3 min-w-[220px] max-w-[310px]">Status Jaringan & Log</th>
+              <th class="px-3 sm:px-4 py-3 text-right no-print min-w-[220px]">Aksi</th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
@@ -832,7 +874,7 @@
         <span>📡</span> Billing RT/RW.net Management System
       </div>
       <p class="font-medium tracking-wide">
-        Powered &amp; Developed by <strong class="font-bold text-slate-700">OjanYe</strong> &copy; 2026
+         <strong class="font-bold text-slate-700">JanYe</strong> &copy; 2026
       </p>
       <div class="text-[11px] text-slate-400">
         All Rights Reserved
@@ -3225,10 +3267,10 @@ function render() {
   }
 
   const card = (label, val, sub, color, borderCls = 'border-slate-200/80 dark:border-slate-800') => `
-    <div class="bg-white dark:bg-slate-900/60 border ${borderCls} rounded-xl shadow-xs p-4 transition hover:shadow-sm">
-      <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">${label}</div>
-      <div class="text-2xl font-extrabold mt-1 tracking-tight ${color}">${val}</div>
-      <div class="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">${sub}</div>
+    <div class="bg-white dark:bg-slate-900/60 border ${borderCls} rounded-xl shadow-xs p-3 sm:p-4 transition hover:shadow-sm">
+      <div class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide truncate">${label}</div>
+      <div class="text-lg sm:text-2xl font-extrabold mt-1 tracking-tight ${color} truncate">${val}</div>
+      <div class="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium truncate">${sub}</div>
     </div>`;
 
   $('stats').innerHTML =
@@ -3257,44 +3299,44 @@ function render() {
 
     return `<tr class="hover:bg-slate-50/80 transition">
       <!-- Nama & Kontak -->
-      <td class="px-4 py-3 align-top min-w-[200px]">
+      <td class="px-3 sm:px-4 py-3 align-top min-w-[190px] sm:min-w-[200px]">
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="customer-name-click font-bold text-slate-900 hover:text-indigo-600 transition inline-flex items-center gap-1 group/cname cursor-pointer" data-id="${c.id}" title="Klik untuk melihat Detail Lengkap Pelanggan">
+          <span class="customer-name-click font-bold text-slate-900 dark:text-slate-100 hover:text-indigo-600 transition inline-flex items-center gap-1 group/cname cursor-pointer" data-id="${c.id}" title="Klik untuk melihat Detail Lengkap Pelanggan">
             <span>${esc(c.nama)}</span>
             <span class="text-[10px] text-indigo-400 opacity-0 group-hover/cname:opacity-100 transition">🔍</span>
           </span>
           <span class="customer-name-click text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 dark:text-slate-200 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 transition cursor-pointer shrink-0" data-id="${c.id}" title="ID Pelanggan (Klik untuk lihat detail)">${esc(c.customer_id || ('PLG' + String(c.id).padStart(3,'0')))}</span>
         </div>
-        <div class="text-xs text-slate-600 font-medium flex items-center gap-1 mt-1">
-          <span class="text-[11px]">🌐</span> <span>IP Address Client: <span class="font-mono font-semibold text-slate-800">${esc(c.ipAddress || c.ip_address || ('192.168.88.' + (10 + (c.id || 1))))}</span></span>
+        <div class="text-xs text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1 mt-1">
+          <span class="text-[11px]">🌐</span> <span>IP Address Client: <span class="font-mono font-semibold text-slate-800 dark:text-slate-200">${esc(c.ipAddress || c.ip_address || ('192.168.88.' + (10 + (c.id || 1))))}</span></span>
         </div>
-        <div class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+        <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
           <span>📱</span> ${esc(c.whatsapp)}
         </div>
       </td>
 
       <!-- Alamat & Wilayah -->
-      <td class="px-4 py-3 align-top min-w-[150px]">
-        <div class="text-slate-800">${esc(c.alamat)}</div>
+      <td class="px-3 sm:px-4 py-3 align-top min-w-[140px] sm:min-w-[150px]">
+        <div class="text-slate-800 dark:text-slate-200">${esc(c.alamat)}</div>
         <div class="mt-1">
-          <span class="inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-medium">📍 ${esc(c.wilayah || '-')}</span>
+          <span class="inline-block px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-xs font-medium">📍 ${esc(c.wilayah || '-')}</span>
         </div>
       </td>
 
       <!-- Paket & Harga (Minimalis & Rapi) -->
-      <td class="px-4 py-3 align-top min-w-[160px]">
-        <div class="font-semibold text-slate-900">${esc(c.paket)}</div>
-        <div class="text-xs text-slate-500 font-medium mt-0.5">${rupiah(c.harga)} / bln</div>
+      <td class="px-3 sm:px-4 py-3 align-top min-w-[140px] sm:min-w-[160px]">
+        <div class="font-semibold text-slate-900 dark:text-slate-100">${esc(c.paket)}</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">${rupiah(c.harga)} / bln</div>
       </td>
 
       <!-- Jatuh Tempo -->
-      <td class="px-4 py-3 align-top min-w-[110px]">
-        <div class="text-slate-700 font-medium">${tgl(c.jatuh_tempo)}</div>
-        ${!lunas && diff < 0 ? `<div class="text-[11px] font-semibold text-rose-600 mt-0.5">Lewat ${Math.abs(diff)} hari</div>` : ''}
+      <td class="px-3 sm:px-4 py-3 align-top min-w-[100px] sm:min-w-[110px]">
+        <div class="text-slate-700 dark:text-slate-300 font-medium">${tgl(c.jatuh_tempo)}</div>
+        ${!lunas && diff < 0 ? `<div class="text-[11px] font-semibold text-rose-600 dark:text-rose-400 mt-0.5">Lewat ${Math.abs(diff)} hari</div>` : ''}
       </td>
 
       <!-- Status Tagihan -->
-      <td class="px-4 py-3 align-top min-w-[110px]">
+      <td class="px-3 sm:px-4 py-3 align-top min-w-[100px] sm:min-w-[110px]">
         <span class="inline-flex items-center gap-1.5 text-xs font-semibold ${lunas ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">
           <span class="w-1.5 h-1.5 rounded-full ${lunas ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
           <span>${lunas ? 'Lunas' : 'Belum Lunas'}</span>
@@ -3302,25 +3344,25 @@ function render() {
       </td>
 
       <!-- Status Jaringan & Tombol Isolir / Catat Gangguan / Mikrotik -->
-      <td class="px-4 py-3 align-top min-w-[240px] max-w-[310px]">
+      <td class="px-3 sm:px-4 py-3 align-top min-w-[220px] max-w-[310px]">
         <div class="space-y-1.5">
           <!-- Status Badge & Tombol Aksi Cepat -->
           <div class="flex items-center gap-1.5 flex-wrap">
             ${badgeNet}
             <div class="inline-flex items-center gap-1 flex-wrap">
-              <button data-id="${c.id}" class="toggle-isolir text-[11px] font-semibold px-2 py-0.5 rounded border transition shrink-0 ${isTerisolir ? 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'}" title="${isTerisolir ? 'Buka kembali sambungan internet' : 'Putus / Isolir sementara sambungan internet'}">
+              <button data-id="${c.id}" class="toggle-isolir text-[11px] font-semibold px-2 py-0.5 rounded border transition shrink-0 active:scale-95 ${isTerisolir ? 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'}" title="${isTerisolir ? 'Buka kembali sambungan internet' : 'Putus / Isolir sementara sambungan internet'}">
                 <span>${isTerisolir ? '🔓 Buka' : '🚫 Isolir'}</span>
               </button>
-              <button data-id="${c.id}" class="btn-mt-quick-sync text-[11px] font-medium px-2 py-0.5 rounded border border-sky-300 bg-sky-50 text-sky-700 hover:bg-sky-100 flex items-center gap-1 transition shrink-0" title="Sinkronkan akun PPPoE pelanggan ini ke MikroTik">
+              <button data-id="${c.id}" class="btn-mt-quick-sync text-[11px] font-medium px-2 py-0.5 rounded border border-sky-300 bg-sky-50 text-sky-700 hover:bg-sky-100 flex items-center gap-1 transition shrink-0 active:scale-95" title="Sinkronkan akun PPPoE pelanggan ini ke MikroTik">
                 <span>⚡ Sync MT</span>
               </button>
-              <button data-id="${c.id}" class="catat-gangguan text-[11px] font-medium px-2 py-0.5 rounded border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1 shrink-0" title="Catat Tiket Gangguan & Teknisi">
+              <button data-id="${c.id}" class="catat-gangguan text-[11px] font-medium px-2 py-0.5 rounded border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1 shrink-0 active:scale-95" title="Catat Tiket Gangguan & Teknisi">
                 <span>🛠️ Gangguan</span>
               </button>
             </div>
           </div>
 
-          <!-- Kotak Catatan Kendala & Riwayat Tiket Gangguan (Rapi, berbatas, tidak meluber) -->
+          <!-- Kotak Catatan Kendala & Riwayat Tiket Gangguan -->
           <div class="space-y-1">
             ${c.catatan_kendala ? `
               <div class="text-[11px] text-amber-900 bg-amber-50 border border-amber-200/90 rounded-md px-2 py-1 flex items-start gap-1.5 shadow-xs overflow-hidden" title="${esc(c.catatan_kendala)}">
@@ -3342,7 +3384,7 @@ function render() {
             ` : ''}
 
             ${logCount > 0 ? `
-              <div class="text-[11px] text-slate-500 flex items-center gap-1 cursor-pointer hover:text-indigo-600 transition history-to-logs pt-0.5" data-id="${c.id}" title="Lihat semua tiket gangguan">
+              <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 cursor-pointer hover:text-indigo-600 transition history-to-logs pt-0.5" data-id="${c.id}" title="Lihat semua tiket gangguan">
                 <span>⏱️</span>
                 <span class="underline decoration-slate-300 hover:decoration-indigo-500">${logCount} riwayat log & tiket</span>
               </div>
@@ -3352,17 +3394,19 @@ function render() {
       </td>
 
       <!-- Aksi -->
-      <td class="px-4 py-3 align-top text-right whitespace-nowrap space-x-1 no-print min-w-[220px]">
-        ${!lunas ? `<button data-id="${c.id}" class="pay-qris text-xs px-2.5 py-1.5 rounded-lg bg-sky-600 text-white hover:bg-sky-700 font-semibold shadow-sm transition flex-inline items-center gap-1" title="Bayar & Tampilkan QRIS DANA Bisnis">
-          <span>📱</span> Bayar QRIS
-        </button>` : ''}
-        <button data-id="${c.id}" class="toggle text-xs px-2.5 py-1.5 rounded-lg border font-medium transition ${lunas ? 'border-slate-300 text-slate-600 hover:bg-slate-100' : 'border-green-600 text-green-700 hover:bg-green-50'}">
-          ${lunas ? 'Batalkan Lunas' : 'Tandai Lunas'}
-        </button>
-        <button data-id="${c.id}" class="history text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 font-medium">Riwayat</button>
-        <button data-id="${c.id}" class="open-wa text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 shadow-sm flex-inline items-center gap-1 ${lunas ? 'opacity-60' : ''}">
-          <span>💬</span> Kirim WA
-        </button>
+      <td class="px-3 sm:px-4 py-3 align-top text-right whitespace-nowrap no-print min-w-[220px]">
+        <div class="inline-flex items-center gap-1.5 flex-wrap justify-end">
+          ${!lunas ? `<button data-id="${c.id}" class="pay-qris text-xs px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-semibold shadow-xs transition inline-flex items-center gap-1" title="Bayar & Tampilkan QRIS DANA Bisnis">
+            <span>📱</span> Bayar QRIS
+          </button>` : ''}
+          <button data-id="${c.id}" class="toggle text-xs px-2.5 py-1.5 rounded-lg border font-medium transition active:scale-95 ${lunas ? 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' : 'border-emerald-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'}">
+            ${lunas ? 'Batalkan Lunas' : 'Tandai Lunas'}
+          </button>
+          <button data-id="${c.id}" class="history text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium active:scale-95">Riwayat</button>
+          <button data-id="${c.id}" class="open-wa text-xs px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold shadow-xs inline-flex items-center gap-1 ${lunas ? 'opacity-70' : ''}">
+            <span>💬</span> Kirim WA
+          </button>
+        </div>
       </td>
     </tr>`;
   }).join('') || '<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Tidak ada data pelanggan yang cocok</td></tr>';
@@ -8142,6 +8186,16 @@ function initSidebarCollapse() {
         }
       }
       if (isMobile()) closeSidebar();
+    });
+  }
+
+  // Tutup sidebar otomatis di layar mobile saat item menu / tombol aksi diklik
+  if (sidebar) {
+    const navButtons = sidebar.querySelectorAll('.accordion-content button, #btnLogout');
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isMobile()) closeSidebar();
+      });
     });
   }
 
