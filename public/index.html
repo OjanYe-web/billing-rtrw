@@ -89,31 +89,77 @@
       }
     }
 
-    /* Smooth Momentum Scrolling untuk Tabel Data di Perangkat Layar Sentuh */
-    .overflow-x-auto {
-      -webkit-overflow-scrolling: touch;
+    /* Smooth Momentum Scrolling untuk Tabel Data di Perangkat Layar Sentuh & Mouse Drag */
+    .overflow-x-auto,
+    #tableCustomerWrapper {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
       overscroll-behavior-x: contain;
+      touch-action: pan-x pan-y !important;
       scrollbar-width: thin;
+      position: relative;
     }
-    .overflow-x-auto::-webkit-scrollbar {
-      height: 5px;
+    .overflow-x-auto::-webkit-scrollbar,
+    #tableCustomerWrapper::-webkit-scrollbar {
+      height: 6px;
     }
-    .overflow-x-auto::-webkit-scrollbar-track {
+    .overflow-x-auto::-webkit-scrollbar-track,
+    #tableCustomerWrapper::-webkit-scrollbar-track {
       background: rgba(241, 245, 249, 0.7);
       border-radius: 9999px;
     }
-    .overflow-x-auto::-webkit-scrollbar-thumb {
+    .overflow-x-auto::-webkit-scrollbar-thumb,
+    #tableCustomerWrapper::-webkit-scrollbar-thumb {
       background: #cbd5e1;
       border-radius: 9999px;
     }
-    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover,
+    #tableCustomerWrapper::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
-    html.dark .overflow-x-auto::-webkit-scrollbar-track {
+    html.dark .overflow-x-auto::-webkit-scrollbar-track,
+    html.dark #tableCustomerWrapper::-webkit-scrollbar-track {
       background: #0f172a;
     }
-    html.dark .overflow-x-auto::-webkit-scrollbar-thumb {
+    html.dark .overflow-x-auto::-webkit-scrollbar-thumb,
+    html.dark #tableCustomerWrapper::-webkit-scrollbar-thumb {
       background: #334155;
+    }
+
+    /* Mencegah seleksi teks yang mengganggu swipe geser di seluruh area data tabel mobile */
+    #tableCustomerWrapper table,
+    #tableCustomerWrapper thead,
+    #tableCustomerWrapper tbody,
+    #tableCustomerWrapper tr,
+    #tableCustomerWrapper th,
+    #tableCustomerWrapper td,
+    #rows tr,
+    #rows td,
+    #rows td div,
+    #rows td span,
+    #rows td p {
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
+      touch-action: pan-x pan-y !important;
+    }
+
+    /* Tombol aksi, link, dan form input tetap responsif seketika saat disentuh */
+    #tableCustomerWrapper button,
+    #tableCustomerWrapper a,
+    #tableCustomerWrapper input,
+    #tableCustomerWrapper select,
+    #rows button,
+    #rows a,
+    #rows input {
+      touch-action: manipulation !important;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .overflow-x-auto.is-dragging,
+    #tableCustomerWrapper.is-dragging {
+      cursor: grabbing !important;
+      user-select: none !important;
     }
 
     /* Custom Scrollbar for clean dialogs & panels */
@@ -879,8 +925,8 @@
       </div>
 
       <!-- Tabel Data dengan Smooth Momentum Scroll -->
-      <div class="overflow-x-auto custom-scroll">
-        <table class="w-full text-sm">
+      <div id="tableCustomerWrapper" class="overflow-x-auto custom-scroll" style="-webkit-overflow-scrolling: touch; touch-action: pan-x pan-y;">
+        <table class="w-full min-w-[960px] text-sm select-none" style="touch-action: pan-x pan-y;">
           <thead class="bg-slate-50 dark:bg-slate-900 text-left text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold uppercase tracking-wider">
             <tr>
               <th class="px-3 sm:px-4 py-3 min-w-[190px] sm:min-w-[200px]">Nama & Kontak</th>
@@ -3174,8 +3220,10 @@ function attachThousandSeparator(inputEl) {
 
 let customers = [];
 let appSettings = {};
+let currentSettings = appSettings; // Alias & safe fallback untuk kompatibilitas kode
 let packagesData = [];
 let bankAccountsData = [];
+let bankAccounts = bankAccountsData; // Alias & safe fallback untuk kompatibilitas kode
 let inventoryStockData = [];
 let editingId = null;
 let currentWaCustomer = null;
@@ -3460,8 +3508,10 @@ function fillOptions() {
 async function loadSettings() {
   try {
     appSettings = await (await fetch('/api/settings')).json();
+    currentSettings = appSettings || {};
   } catch (e) {
     appSettings = {};
+    currentSettings = {};
   }
 }
 
@@ -4196,8 +4246,14 @@ $('form').addEventListener('submit', async (e) => {
 // Helper Format Metode Bayar Singkat & Spesifik
 function formatMetodeBayar(rawMetode, context = {}) {
   const str = String(rawMetode || '').trim();
-  const qrisInfo = String((context && context.qris_info) || (currentSettings && currentSettings.qris_info) || '').toUpperCase();
-  const accounts = (context && context.bank_accounts) || bankAccounts || [];
+  const safeSettings = (context && context.settings) || 
+    (typeof appSettings !== 'undefined' && appSettings ? appSettings : null) || 
+    (typeof currentSettings !== 'undefined' && currentSettings ? currentSettings : null) || {};
+  const qrisInfo = String((context && context.qris_info) || safeSettings.qris_info || '').toUpperCase();
+  const safeAccounts = (context && context.bank_accounts) || 
+    (typeof bankAccountsData !== 'undefined' && Array.isArray(bankAccountsData) ? bankAccountsData : null) || 
+    (typeof bankAccounts !== 'undefined' && Array.isArray(bankAccounts) ? bankAccounts : null) || [];
+  const accounts = Array.isArray(safeAccounts) ? safeAccounts : [];
 
   let defaultQris = 'QRIS DANA';
   if (qrisInfo.includes('BCA')) defaultQris = 'QRIS BCA';
@@ -4263,11 +4319,16 @@ function formatMetodeBayar(rawMetode, context = {}) {
 function populatePayMethodSelect() {
   const sel = $('payMethod');
   if (!sel) return;
-  const qrisName = (currentSettings && currentSettings.qris_info && currentSettings.qris_info.toUpperCase().includes('DANA')) ? 'QRIS DANA' : 'QRIS DANA';
+  const safeSettings = (typeof appSettings !== 'undefined' && appSettings ? appSettings : null) || 
+    (typeof currentSettings !== 'undefined' && currentSettings ? currentSettings : null) || {};
+  const qrisRaw = String(safeSettings.qris_info || '').toUpperCase();
+  const qrisName = qrisRaw.includes('DANA') ? 'QRIS DANA' : 'QRIS DANA';
   let opts = [`<option value="${qrisName}">${qrisName}</option>`];
   
-  if (Array.isArray(bankAccounts) && bankAccounts.length > 0) {
-    bankAccounts.filter(b => b.is_active !== false).forEach(b => {
+  const safeAccounts = (typeof bankAccountsData !== 'undefined' && Array.isArray(bankAccountsData) ? bankAccountsData : null) || 
+    (typeof bankAccounts !== 'undefined' && Array.isArray(bankAccounts) ? bankAccounts : null) || [];
+  if (Array.isArray(safeAccounts) && safeAccounts.length > 0) {
+    safeAccounts.filter(b => b && b.is_active !== false).forEach(b => {
       const bName = b.nama_bank ? b.nama_bank.trim() : '';
       if (bName) {
         opts.push(`<option value="Transfer Bank ${bName}">Transfer Bank ${bName}</option>`);
@@ -4781,13 +4842,21 @@ if ($('btnDetailOpenHistoryLogs')) {
 
 // ---- Modal Riwayat (Invoices + Log Gangguan & Tiket Teknisi) ----
 function renderHistoryModal(c, defaultTab = 'invoices') {
+  if (!c) return;
   historyCustomer = c;
-  $('historyTitle').textContent = `Riwayat: ${c.nama}`;
-  $('historySubTitle').textContent = `${c.paket} • ${c.alamat} • Status: ${c.status_jaringan || 'Aktif'}`;
+  $('historyTitle').textContent = `Riwayat: ${c.nama || '-'}`;
+  $('historySubTitle').textContent = `${c.paket || '-'} • ${c.alamat || '-'} • Status: ${c.status_jaringan || 'Aktif'}`;
 
   // Invoices list
-  const inv = [...(c.invoices || [])].sort((a, b) => b.periode.localeCompare(a.periode));
-  $('historyRows').innerHTML = inv.map((i) => `<tr>
+  const inv = [...(c.invoices || [])].sort((a, b) => String(b.periode || '').localeCompare(String(a.periode || '')));
+  $('historyRows').innerHTML = inv.map((i) => {
+    let formattedMetode = '-';
+    try {
+      formattedMetode = formatMetodeBayar(i.metode_bayar);
+    } catch (err) {
+      formattedMetode = String(i.metode_bayar || 'QRIS / Transfer');
+    }
+    return `<tr>
     <td class="py-2.5 font-medium">${periodeLabel(i.periode)}</td>
     <td class="py-2.5">${rupiah(i.nominal)}</td>
     <td class="py-2.5">
@@ -4800,10 +4869,11 @@ function renderHistoryModal(c, defaultTab = 'invoices') {
       ${i.status === 'Lunas' ? `
         <div class="font-medium text-slate-800">${tgl(i.tanggal_bayar)}</div>
         <div class="text-[11px] text-indigo-600 font-semibold mt-0.5 inline-flex items-center gap-1">
-          <span>💳</span> ${esc(formatMetodeBayar(i.metode_bayar))}
+          <span>💳</span> ${esc(formattedMetode)}
         </div>
       ` : '-'}
-    </td></tr>`).join('') ||
+    </td></tr>`;
+  }).join('') ||
     '<tr><td colspan="4" class="py-6 text-center text-slate-400">Belum ada riwayat tagihan</td></tr>';
 
   // Network logs & Tiket Teknisi list
@@ -5278,6 +5348,7 @@ $('formSettings').addEventListener('submit', async (e) => {
     });
     if (res.ok) {
       appSettings = await res.json();
+      currentSettings = appSettings || {};
       closeModal('modalSettings');
       toast('Pengaturan WhatsApp & Info QRIS berhasil disimpan');
     } else {
@@ -5385,131 +5456,136 @@ $('btnExecuteBulk').addEventListener('click', async () => {
 
 // ---- Tabel Actions Delegation (Optimistic UI & Snappy Response) ----
 $('rows').addEventListener('click', async (e) => {
-  // Buka Modal Detail Lengkap Pelanggan saat nama customer atau ID diklik
-  const linkDetail = e.target.closest('.customer-name-click');
-  if (linkDetail) {
-    const c = customers.find((x) => x.id === Number(linkDetail.dataset.id));
-    if (c) return openCustomerDetailModal(c);
-  }
-
-  // Buka log langsung dari shortcut text link
-  const linkLogs = e.target.closest('.history-to-logs');
-  if (linkLogs) {
-    const c = customers.find((x) => x.id === Number(linkLogs.dataset.id));
-    if (c) return renderHistoryModal(c, 'logs');
-  }
-
-  // Buka tab perangkat langsung dari shortcut badge perangkat
-  const linkDevice = e.target.closest('.history-to-device');
-  if (linkDevice) {
-    const c = customers.find((x) => x.id === Number(linkDevice.dataset.id));
-    if (c) return renderHistoryModal(c, 'device');
-  }
-
-  const btn = e.target.closest('button[data-id]');
-  if (!btn) return;
-  const c = customers.find((x) => x.id === Number(btn.dataset.id));
-  if (!c) return;
-
-  if (btn.classList.contains('edit')) return openForm(c);
-  if (btn.classList.contains('history')) return renderHistoryModal(c, 'invoices');
-  if (btn.classList.contains('open-wa')) return openWaModal(c);
-  if (btn.classList.contains('catat-gangguan')) return openLogGangguan(c);
-  if (btn.classList.contains('pay-qris')) return openQris(c);
-
-  // Toggle Isolir Sambungan (Optimistic UI: respons instan tanpa jeda server)
-  if (btn.classList.contains('toggle-isolir')) {
-    const willIsolate = c.status_jaringan !== 'Terisolir';
-    const confirmMsg = willIsolate
-      ? `Isolir sambungan internet ${c.nama}?\nStatus jaringan akan diubah menjadi "Terisolir" dan dicatat log DOWN.`
-      : `Buka kembali sambungan internet ${c.nama}?\nStatus jaringan akan diubah menjadi "Aktif" dan dicatat log UP.`;
-    if (!confirm(confirmMsg)) return;
-
-    // 1. Simpan snapshot untuk rollback jika server error
-    const prevCust = JSON.parse(JSON.stringify(c));
-    const newStatus = willIsolate ? 'Terisolir' : 'Aktif';
-
-    // 2. Perbarui local state & DOM seketika (<1ms)
-    c.status_jaringan = newStatus;
-    c.catatan_kendala = willIsolate ? 'Sambungan Terisolir' : '';
-    if (willIsolate) {
-      c.mikrotikStatus = 'isolated';
-    } else {
-      c.mikrotikStatus = 'active';
+  try {
+    // Buka Modal Detail Lengkap Pelanggan saat nama customer atau ID diklik
+    const linkDetail = e.target.closest('.customer-name-click');
+    if (linkDetail) {
+      const c = customers.find((x) => x.id === Number(linkDetail.dataset.id));
+      if (c) return openCustomerDetailModal(c);
     }
-    render();
-    toast(`${c.nama}: Status jaringan diubah ke ${newStatus}`);
 
-    // 3. Simpan perubahan ke background server
-    fetch(`/api/customers/${c.id}/jaringan`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        status_jaringan: newStatus,
-        catatan_kendala: willIsolate ? 'Sambungan Terisolir' : '',
-        record_log: true,
-        waktu: formatWaktuIndoRealtime(),
-      })
-    }).then(async (res) => {
-      if (!res.ok) throw new Error('Gagal memperbarui status');
-      const updated = await res.json();
-      const idx = customers.findIndex(x => x.id === updated.id);
-      if (idx !== -1) {
-        customers[idx] = updated;
-        render();
-      }
-    }).catch((err) => {
-      // Rollback otomatis jika background sync gagal
-      const idx = customers.findIndex(x => x.id === prevCust.id);
-      if (idx !== -1) {
-        customers[idx] = prevCust;
-        render();
-      }
-      alert('Gagal mengubah status isolir di server: ' + err.message);
-    });
-    return;
-  }
-
-  // Toggle Pelunasan (Optimistic UI: batalkan lunas langsung tanpa jeda)
-  if (btn.classList.contains('toggle')) {
-    if (c.status_tagihan !== 'Lunas') {
-      return openPay(c);
+    // Buka log langsung dari shortcut text link
+    const linkLogs = e.target.closest('.history-to-logs');
+    if (linkLogs) {
+      const c = customers.find((x) => x.id === Number(linkLogs.dataset.id));
+      if (c) return renderHistoryModal(c, 'logs');
     }
-    if (!confirm(`Batalkan status lunas untuk ${c.nama}? Riwayat tanggal bayar periode berjalan akan dihapus.`)) return;
 
-    // 1. Snapshot untuk rollback
-    const prevCust = JSON.parse(JSON.stringify(c));
+    // Buka tab perangkat langsung dari shortcut badge perangkat
+    const linkDevice = e.target.closest('.history-to-device');
+    if (linkDevice) {
+      const c = customers.find((x) => x.id === Number(linkDevice.dataset.id));
+      if (c) return renderHistoryModal(c, 'device');
+    }
 
-    // 2. Update tampilan seketika
-    c.status_tagihan = 'Belum Lunas';
-    c.tanggal_bayar = null;
-    render();
-    toast(`${c.nama}: Belum Lunas`);
+    const btn = e.target.closest('button[data-id]');
+    if (!btn) return;
+    const c = customers.find((x) => x.id === Number(btn.dataset.id));
+    if (!c) return;
 
-    // 3. Sync ke backend
-    fetch(`/api/customers/${c.id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'Belum Lunas' }),
-    }).then(async (res) => {
-      if (!res.ok) throw new Error('Gagal mengubah status di server');
-      const updated = await res.json();
-      const idx = customers.findIndex(x => x.id === updated.id);
-      if (idx !== -1) {
-        customers[idx] = updated;
-        render();
+    if (btn.classList.contains('edit')) return openForm(c);
+    if (btn.classList.contains('history')) return renderHistoryModal(c, 'invoices');
+    if (btn.classList.contains('open-wa')) return openWaModal(c);
+    if (btn.classList.contains('catat-gangguan')) return openLogGangguan(c);
+    if (btn.classList.contains('pay-qris')) return openQris(c);
+
+    // Toggle Isolir Sambungan (Optimistic UI: respons instan tanpa jeda server)
+    if (btn.classList.contains('toggle-isolir')) {
+      const willIsolate = c.status_jaringan !== 'Terisolir';
+      const confirmMsg = willIsolate
+        ? `Isolir sambungan internet ${c.nama}?\nStatus jaringan akan diubah menjadi "Terisolir" dan dicatat log DOWN.`
+        : `Buka kembali sambungan internet ${c.nama}?\nStatus jaringan akan diubah menjadi "Aktif" dan dicatat log UP.`;
+      if (!confirm(confirmMsg)) return;
+
+      // 1. Simpan snapshot untuk rollback jika server error
+      const prevCust = JSON.parse(JSON.stringify(c));
+      const newStatus = willIsolate ? 'Terisolir' : 'Aktif';
+
+      // 2. Perbarui local state & DOM seketika (<1ms)
+      c.status_jaringan = newStatus;
+      c.catatan_kendala = willIsolate ? 'Sambungan Terisolir' : '';
+      if (willIsolate) {
+        c.mikrotikStatus = 'isolated';
+      } else {
+        c.mikrotikStatus = 'active';
       }
-      loadFinancialReport($('chartPeriodFilter') ? $('chartPeriodFilter').value : '');
-    }).catch((err) => {
-      // Rollback jika terjadi kegagalan jaringan
-      const idx = customers.findIndex(x => x.id === prevCust.id);
-      if (idx !== -1) {
-        customers[idx] = prevCust;
-        render();
+      render();
+      toast(`${c.nama}: Status jaringan diubah ke ${newStatus}`);
+
+      // 3. Simpan perubahan ke background server
+      fetch(`/api/customers/${c.id}/jaringan`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status_jaringan: newStatus,
+          catatan_kendala: willIsolate ? 'Sambungan Terisolir' : '',
+          record_log: true,
+          waktu: formatWaktuIndoRealtime(),
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Gagal memperbarui status');
+        const updated = await res.json();
+        const idx = customers.findIndex(x => x.id === updated.id);
+        if (idx !== -1) {
+          customers[idx] = updated;
+          render();
+        }
+      }).catch((err) => {
+        // Rollback otomatis jika background sync gagal
+        const idx = customers.findIndex(x => x.id === prevCust.id);
+        if (idx !== -1) {
+          customers[idx] = prevCust;
+          render();
+        }
+        alert('Gagal mengubah status isolir di server: ' + err.message);
+      });
+      return;
+    }
+
+    // Toggle Pelunasan (Optimistic UI: batalkan lunas langsung tanpa jeda)
+    if (btn.classList.contains('toggle')) {
+      if (c.status_tagihan !== 'Lunas') {
+        return openPay(c);
       }
-      alert('Gagal membatalkan status lunas: ' + err.message);
-    });
-    return;
+      if (!confirm(`Batalkan status lunas untuk ${c.nama}? Riwayat tanggal bayar periode berjalan akan dihapus.`)) return;
+
+      // 1. Snapshot untuk rollback
+      const prevCust = JSON.parse(JSON.stringify(c));
+
+      // 2. Update tampilan seketika
+      c.status_tagihan = 'Belum Lunas';
+      c.tanggal_bayar = null;
+      render();
+      toast(`${c.nama}: Belum Lunas`);
+
+      // 3. Sync ke backend
+      fetch(`/api/customers/${c.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Belum Lunas' }),
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Gagal mengubah status di server');
+        const updated = await res.json();
+        const idx = customers.findIndex(x => x.id === updated.id);
+        if (idx !== -1) {
+          customers[idx] = updated;
+          render();
+        }
+        loadFinancialReport($('chartPeriodFilter') ? $('chartPeriodFilter').value : '');
+      }).catch((err) => {
+        // Rollback jika terjadi kegagalan jaringan
+        const idx = customers.findIndex(x => x.id === prevCust.id);
+        if (idx !== -1) {
+          customers[idx] = prevCust;
+          render();
+        }
+        alert('Gagal membatalkan status lunas: ' + err.message);
+      });
+      return;
+    }
+  } catch (err) {
+    console.error('Error handling customer row action:', err);
+    toast('Terjadi kendala saat memproses aksi pelanggan.');
   }
 });
 
@@ -6844,6 +6920,7 @@ async function loadBankAccounts() {
     const res = await fetch('/api/bank-accounts');
     if (!res.ok) throw new Error('Gagal memuat rekening bank');
     bankAccountsData = await res.json();
+    bankAccounts = bankAccountsData || [];
     renderBankAccountsModal();
   } catch (err) {
     console.error('Error loadBankAccounts:', err);
@@ -8294,9 +8371,66 @@ function initSidebarCollapse() {
   });
 }
 
+// ---- Smooth Drag-to-Scroll Horizontal untuk Tabel Pelanggan ----
+function initTableDragScroll() {
+  const slider = document.getElementById('tableCustomerWrapper');
+  if (!slider) return;
+
+  let isDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+  let hasMoved = false;
+
+  slider.addEventListener('mousedown', (e) => {
+    // Abaikan jika klik terjadi di dalam button, input, select, link, atau form
+    if (e.target.closest('button, input, select, a, textarea')) return;
+    isDown = true;
+    hasMoved = false;
+    slider.classList.add('is-dragging');
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isDown) return;
+    isDown = false;
+    slider.classList.remove('is-dragging');
+    setTimeout(() => { hasMoved = false; }, 50);
+  });
+
+  slider.addEventListener('mouseleave', () => {
+    if (!isDown) return;
+    isDown = false;
+    slider.classList.remove('is-dragging');
+  });
+
+  slider.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    if (Math.abs(walk) > 4) {
+      hasMoved = true;
+    }
+    slider.scrollLeft = scrollLeft - walk;
+  });
+
+  // Mencegah trigger klik pada baris/nama customer jika user sedang melakukan drag-scroll
+  slider.addEventListener('click', (e) => {
+    if (hasMoved) {
+      e.preventDefault();
+      e.stopPropagation();
+      hasMoved = false;
+    }
+  }, true);
+}
+
 // Inisialisasi Sidebar Navigasi
 initSidebarAccordion();
 initSidebarCollapse();
+
+// Inisialisasi Drag Scroll Horizontal Tabel Pelanggan
+initTableDragScroll();
 
 // Inisialisasi Tema Aplikasi Langsung
 initTheme();
