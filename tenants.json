@@ -7,7 +7,32 @@
     "status": "active",
     "plan": "Enterprise Pro",
     "expired_at": "2029-12-31",
-    "created_at": "2026-01-01"
+    "created_at": "2026-01-01",
+    "mikrotik": {
+      "enabled": false,
+      "host": "",
+      "port": 8728,
+      "user": "admin",
+      "pass": "",
+      "profile_isolir": "ISOLIR_PROFILE",
+      "timeout": 8,
+      "assign_static_ip": false
+    },
+    "olt": {
+      "enabled": false,
+      "vendor": "zte",
+      "protocol": "ssh",
+      "host": "",
+      "port": 22,
+      "user": "",
+      "pass": "",
+      "enable_pass": "",
+      "timeout": 15,
+      "legacy_algorithms": true,
+      "rx_warning_dbm": -25,
+      "rx_critical_dbm": -27,
+      "auto_monitor": false
+    }
   },
   {
     "id": "tenant_berkah_network",
@@ -17,6 +42,31 @@
     "status": "active",
     "plan": "Pro Cloud",
     "expired_at": "2028-12-31",
-    "created_at": "11 Oktober 2026, 14:15 WIB"
+    "created_at": "11 Oktober 2026, 14:15 WIB",
+    "mikrotik": {
+      "enabled": false,
+      "host": "",
+      "port": 8728,
+      "user": "admin",
+      "pass": "",
+      "profile_isolir": "ISOLIR_PROFILE",
+      "timeout": 8,
+      "assign_static_ip": false
+    },
+    "olt": {
+      "enabled": false,
+      "vendor": "zte",
+      "protocol": "ssh",
+      "host": "",
+      "port": 22,
+      "user": "",
+      "pass": "",
+      "enable_pass": "",
+      "timeout": 15,
+      "legacy_algorithms": true,
+      "rx_warning_dbm": -25,
+      "rx_critical_dbm": -27,
+      "auto_monitor": false
+    }
   }
 ]

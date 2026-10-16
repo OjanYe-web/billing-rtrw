@@ -1,5 +1,27 @@
 [
   {
+    "id": 1792137680940,
+    "aksi": "NETWORK_CONFIG_UPDATE",
+    "kategori": "Pengaturan",
+    "keterangan": "Pengaturan jaringan MikroTik & OLT diperbarui untuk tenant: default",
+    "admin": "Admin Utama",
+    "waktu": "16 Oktober 2026, 15:01 WIB",
+    "timestamp": 1792137680812,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1792137674759,
+    "aksi": "NETWORK_CONFIG_UPDATE",
+    "kategori": "Pengaturan",
+    "keterangan": "Pengaturan jaringan MikroTik & OLT diperbarui untuk tenant: default",
+    "admin": "Admin Utama",
+    "waktu": "16 Oktober 2026, 15:01 WIB",
+    "timestamp": 1792137673950,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
     "id": 1791846690670,
     "aksi": "UPDATE_KREDENSIAL_ADMIN",
     "kategori": "Keamanan",

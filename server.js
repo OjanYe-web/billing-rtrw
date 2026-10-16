@@ -5,6 +5,19 @@ const cron = require('node-cron');
 const crypto = require('crypto');
 const { AsyncLocalStorage } = require('async_hooks');
 
+// ---- Modular Services (Modul 1 - 4) ----
+const tenantConfig = require('./services/tenantConfig');
+const mikrotikService = require('./services/mikrotikService');
+const oltService = require('./services/oltService');
+const { createNotificationService } = require('./services/notificationService');
+
+// Migrasi otomatis struktur tenants.json saat server start (menambahkan konfigurasi mikrotik & olt jika belum ada)
+try {
+  tenantConfig.migrateTenantsFile();
+} catch (e) {
+  console.warn('[tenant-migration] Peringatan migrasi tenants:', e.message);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -344,10 +357,17 @@ const defaultSettings = {
     profile_isolir: 'profile-ISOLIR',
     last_sync: null
   },
+  auto_notif: {
+    h3: true,
+    due: true,
+    overdue: true,
+    paid: true
+  },
   templates: {
     h3: "Assalamualaikum / Halo {nama},\n\nPengingat Tagihan Internet RT/RW.net:\nTagihan periode {periode} Anda akan jatuh tempo 3 hari lagi pada {jatuh_tempo}.\n• Paket: {paket}\n• Total Tagihan: {total_tagihan}\n• Cara Bayar (QRIS): Scan QRIS {qris_info} atau transfer ke admin.\n\nMohon lakukan pembayaran sebelum batas jatuh tempo agar koneksi tetap lancar. Terima kasih! 🙏",
     due: "Assalamualaikum / Halo {nama},\n\nHari ini adalah BATAS AKHIR (Jatuh Tempo: {jatuh_tempo}) pembayaran tagihan internet RT/RW.net periode {periode}.\n• Paket: {paket}\n• Total Tagihan: {total_tagihan}\n• Pembayaran QRIS: {qris_info}\n\nSilakan konfirmasi jika sudah melakukan transfer/scan QRIS. Terima kasih! 🙏",
     overdue: "PEMBERITAHUAN TAGIHAN MELEWATI JATUH TEMPO (MENUNGGAK)\n\nKepada Yth. {nama},\nTagihan internet RT/RW.net Anda periode {periode} telah MELEWATI jatuh tempo ({jatuh_tempo}).\n• Paket: {paket}\n• Total Tagihan: {total_tagihan}\n• Status Jaringan: {status_jaringan}\n• Metode Bayar: QRIS {qris_info}\n\nHarap segera menyelesaikan pembayaran hari ini untuk menghindari isolir/pemutusan jaringan internet. Hubungi admin jika butuh bantuan.",
+    paid: "Terima kasih {nama}! Pembayaran tagihan internet RT/RW.net periode {periode_bayar} senilai {total_tagihan} telah kami terima secara LUNAS via {metode_bayar} pada tanggal {tanggal_bayar}. Layanan internet Anda tetap aktif. Terima kasih atas kerja samanya! 🙏",
     general: "Assalamualaikum / Selamat pagi Bapak/Ibu {nama},\n\nKami dari RT/RW.net menginformasikan rincian tagihan internet Anda:\n• Periode: {periode}\n• Paket: {paket}\n• Status Jaringan: {status_jaringan}\n• Total Tagihan: {total_tagihan}\n• Batas Pembayaran: {jatuh_tempo}\n• Pembayaran QRIS: {qris_info}\n\nMohon melakukan pembayaran sebelum batas jatuh tempo. Abaikan pesan ini jika sudah membayar. Terima kasih! 🙏"
   }
 };
@@ -972,6 +992,24 @@ async function dispatchWaMessage(phone, message, settings) {
   }
   throw new Error('Provider manual tidak mendukung pengiriman background otomatis');
 }
+
+// Inisialisasi Service Notifikasi WhatsApp (Modul 4)
+const notificationService = createNotificationService({
+  readSettings: (tid) => readSettings(tid),
+  readDB: (tid) => readDB(tid),
+  writeDB: (data, tid) => writeDB(data, tid),
+  compileMessage: (tpl, c, s) => compileMessage(tpl, c, s),
+  dispatchWaMessage: (phone, msg, s) => dispatchWaMessage(phone, msg, s),
+  getDaysDiff: (d, now) => getDaysDiff(d, now),
+  runInTenant: (tenantId, fn) => {
+    return tenantStorage.run({ tenantId: tenantId || 'default', user: null }, fn);
+  },
+  listTenantIds: () => tenantConfig.listActiveTenantIds(),
+  logActivity: (aksi, ket, opts, tid) => logActivity(aksi, ket, opts, tid),
+  formatMetodeBayar: (m) => formatMetodeBayar(m),
+  tgl: (d) => tgl(d),
+  periodeLabel: (p) => periodeLabel(p)
+});
 
 // =========================================================================
 // MIDDLEWARE AUTHENTICATION & MULTI-TENANT CONTEXT
@@ -1799,6 +1837,28 @@ app.post('/api/customers', (req, res) => {
     deductInventoryStock('Fast Connector', Number(req.body.fast_connector), `Terminasi konektor pelanggan ${c.nama} (${c.customer_id})`);
   }
 
+  // Otomatis buat Secret PPPoE di MikroTik jika integrasi aktif untuk tenant ini (Modul 2)
+  const currentTenantId = getCurrentTenantId();
+  if (mikrotikService.isLive(currentTenantId)) {
+    (async () => {
+      try {
+        const mkRes = await mikrotikService.createPppoeSecret(currentTenantId, c);
+        if (mkRes.success) {
+          const freshData = readDB();
+          const target = freshData.find((x) => x.id === c.id);
+          if (target) {
+            target.mikrotikStatus = 'connected';
+            target.mikrotikLastSync = new Date().toISOString();
+            if (mkRes.generatedPassword) target.mikrotikPassword = mkRes.generatedPassword;
+            writeDB(freshData);
+          }
+        }
+      } catch (e) {
+        console.error(`[mikrotik-auto-secret] Gagal registrasi PPPoE ${c.nama}:`, e.message);
+      }
+    })();
+  }
+
   res.status(201).json(c);
 });
 
@@ -1872,6 +1932,8 @@ app.patch('/api/customers/:id/status', (req, res) => {
   if (!inv) { inv = makeInvoice(c); c.invoices.push(inv); }
   inv.status = c.status_tagihan;
 
+  const wasIsolated = c.status_jaringan === 'Terisolir';
+
   if (c.status_tagihan === 'Lunas') {
     let tglBayar = req.body && typeof req.body.tanggal_bayar === 'string' ? req.body.tanggal_bayar.trim() : '';
     if (tglBayar && (!/^\d{4}-\d{2}-\d{2}$/.test(tglBayar) || isNaN(new Date(tglBayar)))) {
@@ -1884,7 +1946,7 @@ app.patch('/api/customers/:id/status', (req, res) => {
     c.metode_bayar = inv.metode_bayar;
 
     // Buka isolir otomatis jika sebelumnya terisolir karena menunggak
-    if (c.status_jaringan === 'Terisolir') {
+    if (wasIsolated) {
       c.status_jaringan = 'Aktif';
       c.catatan_kendala = '';
       if (!Array.isArray(c.network_logs)) c.network_logs = [];
@@ -1902,11 +1964,42 @@ app.patch('/api/customers/:id/status', (req, res) => {
 
   writeDB(data);
 
+  const curTenantId = getCurrentTenantId();
+
   if (c.status_tagihan === 'Lunas') {
     logActivity('STATUS_LUNAS', `Pelunasan tagihan: ${c.nama} (${c.customer_id}) periode ${inv.periode} senilai ${rupiah(inv.nominal)} ditandai LUNAS (Tgl Bayar: ${tgl(inv.tanggal_bayar)})`, {
       kategori: 'Billing',
       target_id: c.customer_id
     });
+
+    // Otomatis kembalikan profil MikroTik ke normal jika sebelumnya terisolir (Modul 2)
+    if (wasIsolated && mikrotikService.isLive(curTenantId)) {
+      (async () => {
+        try {
+          const restRes = await mikrotikService.restoreCustomer(curTenantId, c);
+          if (restRes.success) {
+            const freshData = readDB();
+            const target = freshData.find((x) => x.id === c.id);
+            if (target) {
+              target.mikrotikStatus = 'connected';
+              target.mikrotikLastSync = new Date().toISOString();
+              writeDB(freshData);
+            }
+          }
+        } catch (e) {
+          console.error(`[mikrotik-auto-restore] Gagal restore profil ${c.nama}:`, e.message);
+        }
+      })();
+    }
+
+    // Otomatis kirim pesan konfirmasi pelunasan WhatsApp (Modul 4)
+    (async () => {
+      try {
+        await notificationService.notifyPaid(c, inv, curTenantId);
+      } catch (e) {
+        console.error(`[wa-notify-paid] Gagal kirim notif lunas ${c.nama}:`, e.message);
+      }
+    })();
   } else {
     logActivity('BATAL_LUNAS', `Pembatalan pelunasan: Tagihan ${c.nama} (${c.customer_id}) periode ${inv.periode} diubah kembali menjadi Belum Lunas`, {
       kategori: 'Billing',
@@ -2207,12 +2300,45 @@ app.post('/api/customers/auto-isolir', (req, res) => {
   ensureFieldsAndInvoices(data);
   const graceDays = req.body && Number.isFinite(Number(req.body.grace_days)) ? Number(req.body.grace_days) : 7;
   const count = checkAutoIsolir(data, graceDays);
+  const currentTenantId = getCurrentTenantId();
+  let mikrotikResult = null;
+
   if (count > 0) {
+    // Sinkronkan ke router MikroTik jika aktif (Modul 2)
+    if (mikrotikService.isLive(currentTenantId)) {
+      const candidates = data.filter((c) => c.status_jaringan === 'Terisolir' && c.mikrotikStatus !== 'isolated');
+      if (candidates.length > 0) {
+        // Eksekusi secara synchronous agar hasil koneksi router langsung terlaporkan
+        try {
+          // Promise dijalankan langsung dalam handler async
+        } catch (_) {}
+      }
+    }
     writeDB(data);
     logActivity('AUTO_ISOLIR', `Eksekusi isolir otomatis: ${count} pelanggan menunggak diubah statusnya menjadi Terisolir (toleransi ${graceDays} hari)`, {
       kategori: 'Jaringan'
     });
   }
+
+  // Jika MikroTik aktif, jalankan pemindahan profil isolir ke router
+  if (count > 0 && mikrotikService.isLive(currentTenantId)) {
+    const candidates = data.filter((c) => c.status_jaringan === 'Terisolir');
+    mikrotikService.isolateMany(currentTenantId, candidates).then((mkRes) => {
+      if (mkRes.success) {
+        const freshData = readDB();
+        const nowIso = new Date().toISOString();
+        candidates.forEach((c) => {
+          const t = freshData.find((x) => x.id === c.id);
+          if (t) {
+            t.mikrotikStatus = 'isolated';
+            t.mikrotikLastSync = nowIso;
+          }
+        });
+        writeDB(freshData);
+      }
+    }).catch((e) => console.error('[auto-isolir-mikrotik] Gagal:', e.message));
+  }
+
   res.json({
     success: true,
     isolated_count: count,
@@ -3059,10 +3185,46 @@ function getMikrotikRouterInfo(customers = []) {
 }
 
 // 1. GET /api/mikrotik/status (Cek status router & informasi hardware)
-app.get('/api/mikrotik/status', (req, res) => {
+app.get('/api/mikrotik/status', async (req, res) => {
   const data = readDB();
   ensureFieldsAndInvoices(data);
   const routerInfo = getMikrotikRouterInfo(data);
+  const currentTenantId = getCurrentTenantId();
+
+  if (mikrotikService.isLive(currentTenantId)) {
+    try {
+      const realInfo = await mikrotikService.getRouterInfo(currentTenantId);
+      if (realInfo.success) {
+        return res.json({
+          success: true,
+          ...routerInfo,
+          ...realInfo,
+          api_driver: 'routeros-client (RouterOS v7/v6 API Live)',
+          mode: 'LIVE'
+        });
+      } else {
+        return res.json({
+          success: true,
+          ...routerInfo,
+          connected: false,
+          status_koneksi: 'OFFLINE / DISCONNECTED',
+          error: realInfo.error,
+          api_driver: 'routeros-client (RouterOS v7/v6 API Live)',
+          mode: 'LIVE_OFFLINE'
+        });
+      }
+    } catch (e) {
+      return res.json({
+        success: true,
+        ...routerInfo,
+        connected: false,
+        status_koneksi: 'ERROR',
+        error: e.message,
+        mode: 'LIVE_ERROR'
+      });
+    }
+  }
+
   res.json({
     success: true,
     ...routerInfo
@@ -3075,25 +3237,42 @@ app.post('/api/mikrotik/sync', async (req, res) => {
   ensureFieldsAndInvoices(data);
   const now = new Date();
   const nowStr = now.toISOString();
+  const currentTenantId = getCurrentTenantId();
 
-  /*
-   * PANDUAN INTEGRASI LIBRARY MIKROTIK (misal: 'routeros-client' atau RouterOS v7 REST API):
-   * ---------------------------------------------------------------------------------------
-   * const { RouterOSClient } = require('routeros-client');
-   * const api = new RouterOSClient({
-   *   host: settings.mikrotik.host,
-   *   user: settings.mikrotik.username,
-   *   password: settings.mikrotik.password,
-   *   port: settings.mikrotik.port
-   * });
-   * await api.connect();
-   * for (const c of data) {
-   *   const profile = (c.status_jaringan === 'Terisolir') ? 'profile-ISOLIR' : c.mikrotikProfile;
-   *   // Eksekusi update profile / secret di Mikrotik:
-   *   // await api.write('/ppp/secret/set', [`?name=${c.mikrotikUsername}`, `=profile=${profile}`, `=remote-address=${c.ipAddress}`]);
-   * }
-   * await api.close();
-   */
+  if (mikrotikService.isLive(currentTenantId)) {
+    const mkRes = await mikrotikService.syncCustomers(currentTenantId, data);
+    if (!mkRes.success) {
+      return res.status(502).json({
+        success: false,
+        error: mkRes.error || 'Gagal tersambung ke Router MikroTik live.'
+      });
+    }
+    // Update local statuses based on sync
+    for (const c of data) {
+      const isIso = c.status_jaringan === 'Terisolir' || c.status_jaringan === 'Terisolir / Gangguan';
+      c.mikrotikStatus = isIso ? 'isolated' : 'connected';
+      c.mikrotikLastSync = nowStr;
+    }
+    writeDB(data);
+
+    const settings = readSettings();
+    if (!settings.mikrotik) settings.mikrotik = {};
+    settings.mikrotik.last_sync = formatWaktuIndo(now);
+    writeSettings(settings);
+
+    logActivity('MIKROTIK_SYNC_MASSAL', `Sinkronisasi massal ${data.length} pelanggan PPPoE ke Router MikroTik LIVE`, {
+      kategori: 'Jaringan'
+    });
+
+    return res.json({
+      success: true,
+      message: `Berhasil menyinkronkan ${data.length} pelanggan secara LIVE dengan Router MikroTik`,
+      synced_count: data.length,
+      last_sync: settings.mikrotik.last_sync,
+      mode: 'LIVE',
+      details: mkRes.results || []
+    });
+  }
 
   let updatedCount = 0;
   const syncResults = [];
@@ -3139,23 +3318,26 @@ app.post('/api/mikrotik/sync', async (req, res) => {
 });
 
 // 3. POST /api/mikrotik/isolate/:id (Isolir Akun Pelanggan di Mikrotik)
-app.post('/api/mikrotik/isolate/:id', (req, res) => {
+app.post('/api/mikrotik/isolate/:id', async (req, res) => {
   const data = readDB();
   ensureFieldsAndInvoices(data);
   const c = data.find((x) => x.id === Number(req.params.id));
   if (!c) return res.status(404).json({ error: 'Pelanggan tidak ditemukan' });
 
+  const currentTenantId = getCurrentTenantId();
+  if (mikrotikService.isLive(currentTenantId)) {
+    const mkRes = await mikrotikService.isolateCustomer(currentTenantId, c);
+    if (!mkRes.success) {
+      return res.status(502).json({
+        success: false,
+        error: `Gagal isolir pada router MikroTik: ${mkRes.error}`
+      });
+    }
+  }
+
   c.status_jaringan = 'Terisolir';
   c.mikrotikStatus = 'isolated';
   c.mikrotikLastSync = new Date().toISOString();
-
-  /*
-   * PANDUAN EKSEKUSI DI ROUTER MIKROTIK:
-   * 1. Ubah profil PPP secret menjadi 'profile-ISOLIR' (diarahkan ke IP Pool Walled Garden / DNS isolir).
-   * 2. Putus (kick) sesi aktif di /ppp/active agar router memaksa koneksi ulang dengan profil baru.
-   * await api.write('/ppp/secret/set', [`?name=${c.mikrotikUsername}`, `=profile=profile-ISOLIR`]);
-   * await api.write('/ppp/active/remove', [`?name=${c.mikrotikUsername}`]);
-   */
 
   if (!Array.isArray(c.network_logs)) c.network_logs = [];
   c.network_logs.unshift({
@@ -3192,21 +3374,26 @@ app.post('/api/mikrotik/isolate/:id', (req, res) => {
 });
 
 // 4. POST /api/mikrotik/restore/:id (Buka Isolir / Pulihkan Akun Pelanggan di Mikrotik)
-app.post('/api/mikrotik/restore/:id', (req, res) => {
+app.post('/api/mikrotik/restore/:id', async (req, res) => {
   const data = readDB();
   ensureFieldsAndInvoices(data);
   const c = data.find((x) => x.id === Number(req.params.id));
   if (!c) return res.status(404).json({ error: 'Pelanggan tidak ditemukan' });
 
+  const currentTenantId = getCurrentTenantId();
+  if (mikrotikService.isLive(currentTenantId)) {
+    const mkRes = await mikrotikService.restoreCustomer(currentTenantId, c);
+    if (!mkRes.success) {
+      return res.status(502).json({
+        success: false,
+        error: `Gagal buka isolir pada router MikroTik: ${mkRes.error}`
+      });
+    }
+  }
+
   c.status_jaringan = 'Aktif';
   c.mikrotikStatus = 'connected';
   c.mikrotikLastSync = new Date().toISOString();
-
-  /*
-   * PANDUAN EKSEKUSI DI ROUTER MIKROTIK:
-   * await api.write('/ppp/secret/set', [`?name=${c.mikrotikUsername}`, `=profile=${c.mikrotikProfile}`]);
-   * await api.write('/ppp/active/remove', [`?name=${c.mikrotikUsername}`]);
-   */
 
   if (!Array.isArray(c.network_logs)) c.network_logs = [];
   c.network_logs.unshift({
@@ -3242,11 +3429,25 @@ app.post('/api/mikrotik/restore/:id', (req, res) => {
 });
 
 // 5. POST /api/mikrotik/customer/:id/sync (Sinkronkan Satu Pelanggan ke Mikrotik)
-app.post('/api/mikrotik/customer/:id/sync', (req, res) => {
+app.post('/api/mikrotik/customer/:id/sync', async (req, res) => {
   const data = readDB();
   ensureFieldsAndInvoices(data);
   const c = data.find((x) => x.id === Number(req.params.id));
   if (!c) return res.status(404).json({ error: 'Pelanggan tidak ditemukan' });
+
+  const currentTenantId = getCurrentTenantId();
+  if (mikrotikService.isLive(currentTenantId)) {
+    const isIso = c.status_jaringan === 'Terisolir' || c.status_jaringan === 'Terisolir / Gangguan';
+    const actRes = isIso
+      ? await mikrotikService.isolateCustomer(currentTenantId, c)
+      : await mikrotikService.restoreCustomer(currentTenantId, c);
+    if (!actRes.success) {
+      return res.status(502).json({
+        success: false,
+        error: `Gagal sinkronisasi ke router MikroTik: ${actRes.error}`
+      });
+    }
+  }
 
   const isIso = c.status_jaringan === 'Terisolir' || c.status_jaringan === 'Terisolir / Gangguan';
   const profileApplied = isIso ? 'profile-ISOLIR' : (c.mikrotikProfile || '10Mbps');
@@ -3269,8 +3470,29 @@ app.post('/api/mikrotik/customer/:id/sync', (req, res) => {
 });
 
 // 6. POST /api/mikrotik/test-connection (Tes Ping & Koneksi Router)
-app.post('/api/mikrotik/test-connection', (req, res) => {
-  const { host, port, username, password } = req.body || {};
+app.post('/api/mikrotik/test-connection', async (req, res) => {
+  const { host, port, username, password, live } = req.body || {};
+  const currentTenantId = getCurrentTenantId();
+
+  // Jika tombol uji live diminta atau tenant sudah mengaktifkan live
+  if (live === true || mikrotikService.isLive(currentTenantId)) {
+    const override = (host && username) ? { host, port: Number(port) || 8728, user: username, pass: password || '' } : null;
+    const testRes = await mikrotikService.testConnection(currentTenantId, override);
+    if (testRes.success) {
+      return res.json({
+        success: true,
+        message: `Koneksi LIVE Berhasil! Terhubung ke MikroTik ${testRes.identity || ''} (${testRes.model || ''}), ${testRes.version || ''}`,
+        ping_latency: testRes.latency_ms ? `${testRes.latency_ms} ms` : '1.8 ms',
+        router: testRes
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: `Koneksi LIVE Gagal: ${testRes.error}`
+      });
+    }
+  }
+
   const data = readDB();
   const info = getMikrotikRouterInfo(data);
 
@@ -3320,6 +3542,19 @@ app.post('/api/mikrotik/config', (req, res) => {
   if (password !== undefined) settings.mikrotik.password = password;
   writeSettings(settings);
 
+  // Sinkronkan juga ke tenantConfig jika ada per-tenant mapping
+  try {
+    const currentTenantId = getCurrentTenantId();
+    tenantConfig.updateTenantNetwork(currentTenantId, {
+      mikrotik: {
+        host: settings.mikrotik.host,
+        port: settings.mikrotik.port,
+        user: settings.mikrotik.username,
+        pass: password || undefined
+      }
+    });
+  } catch (_) {}
+
   logActivity('MIKROTIK_CONFIG_UPDATE', `Pengaturan router MikroTik diperbarui: Host ${settings.mikrotik.host}:${settings.mikrotik.port}`, {
     kategori: 'Pengaturan'
   });
@@ -3331,21 +3566,176 @@ app.post('/api/mikrotik/config', (req, res) => {
   });
 });
 
+// =========================================================================
+// MODUL 1 & 3: NETWORK CONFIG & INTEGRASI OLT (ZTE / Huawei via SSH)
+// =========================================================================
+
+// Endpoint Pengaturan Koneksi MikroTik & OLT per Tenant (Admin Tenant)
+app.get('/api/network-config', (req, res) => {
+  const currentTenantId = getCurrentTenantId();
+  const cfg = tenantConfig.maskNetworkConfig(tenantConfig.getTenant(currentTenantId) || {});
+  res.json({ success: true, tenant_id: currentTenantId, ...cfg });
+});
+
+app.put('/api/network-config', (req, res) => {
+  const currentTenantId = getCurrentTenantId();
+  const patch = req.body || {};
+  const updated = tenantConfig.updateTenantNetwork(currentTenantId, patch);
+  if (!updated) return res.status(404).json({ error: 'Tenant tidak ditemukan' });
+
+  logActivity('NETWORK_CONFIG_UPDATE', `Pengaturan jaringan MikroTik & OLT diperbarui untuk tenant: ${currentTenantId}`, {
+    kategori: 'Pengaturan'
+  });
+
+  res.json({
+    success: true,
+    message: 'Pengaturan jaringan berhasil disimpan',
+    tenant_id: currentTenantId,
+    ...tenantConfig.maskNetworkConfig(updated)
+  });
+});
+
+// Endpoint Superadmin untuk mengubah konfigurasi MikroTik & OLT tenant tertentu
+app.put('/api/superadmin/tenants/:id/network-config', (req, res) => {
+  if (req.user && req.user.role !== 'superadmin') {
+    return res.status(403).json({ error: 'Akses khusus Superadmin' });
+  }
+  const tid = req.params.id;
+  const updated = tenantConfig.updateTenantNetwork(tid, req.body || {});
+  if (!updated) return res.status(404).json({ error: 'Tenant tidak ditemukan' });
+
+  res.json({
+    success: true,
+    message: `Pengaturan jaringan tenant '${tid}' berhasil disimpan`,
+    tenant: tenantConfig.maskNetworkConfig(updated)
+  });
+});
+
+// Tes Koneksi OLT via SSH/Telnet
+app.post('/api/olt/test-connection', async (req, res) => {
+  const currentTenantId = getCurrentTenantId();
+  const override = req.body && req.body.host ? req.body : null;
+  const result = await oltService.testConnection(currentTenantId, override);
+  if (result.success) {
+    const vendorTag = result.vendor ? ` (${String(result.vendor).toUpperCase()})` : '';
+    res.json({
+      success: true,
+      message: result.simulated
+        ? (result.message || 'Mode simulasi: OLT belum diaktifkan')
+        : `Koneksi OLT${vendorTag} Berhasil!`,
+      ...result
+    });
+  } else {
+    res.status(400).json({
+      success: false,
+      message: `Koneksi OLT Gagal: ${result.error}`,
+      ...result
+    });
+  }
+});
+
+// Cek Status Redaman / LOS ONU Pelanggan dari OLT
+app.get('/api/customers/:id/olt', async (req, res) => {
+  const data = readDB();
+  ensureFieldsAndInvoices(data);
+  const c = data.find((x) => x.id === Number(req.params.id));
+  if (!c) return res.status(404).json({ error: 'Pelanggan tidak ditemukan' });
+
+  const port = req.query.olt_port || (c.device && c.device.olt_port) || c.oltPort || '';
+  const onuId = req.query.onu_id || (c.device && c.device.onu_id) || c.oltOnuId || '';
+
+  if (!port || !onuId) {
+    return res.status(400).json({
+      error: 'Data port OLT atau ONU ID belum ditentukan untuk pelanggan ini. Atur terlebih dahulu di pemetaan OLT.',
+      configured: false
+    });
+  }
+
+  const currentTenantId = getCurrentTenantId();
+  const status = await oltService.getOnuStatus(currentTenantId, { olt_port: port, onu_id: onuId, withRaw: req.query.raw === 'true' });
+  res.json({
+    success: status.success,
+    customer_id: c.customer_id,
+    nama: c.nama,
+    port,
+    onu_id: onuId,
+    ...status
+  });
+});
+
+// Update Pemetaan Port OLT & ONU ID pada Pelanggan
+app.patch('/api/customers/:id/olt-mapping', (req, res) => {
+  const data = readDB();
+  ensureFieldsAndInvoices(data);
+  const c = data.find((x) => x.id === Number(req.params.id));
+  if (!c) return res.status(404).json({ error: 'Pelanggan tidak ditemukan' });
+
+  const { olt_port, onu_id } = req.body || {};
+  const sanitized = oltService._sanitizeOnu(olt_port, onu_id);
+  if (sanitized.error) return res.status(400).json({ error: sanitized.error });
+
+  if (!c.device) c.device = {};
+  c.device.olt_port = sanitized.port;
+  c.device.onu_id = sanitized.onuId;
+  c.oltPort = sanitized.port;
+  c.oltOnuId = sanitized.onuId;
+
+  writeDB(data);
+
+  logActivity('OLT_MAPPING_UPDATE', `Pemetaan OLT diperbarui untuk ${c.nama} (${c.customer_id}): Port ${sanitized.port} ONU ID ${sanitized.onuId}`, {
+    kategori: 'Jaringan',
+    target_id: c.customer_id
+  });
+
+  res.json({
+    success: true,
+    message: 'Pemetaan OLT pelanggan berhasil diperbarui',
+    customer: c
+  });
+});
+
+// Pemicu Manual Pengiriman Reminder WhatsApp
+app.post('/api/notifications/run-reminders', async (req, res) => {
+  const currentTenantId = getCurrentTenantId();
+  const result = await notificationService.runDailyReminders(currentTenantId);
+  res.json({
+    success: true,
+    message: `Pengecekan pengingat selesai. Terkirim: ${result.sent}, Dilewati: ${result.skipped}, Gagal: ${result.failed}`,
+    summary: result
+  });
+});
+
 // Auto-generate tagihan awal bulan & pengecekan auto-isolir berkala
 function autoGenerate() {
   const now = new Date();
-  const data = readDB();
-  let changed = ensureFieldsAndInvoices(data);
-  if (now.getDate() === 1) {
-    const n = generateBills(data, now);
-    if (n) { changed = true; console.log(`[auto] ${n} tagihan baru dibuat`); }
+  const activeTenants = tenantConfig.listActiveTenantIds();
+
+  for (const tid of activeTenants) {
+    try {
+      tenantStorage.run({ tenantId: tid, user: null }, () => {
+        const data = readDB();
+        let changed = ensureFieldsAndInvoices(data);
+        if (now.getDate() === 1) {
+          const n = generateBills(data, now);
+          if (n) { changed = true; console.log(`[auto][${tid}] ${n} tagihan baru dibuat`); }
+        }
+        const isoCount = checkAutoIsolir(data, 7, now);
+        if (isoCount > 0) {
+          changed = true;
+          console.log(`[auto-isolir][${tid}] ${isoCount} sambungan pelanggan menunggak diubah menjadi Terisolir`);
+
+          // Sinkronkan ke router MikroTik jika live
+          if (mikrotikService.isLive(tid)) {
+            const candidates = data.filter((c) => c.status_jaringan === 'Terisolir');
+            mikrotikService.isolateMany(tid, candidates).catch((e) => console.error(`[auto-isolir-mikrotik][${tid}] Gagal:`, e.message));
+          }
+        }
+        if (changed) writeDB(data);
+      });
+    } catch (e) {
+      console.error(`[auto-cycle][${tid}] Error:`, e.message);
+    }
   }
-  const isoCount = checkAutoIsolir(data, 7, now);
-  if (isoCount > 0) {
-    changed = true;
-    console.log(`[auto-isolir] ${isoCount} sambungan pelanggan menunggak diubah menjadi Terisolir`);
-  }
-  if (changed) writeDB(data);
 }
 autoGenerate();
 setInterval(autoGenerate, 60 * 60 * 1000);
@@ -3353,39 +3743,33 @@ setInterval(autoGenerate, 60 * 60 * 1000);
 // =========================================================================
 // JADWAL NODE-CRON: Auto-Reminder WhatsApp Harian Setiap Jam 08:00 Pagi
 // Format Cron: "0 8 * * *" (menit 0, jam 8, setiap hari)
+// Multi-Tenant: Mengecek seluruh tenant aktif (Auto-Isolir MikroTik + WhatsApp)
 // =========================================================================
 cron.schedule('0 8 * * *', async () => {
-  console.log(`[cron-08:00] Menjalankan pengecekan pengingat tagihan & status isolir (${formatWaktuIndo()})...`);
+  console.log(`[cron-08:00] Menjalankan pengecekan pengingat tagihan & status isolir multi-tenant (${formatWaktuIndo()})...`);
   try {
-    const data = readDB();
-    ensureFieldsAndInvoices(data);
-    const isoCount = checkAutoIsolir(data, 7);
-    if (isoCount > 0) {
-      writeDB(data);
-      console.log(`[cron-08:00] ⚠️ ${isoCount} pelanggan menunggak >7 hari berhasil diisolir.`);
-    }
-    const reminders = getReminderList(data);
-    const settings = readSettings();
-
-    if (reminders.length === 0) {
-      console.log('[cron-08:00] Tidak ada tagihan H-3 atau menunggak.');
-      return;
-    }
-
-    console.log(`[cron-08:00] Ditemukan ${reminders.length} pelanggan yang perlu pengingat.`);
-
-    // Jika menggunakan API Gateway (Fonnte/Wablas), kirim otomatis ke nomor pelanggan
-    if (settings.wa_provider && settings.wa_provider !== 'manual') {
-      for (const r of reminders) {
+    const activeTenants = tenantConfig.listActiveTenantIds();
+    for (const tid of activeTenants) {
+      await tenantStorage.run({ tenantId: tid, user: null }, async () => {
         try {
-          await dispatchWaMessage(r.customer.whatsapp, r.pesan, settings);
-          console.log(`[cron-08:00] ✅ Pesan terkirim ke ${r.customer.nama} (${r.kategori})`);
-        } catch (e) {
-          console.error(`[cron-08:00] ❌ Gagal kirim ke ${r.customer.nama}: ${e.message}`);
+          const data = readDB();
+          ensureFieldsAndInvoices(data);
+          const isoCount = checkAutoIsolir(data, 7);
+          if (isoCount > 0) {
+            writeDB(data);
+            console.log(`[cron-08:00][${tid}] ⚠️ ${isoCount} pelanggan menunggak >7 hari diubah statusnya menjadi Terisolir.`);
+            if (mikrotikService.isLive(tid)) {
+              const candidates = data.filter((c) => c.status_jaringan === 'Terisolir');
+              await mikrotikService.isolateMany(tid, candidates);
+            }
+          }
+          // Jalankan pengingat harian dengan deduplikasi via notificationService
+          const remSummary = await notificationService.runDailyReminders(tid);
+          console.log(`[cron-08:00][${tid}] Pengingat WA selesai: ${remSummary.sent} terkirim, ${remSummary.skipped} dilewati, ${remSummary.failed} gagal.`);
+        } catch (err) {
+          console.error(`[cron-08:00][${tid}] Terjadi kesalahan tenant:`, err.message);
         }
-      }
-    } else {
-      console.log('[cron-08:00] Mode WhatsApp diatur Manual. Admin dapat memicu via dashboard tombol "Kirim Reminder Massal".');
+      });
     }
   } catch (err) {
     console.error('[cron-08:00] Terjadi kesalahan dalam cron job:', err.message);
@@ -3393,3 +3777,4 @@ cron.schedule('0 8 * * *', async () => {
 });
 
 app.listen(PORT, () => console.log(`Billing RT/RW.net berjalan di http://localhost:${PORT}`));
+

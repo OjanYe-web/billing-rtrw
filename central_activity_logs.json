@@ -1,5 +1,31 @@
 [
   {
+    "id": 1792137680949,
+    "aksi": "NETWORK_CONFIG_UPDATE",
+    "kategori": "Pengaturan",
+    "keterangan": "Pengaturan jaringan MikroTik & OLT diperbarui untuk tenant: default",
+    "admin": "Admin Utama",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "16 Oktober 2026, 15:01 WIB",
+    "timestamp": 1792137680817,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1792137673972,
+    "aksi": "NETWORK_CONFIG_UPDATE",
+    "kategori": "Pengaturan",
+    "keterangan": "Pengaturan jaringan MikroTik & OLT diperbarui untuk tenant: default",
+    "admin": "Admin Utama",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "16 Oktober 2026, 15:01 WIB",
+    "timestamp": 1792137673972,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
     "id": 1791846691414,
     "aksi": "UPDATE_KREDENSIAL_ADMIN",
     "kategori": "Keamanan",

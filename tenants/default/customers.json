@@ -478,9 +478,22 @@
         "tanggal_bayar": null
       }
     ],
-    "status_jaringan": "Aktif",
-    "catatan_kendala": "",
-    "network_logs": [],
+    "status_jaringan": "Terisolir",
+    "catatan_kendala": "Terisolir otomatis (Menunggak 8 hari)",
+    "network_logs": [
+      {
+        "id": 1792134980904,
+        "status": "DOWN",
+        "waktu": "16 Oktober 2026, 14:16 WIB",
+        "keterangan": "Isolir otomatis sistem: Menunggak 8 hari (jatuh tempo: 8 Oktober 2026)",
+        "tiket_id": "TKT-980904",
+        "status_penanganan": "Pending",
+        "jenis_kendala": "Isolir otomatis sistem: Menunggak 8 hari (jatuh tempo: 8 Oktober 2026)",
+        "teknisi": "Menunggu Penugasan",
+        "catatan_perbaikan": "Isolir otomatis sistem: Menunggak 8 hari (jatuh tempo: 8 Oktober 2026)",
+        "durasi": "Sedang Berlangsung"
+      }
+    ],
     "customer_id": "PLG006",
     "device": {
       "tipe": "Huawei HG8245H5 (Dual Band GPON)",
@@ -771,9 +784,22 @@
         "tanggal_bayar": null
       }
     ],
-    "status_jaringan": "Aktif",
-    "catatan_kendala": "",
-    "network_logs": [],
+    "status_jaringan": "Terisolir",
+    "catatan_kendala": "Terisolir otomatis (Menunggak 7 hari)",
+    "network_logs": [
+      {
+        "id": 1792134981394,
+        "status": "DOWN",
+        "waktu": "16 Oktober 2026, 14:16 WIB",
+        "keterangan": "Isolir otomatis sistem: Menunggak 7 hari (jatuh tempo: 9 Oktober 2026)",
+        "tiket_id": "TKT-981394",
+        "status_penanganan": "Pending",
+        "jenis_kendala": "Isolir otomatis sistem: Menunggak 7 hari (jatuh tempo: 9 Oktober 2026)",
+        "teknisi": "Menunggu Penugasan",
+        "catatan_perbaikan": "Isolir otomatis sistem: Menunggak 7 hari (jatuh tempo: 9 Oktober 2026)",
+        "durasi": "Sedang Berlangsung"
+      }
+    ],
     "customer_id": "PLG010",
     "device": {
       "tipe": "Huawei HG8245H5 (Dual Band GPON)",

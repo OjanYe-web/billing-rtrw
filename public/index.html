@@ -1175,6 +1175,17 @@
                 <option value="static">Static IP / Simple Queue</option>
               </select>
             </div>
+
+            <!-- Pemetaan OLT EPON / GPON Pelanggan -->
+            <div>
+              <label class="block font-medium text-slate-700 dark:text-slate-300 text-xs mb-1">Port OLT (EPON / GPON)</label>
+              <input name="olt_port" placeholder="mis. 0/1 atau 1/1/1" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-normal bg-white dark:bg-slate-900 font-mono focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-700 dark:text-slate-300 text-xs mb-1">ONU ID / ONT Number</label>
+              <input type="number" name="onu_id" placeholder="mis. 1..128" min="1" max="255" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-normal bg-white dark:bg-slate-900 font-mono focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+            </div>
           </div>
         </div>
 
@@ -2336,18 +2347,30 @@
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="font-bold text-base sm:text-lg leading-tight text-white">Setting &amp; Detail Router MikroTik</h3>
+              <h3 class="font-bold text-base sm:text-lg leading-tight text-white">Integrasi Perangkat Jaringan (MikroTik &amp; OLT)</h3>
               <span id="mtModalOnlineBadge" class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-300">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
               </span>
             </div>
-            <p class="text-xs text-sky-200 mt-0.5">Konfigurasi parameter koneksi API RouterOS, monitoring hardware, &amp; sinkronisasi pelanggan</p>
+            <p class="text-xs text-sky-200 mt-0.5">Konfigurasi Router MikroTik PPPoE &amp; Monitoring Redaman OLT EPON / GPON</p>
           </div>
         </div>
         <button type="button" data-close class="text-white/70 hover:text-white text-2xl leading-none transition">&times;</button>
       </div>
 
+      <!-- Tab Navigasi Modal -->
+      <div class="bg-slate-100 border-b border-slate-200 px-5 sm:px-6 flex items-center gap-2 shrink-0 text-xs">
+        <button type="button" id="tabBtnMikrotik" class="py-2.5 px-4 font-bold border-b-2 border-sky-600 text-sky-700 flex items-center gap-1.5 transition">
+          <span>⚡</span> Router MikroTik
+        </button>
+        <button type="button" id="tabBtnOlt" class="py-2.5 px-4 font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-1.5 transition">
+          <span>🌐</span> OLT EPON / GPON
+        </button>
+      </div>
+
       <div class="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 text-xs custom-scroll">
+        <!-- TAB PANEL 1: MIKROTIK -->
+        <div id="tabPanelMikrotik" class="space-y-4">
         <!-- BAGIAN 1: FORM PENGATURAN KONEKSI ROUTER MIKROTIK -->
         <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs transition">
           <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-200">
@@ -2508,6 +2531,143 @@
             Data konfigurasi disimpan otomatis di <code class="bg-white px-1 py-0.5 rounded border text-indigo-700">localStorage</code> dan sinkron ke server. Pastikan API RouterOS aktif di Winbox menu <code class="bg-white px-1 py-0.5 rounded border text-indigo-700">IP -&gt; Services -&gt; api (Port 8728)</code>.
           </p>
         </div>
+        </div>
+        <!-- AKHIR TAB PANEL 1: MIKROTIK -->
+
+        <!-- TAB PANEL 2: OLT EPON / GPON -->
+        <div id="tabPanelOlt" class="space-y-4 hidden">
+          <!-- BAGIAN 1: FORM PENGATURAN KONEKSI OLT -->
+          <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs transition">
+            <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-200">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-sm font-bold">🌐</span>
+                <div>
+                  <h4 class="font-bold text-slate-900 text-sm">Parameter Koneksi OLT (EPON / GPON)</h4>
+                  <p class="text-[11px] text-slate-500">Monitoring redaman optik & status kabel pelanggan via Telnet atau SSH</p>
+                </div>
+              </div>
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="oltSettingEnabled" class="rounded border-slate-300 text-teal-600 focus:ring-teal-500 w-4 h-4">
+                <span class="text-xs font-bold text-slate-700">Aktifkan OLT</span>
+              </label>
+            </div>
+
+            <form id="formOltConfig" class="space-y-3.5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                <!-- Tipe Vendor / EPON -->
+                <div class="sm:col-span-2">
+                  <label class="block font-semibold text-slate-700 text-xs mb-1">
+                    Tipe Teknologi &amp; Vendor OLT <span class="text-red-500">*</span>
+                  </label>
+                  <select id="oltSettingVendor" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                    <option value="epon">EPON Generic (VSOL, HIOSO, BDCOM, HSQG, C-Data)</option>
+                    <option value="vsol">VSOL EPON / GPON</option>
+                    <option value="hioso">HIOSO EPON</option>
+                    <option value="bdcom">BDCOM EPON</option>
+                    <option value="cdata">C-Data EPON</option>
+                    <option value="zte_epon">ZTE EPON (C300 / C320 Card EPON)</option>
+                    <option value="zte">ZTE GPON (C300 / C320 Card GPON)</option>
+                    <option value="huawei">Huawei GPON (SmartAX MA56xx / MA58xx)</option>
+                  </select>
+                </div>
+
+                <!-- Protokol Login -->
+                <div>
+                  <label class="block font-semibold text-slate-700 text-xs mb-1">
+                    Protokol Login <span class="text-red-500">*</span>
+                  </label>
+                  <select id="oltSettingProtocol" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                    <option value="telnet">Telnet (Port 23) - Umum EPON</option>
+                    <option value="ssh">SSH (Port 22)</option>
+                  </select>
+                </div>
+
+                <!-- Port -->
+                <div>
+                  <label class="block font-semibold text-slate-700 text-xs mb-1">
+                    Port OLT <span class="text-red-500">*</span>
+                  </label>
+                  <input type="number" id="oltSettingPort" placeholder="23" value="23" min="1" max="65535" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+
+                <!-- IP / Hostname -->
+                <div class="sm:col-span-2">
+                  <label class="block font-semibold text-slate-700 text-xs mb-1">
+                    IP Address OLT <span class="text-red-500">*</span>
+                  </label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🌐</span>
+                    <input type="text" id="oltSettingHost" placeholder="mis. 192.168.10.2" class="w-full border border-slate-300 rounded-lg pl-8 pr-3 py-2 text-xs font-mono bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                  </div>
+                </div>
+
+                <!-- Username -->
+                <div>
+                  <label class="block font-semibold text-slate-700 text-xs mb-1">
+                    Username OLT <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" id="oltSettingUser" placeholder="admin" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+
+                <!-- Password -->
+                <div>
+                  <label class="block font-semibold text-slate-700 text-xs mb-1">
+                    Password OLT
+                  </label>
+                  <input type="password" id="oltSettingPass" placeholder="Kosongkan jika tidak berubah" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+
+                <!-- Password Enable (Opsional) -->
+                <div class="sm:col-span-2">
+                  <label class="block font-semibold text-slate-700 text-xs mb-1">
+                    Password Enable (Privileged Mode - Opsional)
+                  </label>
+                  <input type="password" id="oltSettingEnablePass" placeholder="Khusus OLT yang butuh password perintah 'enable'" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+
+                <!-- Ambang Redaman Rx Warning / Critical -->
+                <div>
+                  <label class="block font-semibold text-slate-700 text-xs mb-1">
+                    Batas Redaman Warning (dBm)
+                  </label>
+                  <input type="number" step="0.5" id="oltSettingRxWarning" value="-25" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+
+                <div>
+                  <label class="block font-semibold text-slate-700 text-xs mb-1">
+                    Batas Redaman Kritis / Putus (dBm)
+                  </label>
+                  <input type="number" step="0.5" id="oltSettingRxCritical" value="-27" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+              </div>
+
+              <!-- Feedback Alert OLT -->
+              <div id="oltConnectionFeedback" class="hidden rounded-xl p-3 text-xs transition"></div>
+
+              <!-- Tombol Aksi Form OLT -->
+              <div class="flex items-center justify-between flex-wrap gap-2.5 pt-1">
+                <button type="button" id="btnTestOltConn" class="px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-lg border border-slate-300 shadow-sm transition flex items-center gap-1.5 active:scale-95">
+                  <span>🔌</span> Test Koneksi OLT
+                </button>
+                <button type="submit" id="btnSaveOltConfig" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-1.5 active:scale-95">
+                  <span>💾</span> Simpan Konfigurasi OLT
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Konsol Log Respons CLI OLT -->
+          <div class="bg-slate-900 rounded-2xl p-4 text-white shadow space-y-2 border border-slate-800">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-teal-400 flex items-center gap-1.5">
+                <span>💻</span> Konsol Output Perintah OLT:
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono" id="oltStatusTag">Status: Siap dihubungi</span>
+            </div>
+            <pre class="bg-black/60 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-x-auto max-h-40 whitespace-pre-wrap leading-relaxed" id="oltCliPreviewBox">// Klik 'Test Koneksi OLT' untuk melihat banner versi & respons OLT EPON/GPON Anda...</pre>
+          </div>
+        </div>
+        <!-- AKHIR TAB PANEL 2: OLT -->
       </div>
 
       <div class="bg-slate-50 px-5 sm:px-6 py-3 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500 shrink-0">
@@ -6677,6 +6837,199 @@ if ($('btnToggleMtPass')) {
       $('btnToggleMtPass').title = 'Lihat Password';
     }
   });
+}
+
+// ==========================================
+// KONTROL TAB & PENGATURAN OLT EPON / GPON
+// ==========================================
+function switchNetworkTab(tab) {
+  const isMt = tab === 'mikrotik';
+  if ($('tabPanelMikrotik')) $('tabPanelMikrotik').classList.toggle('hidden', !isMt);
+  if ($('tabPanelOlt')) $('tabPanelOlt').classList.toggle('hidden', isMt);
+
+  if ($('tabBtnMikrotik')) {
+    $('tabBtnMikrotik').className = isMt 
+      ? 'py-2.5 px-4 font-bold border-b-2 border-sky-600 text-sky-700 flex items-center gap-1.5 transition'
+      : 'py-2.5 px-4 font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-1.5 transition';
+  }
+  if ($('tabBtnOlt')) {
+    $('tabBtnOlt').className = !isMt 
+      ? 'py-2.5 px-4 font-bold border-b-2 border-teal-600 text-teal-700 flex items-center gap-1.5 transition'
+      : 'py-2.5 px-4 font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-1.5 transition';
+  }
+}
+
+if ($('tabBtnMikrotik')) {
+  $('tabBtnMikrotik').addEventListener('click', () => switchNetworkTab('mikrotik'));
+}
+if ($('tabBtnOlt')) {
+  $('tabBtnOlt').addEventListener('click', () => {
+    switchNetworkTab('olt');
+    loadOltConfigFromApi();
+  });
+}
+
+// Ubah default port saat memilih protokol Telnet / SSH di OLT
+if ($('oltSettingProtocol')) {
+  $('oltSettingProtocol').addEventListener('change', (e) => {
+    const proto = e.target.value;
+    const portInput = $('oltSettingPort');
+    if (portInput) {
+      portInput.value = proto === 'ssh' ? 22 : 23;
+    }
+  });
+}
+
+function setOltFeedback(isSuccess, title, desc) {
+  const box = $('oltConnectionFeedback');
+  if (!box) return;
+  box.className = isSuccess
+    ? 'rounded-xl p-3 text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-start gap-2 animate-in'
+    : 'rounded-xl p-3 text-xs bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-2 animate-in';
+  box.innerHTML = `
+    <span class="text-base">${isSuccess ? '✅' : '❌'}</span>
+    <div>
+      <div class="font-bold">${esc(title)}</div>
+      <div class="mt-0.5 text-[11px] leading-relaxed">${esc(desc)}</div>
+    </div>
+  `;
+  box.classList.remove('hidden');
+}
+
+// Muat Pengaturan Jaringan OLT dari Server
+async function loadOltConfigFromApi() {
+  try {
+    const res = await fetch('/api/network-config');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.olt) {
+      const o = data.olt;
+      if ($('oltSettingEnabled')) $('oltSettingEnabled').checked = o.enabled === true;
+      if ($('oltSettingVendor') && o.vendor) $('oltSettingVendor').value = o.vendor;
+      if ($('oltSettingProtocol') && o.protocol) $('oltSettingProtocol').value = o.protocol;
+      if ($('oltSettingPort')) $('oltSettingPort').value = o.port || (o.protocol === 'ssh' ? 22 : 23);
+      if ($('oltSettingHost')) $('oltSettingHost').value = o.host || '';
+      if ($('oltSettingUser')) $('oltSettingUser').value = o.user || '';
+      if ($('oltSettingRxWarning')) $('oltSettingRxWarning').value = o.rx_warning_dbm ?? -25;
+      if ($('oltSettingRxCritical')) $('oltSettingRxCritical').value = o.rx_critical_dbm ?? -27;
+      if ($('oltStatusTag')) {
+        $('oltStatusTag').textContent = o.enabled ? `Status: Aktif (${o.vendor?.toUpperCase()})` : 'Status: Belum diaktifkan';
+      }
+    }
+  } catch (err) {
+    console.warn('Gagal memuat network config OLT:', err.message);
+  }
+}
+
+// Simpan Pengaturan OLT ke Server
+async function saveOltConfig(e) {
+  if (e) e.preventDefault();
+  const btn = $('btnSaveOltConfig');
+  if (btn) setBtnLoading(btn, true, 'Menyimpan...');
+
+  const enabled = $('oltSettingEnabled') ? $('oltSettingEnabled').checked : false;
+  const vendor = $('oltSettingVendor') ? $('oltSettingVendor').value : 'epon';
+  const protocol = $('oltSettingProtocol') ? $('oltSettingProtocol').value : 'telnet';
+  const port = Number($('oltSettingPort') ? $('oltSettingPort').value : 23) || 23;
+  const host = ($('oltSettingHost') ? $('oltSettingHost').value : '').trim();
+  const user = ($('oltSettingUser') ? $('oltSettingUser').value : '').trim();
+  const pass = $('oltSettingPass') ? $('oltSettingPass').value : '';
+  const enable_pass = $('oltSettingEnablePass') ? $('oltSettingEnablePass').value : '';
+  const rx_warning_dbm = Number($('oltSettingRxWarning') ? $('oltSettingRxWarning').value : -25);
+  const rx_critical_dbm = Number($('oltSettingRxCritical') ? $('oltSettingRxCritical').value : -27);
+
+  const oltPayload = {
+    enabled,
+    vendor,
+    protocol,
+    port,
+    host,
+    user,
+    rx_warning_dbm,
+    rx_critical_dbm
+  };
+  if (pass) oltPayload.pass = pass;
+  if (enable_pass !== undefined) oltPayload.enable_pass = enable_pass;
+
+  try {
+    const res = await fetch('/api/network-config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ olt: oltPayload })
+    });
+    const resData = await res.json();
+    if (!res.ok) throw new Error(resData.error || 'Gagal menyimpan konfigurasi OLT');
+
+    setOltFeedback(true, 'Konfigurasi OLT Berhasil Disimpan!', `Parameter koneksi OLT ${vendor.toUpperCase()} (${host}:${port}) telah disimpan ke tenant server.`);
+    toast(`Konfigurasi OLT ${vendor.toUpperCase()} berhasil disimpan!`);
+    if ($('oltStatusTag')) {
+      $('oltStatusTag').textContent = enabled ? `Status: Aktif (${vendor.toUpperCase()})` : 'Status: Tersimpan (Non-aktif)';
+    }
+    if ($('oltSettingPass')) $('oltSettingPass').value = '';
+    if ($('oltSettingEnablePass')) $('oltSettingEnablePass').value = '';
+  } catch (err) {
+    setOltFeedback(false, 'Gagal Menyimpan OLT', err.message);
+    toast('Gagal menyimpan konfigurasi OLT: ' + err.message);
+  } finally {
+    if (btn) setBtnLoading(btn, false);
+  }
+}
+
+// Uji Koneksi OLT Langsung
+async function testOltConnection() {
+  const btn = $('btnTestOltConn');
+  const consoleBox = $('oltCliPreviewBox');
+  if (btn) setBtnLoading(btn, true, 'Menghubungkan OLT...');
+
+  const host = ($('oltSettingHost') ? $('oltSettingHost').value : '').trim();
+  const port = Number($('oltSettingPort') ? $('oltSettingPort').value : 23) || 23;
+  const vendor = $('oltSettingVendor') ? $('oltSettingVendor').value : 'epon';
+  const protocol = $('oltSettingProtocol') ? $('oltSettingProtocol').value : 'telnet';
+  const user = ($('oltSettingUser') ? $('oltSettingUser').value : '').trim();
+  const pass = $('oltSettingPass') ? $('oltSettingPass').value : '';
+  const enable_pass = $('oltSettingEnablePass') ? $('oltSettingEnablePass').value : '';
+
+  if (!host) {
+    setOltFeedback(false, 'IP Address Kosong', 'Silakan masukkan IP Address OLT terlebih dahulu.');
+    if (btn) setBtnLoading(btn, false);
+    return;
+  }
+
+  const payload = { host, port, vendor, protocol, user };
+  if (pass) payload.pass = pass;
+  if (enable_pass) payload.enable_pass = enable_pass;
+
+  try {
+    const res = await fetch('/api/olt/test-connection', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || data.message || 'Koneksi ke OLT gagal.');
+
+    setOltFeedback(true, 'Koneksi OLT Berhasil!', data.message || `Terhubung ke OLT ${vendor.toUpperCase()} (${host}:${port}) via ${protocol.toUpperCase()}`);
+    toast(`Koneksi OLT ${vendor.toUpperCase()} Berhasil!`);
+
+    if (consoleBox) {
+      consoleBox.textContent = data.output_preview || `// Koneksi ${protocol.toUpperCase()} sukses!\nOLT merespons normal pada port ${port}.`;
+    }
+  } catch (err) {
+    setOltFeedback(false, 'Koneksi OLT Gagal', err.message);
+    toast('Koneksi OLT Gagal: ' + err.message);
+    if (consoleBox) {
+      consoleBox.textContent = `// ERROR KONEKSI:\n${err.message}\n\nTips:\n- Pastikan kabel/VLAN manajemen OLT bisa di-ping dari server\n- Pastikan port ${port} (${protocol.toUpperCase()}) aktif di OLT\n- Periksa kembali Username dan Password`;
+    }
+  } finally {
+    if (btn) setBtnLoading(btn, false);
+  }
+}
+
+if ($('formOltConfig')) {
+  $('formOltConfig').addEventListener('submit', saveOltConfig);
+}
+if ($('btnTestOltConn')) {
+  $('btnTestOltConn').addEventListener('click', testOltConnection);
 }
 // ==========================================
 // MANAJEMEN PAKET INTERNET (PACKAGES)
