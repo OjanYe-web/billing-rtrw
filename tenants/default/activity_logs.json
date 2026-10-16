@@ -1,5 +1,49 @@
 [
   {
+    "id": 1792166520056,
+    "aksi": "BALAS_LIVE_CHAT",
+    "kategori": "Komunikasi",
+    "keterangan": "Membalas Live Chat pelanggan Budi Santoso (PLG001)",
+    "admin": "Admin Utama",
+    "waktu": "16 Oktober 2026, 23:01 WIB",
+    "timestamp": 1792166519576,
+    "target_id": "PLG001",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1792166520344,
+    "aksi": "TRANSAKSI_POS",
+    "kategori": "Keuangan",
+    "keterangan": "Penjualan POS INV-POS-20261016-002 kepada \"Warkop Maju Jaya\" senilai Rp 4.000 (1 item)",
+    "admin": "Admin Utama",
+    "waktu": "16 Oktober 2026, 23:01 WIB",
+    "timestamp": 1792166519500,
+    "target_id": "INV-POS-20261016-002",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1792166520219,
+    "aksi": "GENERATE_VOUCHER_HOTSPOT",
+    "kategori": "Hotspot",
+    "keterangan": "Membuat 2 voucher Hotspot paket \"Voucher 3 Jam Hemat\" (Batch: BATCH-20261016-9449, Reseller: POS Toko)",
+    "admin": "Admin Utama",
+    "waktu": "16 Oktober 2026, 23:01 WIB",
+    "timestamp": 1792166519454,
+    "target_id": "BATCH-20261016-9449",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1792166520276,
+    "aksi": "GENERATE_VOUCHER_HOTSPOT",
+    "kategori": "Hotspot",
+    "keterangan": "Membuat 3 voucher Hotspot paket \"Voucher Harian 24 Jam\" (Batch: BATCH-20261016-9309, Reseller: Loket Utama)",
+    "admin": "Admin Utama",
+    "waktu": "16 Oktober 2026, 23:01 WIB",
+    "timestamp": 1792166519318,
+    "target_id": "BATCH-20261016-9309",
+    "ip": "127.0.0.1"
+  },
+  {
     "id": 1792137680940,
     "aksi": "NETWORK_CONFIG_UPDATE",
     "kategori": "Pengaturan",

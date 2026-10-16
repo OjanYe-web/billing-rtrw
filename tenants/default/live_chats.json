@@ -1,0 +1,80 @@
+[
+  {
+    "session_id": "CHAT-PLG001",
+    "customer_id": "PLG001",
+    "customer_db_id": 1,
+    "nama_pelanggan": "Budi Santoso",
+    "whatsapp": "6281234567891",
+    "kategori": "tagihan",
+    "status": "pending",
+    "assigned_to": "Kasir & Admin",
+    "unread_admin": 0,
+    "unread_client": 1,
+    "updated_at": "16 Oktober 2026, 23:01 WIB",
+    "messages": [
+      {
+        "id": "MSG-101",
+        "sender_type": "customer",
+        "sender_name": "Budi Santoso",
+        "sender_role": "pelanggan",
+        "message": "Halo kak, saya mau konfirmasi pembayaran tagihan Wi-Fi bulan ini via QRIS DANA ya.",
+        "waktu": "16 Oktober 2026, 23:01 WIB"
+      },
+      {
+        "id": "MSG-1792166519522",
+        "sender_type": "customer",
+        "sender_name": "Budi Santoso",
+        "sender_role": "pelanggan",
+        "message": "Halo kak, mau cek tagihan bulan ini dong",
+        "waktu": "16 Oktober 2026, 23:01 WIB"
+      },
+      {
+        "id": "MSG-BOT-1792166519523",
+        "sender_type": "bot",
+        "sender_name": "Asisten Otomatis Billing",
+        "sender_role": "system",
+        "message": "Halo Bapak/Ibu Budi Santoso, status tagihan paket \"Paket Warga 10 Mbps\" Anda saat ini adalah *Lunas* (Rp 100.000, Jatuh Tempo: 2026-11-10). Tim kasir kami akan segera merespons pesan Anda.",
+        "waktu": "16 Oktober 2026, 23:01 WIB"
+      },
+      {
+        "id": "MSG-1792166519534",
+        "sender_type": "staff",
+        "sender_name": "Siti Rahma (Kasir Utama)",
+        "sender_role": "kasir",
+        "message": "Halo Pak, silakan pembayaran bisa via QRIS ya.",
+        "waktu": "16 Oktober 2026, 23:01 WIB"
+      }
+    ]
+  },
+  {
+    "session_id": "CHAT-PLG002",
+    "customer_id": "PLG002",
+    "customer_db_id": 2,
+    "nama_pelanggan": "Siti Aminah",
+    "whatsapp": "6281234567892",
+    "kategori": "gangguan",
+    "status": "pending",
+    "assigned_to": "Rian Pratama (Teknisi Lapangan)",
+    "unread_admin": 0,
+    "unread_client": 0,
+    "updated_at": "16 Oktober 2026, 23:01 WIB",
+    "messages": [
+      {
+        "id": "MSG-201",
+        "sender_type": "customer",
+        "sender_name": "Siti Aminah",
+        "sender_role": "pelanggan",
+        "message": "Siang mas teknisi, lampu indikator LOS di modem ZTE saya kedip merah sejak tadi pagi.",
+        "waktu": "16 Oktober 2026, 23:01 WIB"
+      },
+      {
+        "id": "MSG-202",
+        "sender_type": "staff",
+        "sender_name": "Rian Pratama (Teknisi Lapangan)",
+        "sender_role": "teknisi",
+        "message": "Siap Bapak/Ibu, laporan sudah kami terima. Tim teknisi sedang menuju ODP wilayah Anda untuk pengecekan kabel dropcore.",
+        "waktu": "16 Oktober 2026, 23:01 WIB"
+      }
+    ]
+  }
+]

@@ -1,1 +1,1489 @@
-[]
+[
+  {
+    "id": 1,
+    "nama": "Budi Santoso",
+    "whatsapp": "6281234567891",
+    "alamat": "Jl. Mawar RT 01/05 No. 12",
+    "wilayah": "Kel. Kebayoran Baru",
+    "paket": "Paket Warga 10 Mbps",
+    "harga": 100000,
+    "status_tagihan": "Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [
+      {
+        "id": 1791670452834,
+        "tiket_id": "RST-452834",
+        "status": "UP",
+        "jenis_kendala": "Buka Isolir Jaringan Mikrotik",
+        "teknisi": "Sistem Billing (Mikrotik API)",
+        "status_penanganan": "Selesai",
+        "catatan_perbaikan": "Akun PPPoE budi_santoso dikembalikan ke 10Mbps & koneksi aktif dipulihkan.",
+        "waktu": "11 Oktober 2026, 05:14 WIB",
+        "waktu_selesai": "11 Oktober 2026, 05:14 WIB",
+        "durasi": "Selesai"
+      },
+      {
+        "id": 1791670452761,
+        "tiket_id": "ISO-452761",
+        "status": "DOWN",
+        "jenis_kendala": "Isolir Jaringan Mikrotik",
+        "teknisi": "Sistem Billing (Mikrotik API)",
+        "status_penanganan": "Selesai",
+        "catatan_perbaikan": "Akun PPPoE budi_santoso dipindahkan ke profile-ISOLIR & sesi aktif diputus.",
+        "waktu": "11 Oktober 2026, 05:14 WIB",
+        "waktu_selesai": "11 Oktober 2026, 05:14 WIB",
+        "durasi": "Selesai"
+      },
+      {
+        "id": 1791668961287,
+        "tiket_id": "MUT-961287",
+        "status": "UP",
+        "jenis_kendala": "Mutasi / Pergantian Perangkat (ONT)",
+        "teknisi": "Rian (Teknisi Lapangan)",
+        "status_penanganan": "Selesai",
+        "waktu": "11 Oktober 2026, 04:49 WIB",
+        "waktu_selesai": "11 Oktober 2026, 04:49 WIB",
+        "durasi": "Selesai",
+        "created_at": 1791668961287,
+        "resolved_at": 1791668961287,
+        "catatan_perbaikan": "Penggantian modem ONT akibat tersambar petir",
+        "keterangan": "Penggantian modem ONT akibat tersambar petir"
+      },
+      {
+        "id": 1791664606902,
+        "tiket_id": "TKT-664606",
+        "status": "DOWN",
+        "jenis_kendala": "Kabel Fiber Optic Putus (LOS Merah)",
+        "teknisi": "Rian (Teknisi Lapangan)",
+        "status_penanganan": "Sedang Dikerjakan",
+        "catatan_perbaikan": "Teknisi sedang melakukan pengecekan kabel dropcore di tiang 3",
+        "waktu": "11 Oktober 2026, 03:36 WIB",
+        "waktu_selesai": null,
+        "durasi": "Sedang Berlangsung",
+        "created_at": 1791664606902,
+        "resolved_at": null,
+        "keterangan": "Kabel FO putus di tiang 3"
+      },
+      {
+        "id": 1791657699880,
+        "tiket_id": "TKT-657699",
+        "status": "UP",
+        "jenis_kendala": "Kabel Fiber Optic Putus (LOS Merah)",
+        "teknisi": "Deni (Teknisi Splicing)",
+        "status_penanganan": "Selesai",
+        "catatan_perbaikan": "Splicing ulang core 2 di tiang 3 selesai, redaman stabil di -19.2 dBm",
+        "waktu": "11 Oktober 2026, 20:00 WIB",
+        "waktu_selesai": "11 Oktober 2026, 21:00 WIB",
+        "durasi": "1 Jam",
+        "created_at": 1791657699850,
+        "resolved_at": 1791657699880,
+        "keterangan": "Splicing selesai, internet normal kembali"
+      }
+    ],
+    "customer_id": "PLG001",
+    "device": {
+      "tipe": "ZTE F609 V3 (GPON ONT)",
+      "serial_number": "ZTEG99887766",
+      "mac_address": "BC:24:11:AA:BB:CC",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-10-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "budi_santoso",
+    "mikrotikProfile": "10Mbps",
+    "ipAddress": "192.168.88.11",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z",
+    "metode_bayar": "QRIS DANA"
+  },
+  {
+    "id": 2,
+    "nama": "Siti Aminah",
+    "whatsapp": "6281234567892",
+    "alamat": "Jl. Mawar RT 01/05 No. 15",
+    "wilayah": "Kel. Gandaria",
+    "paket": "Paket Warga 20 Mbps",
+    "harga": 150000,
+    "status_tagihan": "Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 150000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG002",
+    "device": {
+      "tipe": "Huawei HG8245H5 (Dual Band GPON)",
+      "serial_number": "4857544310024690",
+      "mac_address": "BC:24:11:22:3E:6A",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "siti_aminah",
+    "mikrotikProfile": "20Mbps",
+    "ipAddress": "192.168.88.12",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z",
+    "metode_bayar": "QRIS DANA"
+  },
+  {
+    "id": 3,
+    "nama": "Ahmad Fauzi",
+    "whatsapp": "6281234567893",
+    "alamat": "Jl. Melati RT 02/05 No. 04",
+    "wilayah": "Cluster Melati",
+    "paket": "Paket Warga 10 Mbps",
+    "harga": 100000,
+    "status_tagihan": "Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [
+      {
+        "id": 1791664745236,
+        "status": "UP",
+        "waktu": "11 Oktober 2026, 03:38 WIB",
+        "keterangan": "[Laporan Pelanggan]: INTERNET GA BISA NIH",
+        "tiket_id": "TKT-745236",
+        "status_penanganan": "Selesai",
+        "jenis_kendala": "[Laporan Pelanggan]: INTERNET GA BISA NIH",
+        "teknisi": "Tim Lapangan",
+        "catatan_perbaikan": "[Laporan Pelanggan]: INTERNET GA BISA NIH",
+        "durasi": "Selesai"
+      },
+      {
+        "id": 1791664721480,
+        "status": "DOWN",
+        "waktu": "11 Oktober 2026, 03:38 WIB",
+        "keterangan": "[Laporan Pelanggan] INTERNET GA BISA NIH",
+        "tiket_id": "TKT-721480",
+        "status_penanganan": "Pending",
+        "jenis_kendala": "[Laporan Pelanggan] INTERNET GA BISA NIH",
+        "teknisi": "Menunggu Penugasan",
+        "catatan_perbaikan": "[Laporan Pelanggan] INTERNET GA BISA NIH",
+        "durasi": "Sedang Berlangsung"
+      }
+    ],
+    "customer_id": "PLG003",
+    "device": {
+      "tipe": "Fiberhome AN5506-01-A (GPON ONU)",
+      "serial_number": "FHTT10037035",
+      "mac_address": "BC:24:11:33:5D:9F",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "ahmad_fauzi",
+    "mikrotikProfile": "10Mbps",
+    "ipAddress": "192.168.88.13",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z",
+    "metode_bayar": "QRIS DANA"
+  },
+  {
+    "id": 4,
+    "nama": "Dewi Lestari",
+    "whatsapp": "6281234567894",
+    "alamat": "Jl. Melati RT 02/05 No. 09",
+    "wilayah": "Cluster Mawar",
+    "paket": "Paket Gamer 30 Mbps",
+    "harga": 250000,
+    "status_tagihan": "Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 250000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG004",
+    "device": {
+      "tipe": "VSOL V2801SG (1GE XPON ONT)",
+      "serial_number": "VSOL10049380",
+      "mac_address": "BC:24:11:44:7C:D4",
+      "status_kepemilikan": "Milik Pribadi (Beli Putus)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Modem ONT dibeli putus oleh pelanggan sendiri."
+    },
+    "mikrotikUsername": "dewi_lestari",
+    "mikrotikProfile": "30Mbps",
+    "ipAddress": "192.168.88.14",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z",
+    "metode_bayar": "QRIS DANA"
+  },
+  {
+    "id": 5,
+    "nama": "Joko Widodo",
+    "whatsapp": "6281234567895",
+    "alamat": "Jl. Anggrek RT 03/06 No. 01",
+    "wilayah": "Kel. Kebayoran Baru",
+    "paket": "Paket Warga 10 Mbps",
+    "harga": 100000,
+    "status_tagihan": "Belum Lunas",
+    "jatuh_tempo": "2026-10-01",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      }
+    ],
+    "status_jaringan": "Terisolir",
+    "catatan_kendala": "Terisolir otomatis (Menunggak 10 hari)",
+    "network_logs": [
+      {
+        "id": 1791664000000,
+        "status": "DOWN",
+        "waktu": "11 Oktober 2026, 08:00 WIB",
+        "keterangan": "Isolir otomatis sistem: Menunggak 10 hari (jatuh tempo: 1 Oktober 2026)",
+        "tiket_id": "TKT-000000",
+        "status_penanganan": "Pending",
+        "jenis_kendala": "Isolir otomatis sistem: Menunggak 10 hari (jatuh tempo: 1 Oktober 2026)",
+        "teknisi": "Menunggu Penugasan",
+        "catatan_perbaikan": "Isolir otomatis sistem: Menunggak 10 hari (jatuh tempo: 1 Oktober 2026)",
+        "durasi": "Sedang Berlangsung"
+      }
+    ],
+    "customer_id": "PLG005",
+    "device": {
+      "tipe": "ZTE F609 V3 (GPON ONT)",
+      "serial_number": "ZTEG10061725",
+      "mac_address": "BC:24:11:55:9B:09",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "joko_widodo",
+    "mikrotikProfile": "10Mbps",
+    "ipAddress": "192.168.88.15",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "isolated",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+  },
+  {
+    "id": 6,
+    "nama": "Rina Marlina",
+    "whatsapp": "6281234567896",
+    "alamat": "Jl. Anggrek RT 03/06 No. 08",
+    "wilayah": "Kel. Gandaria",
+    "paket": "Paket Warga 20 Mbps",
+    "harga": 150000,
+    "status_tagihan": "Belum Lunas",
+    "jatuh_tempo": "2026-10-08",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 150000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      }
+    ],
+    "status_jaringan": "Terisolir",
+    "catatan_kendala": "Terisolir otomatis (Menunggak 8 hari)",
+    "network_logs": [
+      {
+        "id": 1792168090428,
+        "status": "DOWN",
+        "waktu": "16 Oktober 2026, 23:28 WIB",
+        "keterangan": "Isolir otomatis sistem: Menunggak 8 hari (jatuh tempo: 8 Oktober 2026)",
+        "tiket_id": "TKT-090428",
+        "status_penanganan": "Pending",
+        "jenis_kendala": "Isolir otomatis sistem: Menunggak 8 hari (jatuh tempo: 8 Oktober 2026)",
+        "teknisi": "Menunggu Penugasan",
+        "catatan_perbaikan": "Isolir otomatis sistem: Menunggak 8 hari (jatuh tempo: 8 Oktober 2026)",
+        "durasi": "Sedang Berlangsung"
+      }
+    ],
+    "customer_id": "PLG006",
+    "device": {
+      "tipe": "Huawei HG8245H5 (Dual Band GPON)",
+      "serial_number": "4857544310074070",
+      "mac_address": "BC:24:11:66:BA:3E",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "rina_marlina",
+    "mikrotikProfile": "20Mbps",
+    "ipAddress": "192.168.88.16",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+  },
+  {
+    "id": 7,
+    "nama": "Eko Prasetyo",
+    "whatsapp": "6281234567897",
+    "alamat": "Jl. Kenanga RT 04/06 No. 21",
+    "wilayah": "Cluster Melati",
+    "paket": "Paket Gamer 30 Mbps",
+    "harga": 250000,
+    "status_tagihan": "Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 250000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG007",
+    "device": {
+      "tipe": "Fiberhome AN5506-01-A (GPON ONU)",
+      "serial_number": "FHTT10086415",
+      "mac_address": "BC:24:11:77:D9:73",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "eko_prasetyo",
+    "mikrotikProfile": "30Mbps",
+    "ipAddress": "192.168.88.17",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z",
+    "metode_bayar": "QRIS DANA"
+  },
+  {
+    "id": 8,
+    "nama": "Sri Wahyuni",
+    "whatsapp": "6281234567898",
+    "alamat": "Jl. Kenanga RT 04/06 No. 25",
+    "wilayah": "Cluster Mawar",
+    "paket": "Paket Warga 10 Mbps",
+    "harga": 100000,
+    "status_tagihan": "Belum Lunas",
+    "jatuh_tempo": "2026-10-02",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      }
+    ],
+    "status_jaringan": "Terisolir",
+    "catatan_kendala": "Terisolir otomatis (Menunggak 9 hari)",
+    "network_logs": [
+      {
+        "id": 1791665197154,
+        "status": "DOWN",
+        "waktu": "11 Oktober 2026, 03:46 WIB",
+        "keterangan": "Isolir otomatis sistem: Menunggak 9 hari (jatuh tempo: 2 Oktober 2026)",
+        "tiket_id": "TKT-197154",
+        "status_penanganan": "Pending",
+        "jenis_kendala": "Isolir otomatis sistem: Menunggak 9 hari (jatuh tempo: 2 Oktober 2026)",
+        "teknisi": "Menunggu Penugasan",
+        "catatan_perbaikan": "Isolir otomatis sistem: Menunggak 9 hari (jatuh tempo: 2 Oktober 2026)",
+        "durasi": "Sedang Berlangsung"
+      },
+      {
+        "id": 1791665169319,
+        "status": "UP",
+        "waktu": "11 Oktober 2026, 03:46 WIB",
+        "keterangan": "Buka isolir otomatis: Tagihan telah dilunasi",
+        "tiket_id": "TKT-169319",
+        "status_penanganan": "Selesai",
+        "jenis_kendala": "Buka isolir otomatis: Tagihan telah dilunasi",
+        "teknisi": "Tim Lapangan",
+        "catatan_perbaikan": "Buka isolir otomatis: Tagihan telah dilunasi",
+        "durasi": "Selesai"
+      },
+      {
+        "id": 1791665153710,
+        "status": "DOWN",
+        "waktu": "11 Oktober 2026, 03:45 WIB",
+        "keterangan": "Isolir otomatis sistem: Menunggak 9 hari (jatuh tempo: 2 Oktober 2026)",
+        "tiket_id": "TKT-153710",
+        "status_penanganan": "Pending",
+        "jenis_kendala": "Isolir otomatis sistem: Menunggak 9 hari (jatuh tempo: 2 Oktober 2026)",
+        "teknisi": "Menunggu Penugasan",
+        "catatan_perbaikan": "Isolir otomatis sistem: Menunggak 9 hari (jatuh tempo: 2 Oktober 2026)",
+        "durasi": "Sedang Berlangsung"
+      }
+    ],
+    "customer_id": "PLG008",
+    "device": {
+      "tipe": "VSOL V2801SG (1GE XPON ONT)",
+      "serial_number": "VSOL10098760",
+      "mac_address": "BC:24:11:88:F8:A8",
+      "status_kepemilikan": "Milik Pribadi (Beli Putus)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Modem ONT dibeli putus oleh pelanggan sendiri."
+    },
+    "mikrotikUsername": "sri_wahyuni",
+    "mikrotikProfile": "10Mbps",
+    "ipAddress": "192.168.88.18",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "isolated",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+  },
+  {
+    "id": 9,
+    "nama": "Hendra Gunawan",
+    "whatsapp": "6281234567899",
+    "alamat": "Jl. Kamboja RT 05/07 No. 03",
+    "wilayah": "Kel. Kebayoran Baru",
+    "paket": "Paket Warga 20 Mbps",
+    "harga": 150000,
+    "status_tagihan": "Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 150000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG009",
+    "device": {
+      "tipe": "ZTE F609 V3 (GPON ONT)",
+      "serial_number": "ZTEG10111105",
+      "mac_address": "BC:24:11:99:17:DD",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "hendra_gunawan",
+    "mikrotikProfile": "20Mbps",
+    "ipAddress": "192.168.88.19",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z",
+    "metode_bayar": "QRIS DANA"
+  },
+  {
+    "id": 10,
+    "nama": "Wati Susilawati",
+    "whatsapp": "6281234567900",
+    "alamat": "Jl. Kamboja RT 05/07 No. 11",
+    "wilayah": "Kel. Gandaria",
+    "paket": "Paket Warga 10 Mbps",
+    "harga": 100000,
+    "status_tagihan": "Belum Lunas",
+    "jatuh_tempo": "2026-10-09",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      }
+    ],
+    "status_jaringan": "Terisolir",
+    "catatan_kendala": "Terisolir otomatis (Menunggak 7 hari)",
+    "network_logs": [
+      {
+        "id": 1792168090504,
+        "status": "DOWN",
+        "waktu": "16 Oktober 2026, 23:28 WIB",
+        "keterangan": "Isolir otomatis sistem: Menunggak 7 hari (jatuh tempo: 9 Oktober 2026)",
+        "tiket_id": "TKT-090504",
+        "status_penanganan": "Pending",
+        "jenis_kendala": "Isolir otomatis sistem: Menunggak 7 hari (jatuh tempo: 9 Oktober 2026)",
+        "teknisi": "Menunggu Penugasan",
+        "catatan_perbaikan": "Isolir otomatis sistem: Menunggak 7 hari (jatuh tempo: 9 Oktober 2026)",
+        "durasi": "Sedang Berlangsung"
+      }
+    ],
+    "customer_id": "PLG010",
+    "device": {
+      "tipe": "Huawei HG8245H5 (Dual Band GPON)",
+      "serial_number": "4857544310123450",
+      "mac_address": "BC:24:11:AA:36:12",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "wati_susilawati",
+    "mikrotikProfile": "10Mbps",
+    "ipAddress": "192.168.88.20",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+  },
+  {
+    "id": 11,
+    "nama": "Dedi Supriadi",
+    "whatsapp": "6281234567901",
+    "alamat": "Jl. Cempaka RT 06/07 No. 05",
+    "wilayah": "Cluster Melati",
+    "paket": "Paket Gamer 30 Mbps",
+    "harga": 250000,
+    "status_tagihan": "Belum Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 250000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 250000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG011",
+    "device": {
+      "tipe": "Fiberhome AN5506-01-A (GPON ONU)",
+      "serial_number": "FHTT10135795",
+      "mac_address": "BC:24:11:BB:55:47",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "dedi_supriadi",
+    "mikrotikProfile": "30Mbps",
+    "ipAddress": "192.168.88.21",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+  },
+  {
+    "id": 12,
+    "nama": "Yanti Nurhayati",
+    "whatsapp": "6281234567902",
+    "alamat": "Jl. Cempaka RT 06/07 No. 14",
+    "wilayah": "Cluster Mawar",
+    "paket": "Paket Warga 20 Mbps",
+    "harga": 150000,
+    "status_tagihan": "Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 150000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG012",
+    "device": {
+      "tipe": "VSOL V2801SG (1GE XPON ONT)",
+      "serial_number": "VSOL10148140",
+      "mac_address": "BC:24:11:CC:74:7C",
+      "status_kepemilikan": "Milik Pribadi (Beli Putus)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Modem ONT dibeli putus oleh pelanggan sendiri."
+    },
+    "mikrotikUsername": "yanti_nurhayati",
+    "mikrotikProfile": "20Mbps",
+    "ipAddress": "192.168.88.22",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z",
+    "metode_bayar": "QRIS DANA"
+  },
+  {
+    "id": 13,
+    "nama": "Agus Setiawan",
+    "whatsapp": "6281234567903",
+    "alamat": "Komplek Persada Blok A No. 2",
+    "wilayah": "Kel. Kebayoran Baru",
+    "paket": "Paket Warga 10 Mbps",
+    "harga": 100000,
+    "status_tagihan": "Belum Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG013",
+    "device": {
+      "tipe": "ZTE F609 V3 (GPON ONT)",
+      "serial_number": "ZTEG10160485",
+      "mac_address": "BC:24:11:DD:93:B1",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "agus_setiawan",
+    "mikrotikProfile": "10Mbps",
+    "ipAddress": "192.168.88.23",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+  },
+  {
+    "id": 14,
+    "nama": "Ratna Sari",
+    "whatsapp": "6281234567904",
+    "alamat": "Komplek Persada Blok A No. 7",
+    "wilayah": "Kel. Gandaria",
+    "paket": "Paket Warga 20 Mbps",
+    "harga": 150000,
+    "status_tagihan": "Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 150000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG014",
+    "device": {
+      "tipe": "Huawei HG8245H5 (Dual Band GPON)",
+      "serial_number": "4857544310172830",
+      "mac_address": "BC:24:11:EE:B2:E6",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "ratna_sari",
+    "mikrotikProfile": "20Mbps",
+    "ipAddress": "192.168.88.24",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z",
+    "metode_bayar": "QRIS DANA"
+  },
+  {
+    "id": 15,
+    "nama": "Bambang Pamungkas",
+    "whatsapp": "6281234567905",
+    "alamat": "Komplek Persada Blok B No. 10",
+    "wilayah": "Cluster Melati",
+    "paket": "Paket Gamer 30 Mbps",
+    "harga": 250000,
+    "status_tagihan": "Belum Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 250000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 250000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG015",
+    "device": {
+      "tipe": "Fiberhome AN5506-01-A (GPON ONU)",
+      "serial_number": "FHTT10185175",
+      "mac_address": "BC:24:11:FF:D1:1B",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "bambang_pamungkas",
+    "mikrotikProfile": "30Mbps",
+    "ipAddress": "192.168.88.25",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+  },
+  {
+    "id": 16,
+    "nama": "Lilis Suryani",
+    "whatsapp": "6281234567906",
+    "alamat": "Komplek Persada Blok B No. 18",
+    "wilayah": "Cluster Mawar",
+    "paket": "Paket Warga 10 Mbps",
+    "harga": 100000,
+    "status_tagihan": "Belum Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG016",
+    "device": {
+      "tipe": "VSOL V2801SG (1GE XPON ONT)",
+      "serial_number": "VSOL10197520",
+      "mac_address": "BC:24:11:10:F0:50",
+      "status_kepemilikan": "Milik Pribadi (Beli Putus)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Modem ONT dibeli putus oleh pelanggan sendiri."
+    },
+    "mikrotikUsername": "lilis_suryani",
+    "mikrotikProfile": "10Mbps",
+    "ipAddress": "192.168.88.26",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+  },
+  {
+    "id": 17,
+    "nama": "Rian Hidayat",
+    "whatsapp": "6281234567907",
+    "alamat": "Jl. Teratai RT 07/08 No. 22",
+    "wilayah": "Kel. Kebayoran Baru",
+    "paket": "Paket Warga 20 Mbps",
+    "harga": 150000,
+    "status_tagihan": "Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 150000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG017",
+    "device": {
+      "tipe": "ZTE F609 V3 (GPON ONT)",
+      "serial_number": "ZTEG10209865",
+      "mac_address": "BC:24:11:21:0F:85",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "rian_hidayat",
+    "mikrotikProfile": "20Mbps",
+    "ipAddress": "192.168.88.27",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z",
+    "metode_bayar": "QRIS DANA"
+  },
+  {
+    "id": 18,
+    "nama": "Maya Anggraini",
+    "whatsapp": "6281234567908",
+    "alamat": "Jl. Teratai RT 07/08 No. 30",
+    "wilayah": "Kel. Gandaria",
+    "paket": "Paket Warga 10 Mbps",
+    "harga": 100000,
+    "status_tagihan": "Belum Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 100000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 100000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG018",
+    "device": {
+      "tipe": "Huawei HG8245H5 (Dual Band GPON)",
+      "serial_number": "4857544310222210",
+      "mac_address": "BC:24:11:32:2E:BA",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "maya_anggraini",
+    "mikrotikProfile": "10Mbps",
+    "ipAddress": "192.168.88.28",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+  },
+  {
+    "id": 19,
+    "nama": "Doni Kusuma",
+    "whatsapp": "6281234567909",
+    "alamat": "Jl. Dahlia RT 08/08 No. 06",
+    "wilayah": "Cluster Melati",
+    "paket": "Paket Gamer 30 Mbps",
+    "harga": 250000,
+    "status_tagihan": "Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 250000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 250000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-05",
+        "metode_bayar": "QRIS DANA"
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG019",
+    "device": {
+      "tipe": "Fiberhome AN5506-01-A (GPON ONU)",
+      "serial_number": "FHTT10234555",
+      "mac_address": "BC:24:11:43:4D:EF",
+      "status_kepemilikan": "Dipinjamkan / Sewa (Aset RT/RW.net)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Adaptor 12V 1A terpasang rapi di ruang tamu. Aset wajib ditarik saat penonaktifan sambungan."
+    },
+    "mikrotikUsername": "doni_kusuma",
+    "mikrotikProfile": "30Mbps",
+    "ipAddress": "192.168.88.29",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z",
+    "metode_bayar": "QRIS DANA"
+  },
+  {
+    "id": 20,
+    "nama": "Fitri Handayani",
+    "whatsapp": "6281234567910",
+    "alamat": "Jl. Dahlia RT 08/08 No. 19",
+    "wilayah": "Cluster Mawar",
+    "paket": "Paket Warga 20 Mbps",
+    "harga": 150000,
+    "status_tagihan": "Belum Lunas",
+    "jatuh_tempo": "2026-11-10",
+    "invoices": [
+      {
+        "periode": "2026-09",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-09-07",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-08",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-08-09",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-07",
+        "nominal": 150000,
+        "status": "Lunas",
+        "tanggal_bayar": "2026-07-08",
+        "metode_bayar": "QRIS DANA"
+      },
+      {
+        "periode": "2026-11",
+        "nominal": 150000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      },
+      {
+        "periode": "2026-10",
+        "nominal": 150000,
+        "status": "Belum Lunas",
+        "tanggal_bayar": null
+      }
+    ],
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
+    "network_logs": [],
+    "customer_id": "PLG020",
+    "device": {
+      "tipe": "VSOL V2801SG (1GE XPON ONT)",
+      "serial_number": "VSOL10246900",
+      "mac_address": "BC:24:11:54:6C:24",
+      "status_kepemilikan": "Milik Pribadi (Beli Putus)",
+      "tanggal_pasang": "2026-01-15",
+      "kondisi": "Normal / Bagus",
+      "garansi_sampai": "2027-01-15",
+      "catatan_perangkat": "Modem ONT dibeli putus oleh pelanggan sendiri."
+    },
+    "mikrotikUsername": "fitri_handayani",
+    "mikrotikProfile": "20Mbps",
+    "ipAddress": "192.168.88.30",
+    "mikrotikService": "pppoe",
+    "mikrotikStatus": "connected",
+    "mikrotikLastSync": "2026-10-10T23:21:30.526Z"
+  }
+]

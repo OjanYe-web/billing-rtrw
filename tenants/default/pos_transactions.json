@@ -1,0 +1,81 @@
+[
+  {
+    "id": "POS-1792166519471",
+    "no_nota": "INV-POS-20261016-002",
+    "tanggal": "2026-10-16",
+    "waktu": "16 Oktober 2026, 23:01 WIB",
+    "customer_id": null,
+    "nama_pembeli": "Warkop Maju Jaya",
+    "whatsapp_pembeli": "",
+    "kasir": "Siti Rahma (Kasir Utama)",
+    "role_petugas": "kasir",
+    "metode_bayar": "QRIS DANA",
+    "status": "completed",
+    "items": [
+      {
+        "product_id": "HSP-01",
+        "nama_produk": "Voucher 3 Jam Hemat (3 Jam)",
+        "tipe_item": "voucher",
+        "qty": 2,
+        "satuan": "Voucher",
+        "harga_modal": 1000,
+        "harga_satuan": 2000,
+        "subtotal": 4000
+      }
+    ],
+    "subtotal": 4000,
+    "diskon": 0,
+    "total_bayar": 4000,
+    "uang_diterima": 4000,
+    "kembalian": 0,
+    "estimasi_laba": 2000,
+    "generated_vouchers": [
+      {
+        "kode_voucher": "BW756TJV",
+        "password": "BW756TJV",
+        "nama_paket": "Voucher 3 Jam Hemat",
+        "durasi_label": "3 Jam"
+      },
+      {
+        "kode_voucher": "BWMKVHEK",
+        "password": "BWMKVHEK",
+        "nama_paket": "Voucher 3 Jam Hemat",
+        "durasi_label": "3 Jam"
+      }
+    ],
+    "catatan": ""
+  },
+  {
+    "id": "POS-1001",
+    "no_nota": "INV-POS-20261016-001",
+    "tanggal": "2026-10-16",
+    "waktu": "16 Oktober 2026, 23:01 WIB",
+    "customer_id": "PLG001",
+    "nama_pembeli": "Budi Santoso",
+    "whatsapp_pembeli": "6281234567891",
+    "kasir": "Siti Rahma (Kasir Utama)",
+    "role_petugas": "kasir",
+    "metode_bayar": "Tunai",
+    "status": "completed",
+    "items": [
+      {
+        "product_id": "STK-07",
+        "nama_produk": "Router AP Totolink N200RE",
+        "tipe_item": "inventory",
+        "qty": 1,
+        "satuan": "Pcs",
+        "harga_modal": 110000,
+        "harga_satuan": 135000,
+        "subtotal": 135000
+      }
+    ],
+    "subtotal": 135000,
+    "diskon": 0,
+    "total_bayar": 135000,
+    "uang_diterima": 150000,
+    "kembalian": 15000,
+    "estimasi_laba": 25000,
+    "generated_vouchers": [],
+    "catatan": "Pembelian router tambahan untuk lantai 2"
+  }
+]

@@ -15,6 +15,7 @@ const tenantConfig = require('./tenantConfig');
 
 const PPP_SECRET = '/ppp secret';
 const PPP_ACTIVE = '/ppp active';
+const PPP_PROFILE = '/ppp profile';
 
 const log = (...args) => console.log('[mikrotik]', ...args);
 
@@ -114,6 +115,39 @@ const first = (rows) => (Array.isArray(rows) ? rows[0] : rows) || null;
 // ---------------------------------------------------------------------------
 // Helper level-menu (dipanggil di dalam sesi yang sudah terkoneksi)
 // ---------------------------------------------------------------------------
+function formatRateLimit(rate) {
+  if (!rate) return undefined;
+  const str = String(rate).trim();
+  if (str.includes('/')) return str;
+  const m = str.match(/^(\d+(?:\.\d+)?)\s*([kmg]?bps)?$/i);
+  if (m) {
+    const val = m[1];
+    return `${val}M/${val}M`;
+  }
+  return str;
+}
+
+async function ensureProfile(menu, profileName, rateLimit) {
+  if (!profileName || profileName === 'default') return;
+  const rows = await menu.menu(PPP_PROFILE).where('name', profileName).get();
+  const existing = first(rows);
+  const data = {};
+  const formattedRate = formatRateLimit(rateLimit);
+  if (formattedRate) data.rateLimit = formattedRate;
+
+  if (existing) {
+    if (formattedRate && existing.rateLimit !== formattedRate) {
+      await menu.menu(PPP_PROFILE).where('name', profileName).update(data);
+    }
+    return { action: 'exists', profile: profileName };
+  }
+  await menu.menu(PPP_PROFILE).add({
+    name: profileName,
+    ...data
+  });
+  return { action: 'created', profile: profileName };
+}
+
 async function findSecret(menu, name) {
   const rows = await menu.menu(PPP_SECRET).where('name', name).get();
   return first(rows);
@@ -143,6 +177,13 @@ async function ensureSecret(menu, cfg, customer) {
   const profile = isIsolated(customer)
     ? cfg.profile_isolir
     : (customer.mikrotikProfile || 'default');
+
+  // Pastikan profile PPP terdaftar di router jika bukan isolir & ada nama profil
+  if (!isIsolated(customer) && customer.mikrotikProfile) {
+    try {
+      await ensureProfile(menu, customer.mikrotikProfile, customer.paketRateLimit || customer.kecepatan);
+    } catch (_) {}
+  }
 
   const data = { profile, comment: secretComment(customer) };
   if (customer.mikrotikPassword) data.password = customer.mikrotikPassword;
@@ -302,15 +343,137 @@ function syncCustomers(tenantId, customers) {
   });
 }
 
+/** Sinkronkan / buat profil PPP di router dengan rate-limit tertentu */
+function syncProfile(tenantId, { name, rateLimit }) {
+  return runSafe(tenantId, async (menu) => {
+    const r = await ensureProfile(menu, name, rateLimit);
+    log(`[${tenantId}] profile ${name} ${r.action}`);
+    return { success: true, simulated: false, ...r, message: `Profile '${name}' berhasil disinkronkan ke MikroTik` };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// MODUL HOTSPOT VOUCHER & PELACAKAN SESI AKTIF (BayarWifi 3.0)
+// ---------------------------------------------------------------------------
+const HOTSPOT_USER = '/ip hotspot user';
+const HOTSPOT_ACTIVE = '/ip hotspot active';
+const HOTSPOT_PROFILE = '/ip hotspot user profile';
+
+async function ensureHotspotProfile(menu, profile) {
+  const name = profile.mikrotik_profile || profile.nama || 'default';
+  if (!name || name === 'default') return { action: 'default', profile: 'default' };
+
+  const rows = await menu.menu(HOTSPOT_PROFILE).where('name', name).get();
+  const existing = first(rows);
+  const payload = {
+    name,
+    sharedUsers: String(profile.shared_users || 1)
+  };
+  const formattedRate = formatRateLimit(profile.rate_limit || profile.kecepatan);
+  if (formattedRate) payload.rateLimit = formattedRate;
+
+  if (existing) {
+    await menu.menu(HOTSPOT_PROFILE).where('name', name).update(payload);
+    return { action: 'updated', profile: name };
+  }
+  await menu.menu(HOTSPOT_PROFILE).add(payload);
+  return { action: 'created', profile: name };
+}
+
+/** Sinkronisasi profil paket Hotspot ke MikroTik (/ip hotspot user profile) */
+function syncHotspotProfile(tenantId, profile) {
+  return runSafe(tenantId, async (menu) => {
+    const r = await ensureHotspotProfile(menu, profile);
+    log(`[${tenantId}] hotspot profile ${r.profile} ${r.action}`);
+    return { success: true, simulated: false, ...r, message: `Hotspot profile '${r.profile}' berhasil disinkronkan` };
+  });
+}
+
+/** Buat satu atau banyak voucher Hotspot di MikroTik (/ip hotspot user) */
+function createHotspotVouchers(tenantId, vouchers = []) {
+  const list = Array.isArray(vouchers) ? vouchers : [vouchers];
+  return runSafe(tenantId, async (menu) => {
+    const results = [];
+    for (const v of list) {
+      try {
+        const rows = await menu.menu(HOTSPOT_USER).where('name', v.kode_voucher).get();
+        const existing = first(rows);
+        const payload = {
+          name: v.kode_voucher,
+          password: v.password || v.kode_voucher,
+          profile: v.mikrotik_profile || 'default',
+          comment: `VCR|${v.batch_code || 'SINGLE'}|${v.nama_paket || ''}|${v.kasir || 'Admin'}`.slice(0, 120)
+        };
+        if (v.uptime_limit) payload.limitUptime = v.uptime_limit;
+        if (v.quota_bytes && Number(v.quota_bytes) > 0) payload.limitBytesTotal = String(v.quota_bytes);
+
+        if (existing) {
+          await menu.menu(HOTSPOT_USER).where('name', v.kode_voucher).update(payload);
+          results.push({ kode_voucher: v.kode_voucher, success: true, action: 'updated' });
+        } else {
+          await menu.menu(HOTSPOT_USER).add(payload);
+          results.push({ kode_voucher: v.kode_voucher, success: true, action: 'created' });
+        }
+      } catch (e) {
+        results.push({ kode_voucher: v.kode_voucher, success: false, error: errorMessage(e) });
+      }
+    }
+    return {
+      success: true,
+      simulated: false,
+      synced_count: results.filter((r) => r.success).length,
+      results
+    };
+  });
+}
+
+/** Hapus voucher Hotspot dari MikroTik & putus sesi aktif jika sedang online */
+function removeHotspotVoucher(tenantId, kodeVoucher) {
+  return runSafe(tenantId, async (menu) => {
+    const activeRows = await menu.menu(HOTSPOT_ACTIVE).where('user', kodeVoucher).get();
+    if (Array.isArray(activeRows) && activeRows.length > 0) {
+      await menu.menu(HOTSPOT_ACTIVE).where('user', kodeVoucher).remove();
+    }
+    const userRows = await menu.menu(HOTSPOT_USER).where('name', kodeVoucher).get();
+    if (Array.isArray(userRows) && userRows.length > 0) {
+      await menu.menu(HOTSPOT_USER).where('name', kodeVoucher).remove();
+    }
+    return { success: true, simulated: false, kode_voucher: kodeVoucher, removed: true };
+  });
+}
+
+/** Ambil daftar sesi aktif PPPoE & Hotspot dari router untuk pelacakan pelanggan offline */
+function getActiveSessions(tenantId) {
+  return runSafe(tenantId, async (menu) => {
+    const pppActive = await menu.menu(PPP_ACTIVE).get();
+    let hsActive = [];
+    try {
+      hsActive = await menu.menu(HOTSPOT_ACTIVE).get();
+    } catch (_) {}
+    return {
+      success: true,
+      simulated: false,
+      pppoe_active: Array.isArray(pppActive) ? pppActive : [],
+      hotspot_active: Array.isArray(hsActive) ? hsActive : []
+    };
+  });
+}
+
 module.exports = {
   generatePassword,
   isLive,
   testConnection,
   getRouterInfo,
+  syncProfile,
   createPppoeSecret,
   isolateCustomer,
   restoreCustomer,
   isolateMany,
   syncCustomers,
+  syncHotspotProfile,
+  createHotspotVouchers,
+  removeHotspotVoucher,
+  getActiveSessions,
   _errorMessage: errorMessage
 };
+

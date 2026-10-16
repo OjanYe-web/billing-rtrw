@@ -444,19 +444,31 @@
         pointer-events: auto !important;
       }
       #sidebarBackdrop {
+        display: none !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
         position: fixed !important;
         inset: 0 !important;
+      }
+      #sidebarBackdrop.active,
+      #sidebarBackdrop.sidebar-open {
+        display: block !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
+        opacity: 1 !important;
         z-index: 9990 !important;
         background-color: rgba(2, 6, 23, 0.65) !important;
         -webkit-backdrop-filter: blur(4px) !important;
         backdrop-filter: blur(4px) !important;
       }
-      #sidebarBackdrop:not(.hidden),
-      #sidebarBackdrop.active {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: auto !important;
+    }
+    @media (min-width: 768px) {
+      #sidebarBackdrop {
+        display: none !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
       }
     }
     #contentWrapper {
@@ -508,7 +520,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex overflow-x-clip">
   <!-- Overlay Backdrop Sidebar untuk Layar Mobile (No Print) -->
-  <div id="sidebarBackdrop" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden transition-opacity duration-300 no-print"></div>
+  <div id="sidebarBackdrop" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden pointer-events-none transition-opacity duration-300 no-print"></div>
 
   <!-- Menu Samping Bertingkat (Vertical Accordion Sidebar / Gaya 3) (No Print) -->
   <aside id="appSidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 text-slate-200 border-r border-slate-800 flex flex-col shrink-0 transition-all duration-300 -translate-x-full md:translate-x-0 md:static no-print shadow-xl select-none">
@@ -540,6 +552,27 @@
     <!-- Scrollable Accordion Nav Items -->
     <div class="flex-1 overflow-y-auto px-3 py-3 space-y-2.5 custom-scroll text-xs">
       
+      <!-- NAVIGASI UTAMA (VIEWS) -->
+      <div class="space-y-1 mb-2">
+        <p class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Navigasi Utama</p>
+        <button id="navDashboard" type="button" class="w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none bg-indigo-600 text-white shadow-sm" title="Halaman Ringkasan Statistik & Analisis Keuangan">
+          <span class="flex items-center gap-2.5">
+            <span class="text-base">📊</span>
+            <span>Dashboard</span>
+          </span>
+          <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-semibold">Utama</span>
+        </button>
+        <button id="navCustomers" type="button" class="w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none text-slate-300 hover:text-white hover:bg-slate-800/80" title="Halaman Khusus Manajemen Data Pelanggan">
+          <span class="flex items-center gap-2.5">
+            <span class="text-base">👥</span>
+            <span>Pelanggan</span>
+          </span>
+          <span id="navCustomersBadge" class="text-[10px] bg-slate-800 text-indigo-300 border border-slate-700 px-2 py-0.5 rounded-full font-semibold">0</span>
+        </button>
+      </div>
+
+      <div class="h-px bg-slate-800/80 my-2"></div>
+
       <!-- KATEGORI 1: OPERASIONAL -->
       <div class="accordion-group rounded-xl border border-slate-800/80 bg-slate-800/30 overflow-hidden">
         <button type="button" class="accordion-toggle w-full px-3 py-2.5 flex items-center justify-between text-slate-300 hover:text-white hover:bg-slate-800/60 transition font-bold uppercase tracking-wider text-[11px]" data-target="accordionOperasional">
@@ -740,208 +773,276 @@
   </div>
 
   <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
-    <!-- Ringkasan Statistik Keuangan (Grid 2 Kolom di Mobile, 4 Kolom di Layar Lebar) -->
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" id="stats"></section>
+    <!-- VIEW 1: DASHBOARD (Ringkasan Keuangan & Analitik) -->
+    <div id="viewDashboard" class="space-y-4 sm:space-y-6">
+      <!-- Ringkasan Statistik Keuangan (Grid 2 Kolom di Mobile, 4 Kolom di Layar Lebar) -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" id="stats"></section>
 
-    <!-- Laporan Keuangan & Statistik Pendapatan (Visual Charts & Analytics) -->
-    <section class="bg-white dark:bg-slate-900/80 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 space-y-4 sm:space-y-5 no-print transition-colors" id="sectionAnalytics">
-      <div id="analyticsHeader" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-3 sm:pb-4">
+      <!-- Laporan Keuangan & Statistik Pendapatan (Visual Charts & Analytics) -->
+      <section class="bg-white dark:bg-slate-900/80 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 space-y-4 sm:space-y-5 no-print transition-colors" id="sectionAnalytics">
+        <div id="analyticsHeader" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-3 sm:pb-4">
+          <div>
+            <h2 class="font-bold text-slate-800 dark:text-slate-100 text-base sm:text-lg flex items-center gap-2">
+              <span>📊</span> Laporan Keuangan &amp; Statistik Pendapatan
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Analisis visual tren pemasukan, piutang tagihan, dan efektivitas penagihan bulanan</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <div id="analyticsPeriodWrap" class="flex items-center gap-2">
+              <label for="chartPeriodFilter" class="text-xs font-medium text-slate-600 dark:text-slate-400">Periode:</label>
+              <select id="chartPeriodFilter" class="border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium transition cursor-pointer">
+                <option value="">Periode Berjalan (Bulan Ini)</option>
+              </select>
+              <button type="button" id="btnRefreshCharts" class="p-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 transition active:scale-95" title="Muat Ulang Data Grafik">
+                🔄
+              </button>
+            </div>
+            <button type="button" id="btnToggleAnalytics" class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium flex items-center gap-1.5 shadow-xs transition active:scale-95" title="Sembunyikan / Tampilkan Statistik">
+              <span id="toggleAnalyticsIcon" class="text-[10px] leading-none">▲</span>
+              <span id="toggleAnalyticsText">Sembunyikan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Kontainer Konten Analytics (Collapsible) -->
+        <div id="analyticsContent" class="space-y-4 sm:space-y-5">
+        <!-- Ringkasan Metrik Finansial Tambahan (Pendapatan, Pengeluaran & Laba Bersih) -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 text-xs sm:text-sm">
+          <div class="bg-white dark:bg-slate-900/60 border border-emerald-200/80 dark:border-emerald-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+            <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0"></span> Total Pendapatan Lunas
+            </div>
+            <div id="financeIncomeVal" class="text-base sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+            <div id="financeIncomeSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">0 Pelanggan Lunas</div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900/60 border border-amber-200/80 dark:border-amber-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+            <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-amber-500 inline-block shrink-0"></span> Pengeluaran Kas
+            </div>
+            <div id="financeExpenseVal" class="text-base sm:text-xl font-extrabold text-amber-600 dark:text-amber-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+            <div id="financeExpenseSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">0 Pengeluaran</div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900/60 border border-teal-200/80 dark:border-teal-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+            <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-teal-500 inline-block shrink-0"></span> Laba Bersih Operasional
+            </div>
+            <div id="financeNetProfitVal" class="text-base sm:text-xl font-extrabold text-teal-600 dark:text-teal-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+            <div id="financeNetProfitSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Margin: 0%</div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900/60 border border-rose-200/80 dark:border-rose-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+            <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-rose-500 inline-block shrink-0"></span> Estimasi Piutang
+            </div>
+            <div id="financeDebtVal" class="text-base sm:text-xl font-extrabold text-rose-600 dark:text-rose-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+            <div id="financeDebtSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">0 Pelanggan Belum Bayar</div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900/60 border border-blue-200/80 dark:border-blue-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+            <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-blue-500 inline-block shrink-0"></span> Potensi Omzet Total
+            </div>
+            <div id="financePotentialVal" class="text-base sm:text-xl font-extrabold text-blue-600 dark:text-blue-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+            <div id="financePotentialSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Kapasitas billing aktif</div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900/60 border border-purple-200/80 dark:border-purple-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
+            <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-purple-500 inline-block shrink-0"></span> Collection Rate
+            </div>
+            <div id="financeRateVal" class="text-base sm:text-xl font-extrabold text-purple-600 dark:text-purple-400 mt-1.5 tracking-tight truncate">0%</div>
+            <div id="financeRateSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Efektivitas penagihan</div>
+          </div>
+        </div>
+
+        <!-- Dua Kolom Grafik Chart.js -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-1">
+          <!-- Grafik Batang: Tren Pendapatan & Piutang Beberapa Bulan Terakhir -->
+          <div class="lg:col-span-2 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 rounded-xl p-4 transition-colors">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Grafik Perbandingan Pendapatan Beberapa Bulan Terakhir</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Perbandingan realisasi pendapatan lunas vs piutang berjalan</p>
+              </div>
+              <span class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 bg-indigo-50/70 dark:bg-indigo-950/40 px-2.5 py-1 rounded-lg transition select-none">Multi-Bulan</span>
+            </div>
+            <div class="relative w-full h-64 sm:h-72">
+              <canvas id="chartMonthlyIncome"></canvas>
+            </div>
+          </div>
+
+          <!-- Grafik Lingkaran: Rasio Pembayaran Periode Terpilih -->
+          <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between transition-colors">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Rasio Status Pembayaran</h3>
+                <span id="chartRatioPeriodeLabel" class="text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 bg-slate-100/70 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg transition select-none">Bulan Ini</span>
+              </div>
+              <div class="relative w-full h-52 sm:h-56 flex items-center justify-center">
+                <canvas id="chartPaymentRatio"></canvas>
+              </div>
+            </div>
+            <div id="chartRatioSummary" class="text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-lg p-3 mt-3 space-y-1.5 shadow-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-500 dark:text-slate-400">Realisasi Lunas:</span>
+                <span class="font-bold text-emerald-600 dark:text-emerald-400">Rp 0 (0%)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500 dark:text-slate-400">Sisa Tunggakan:</span>
+                <span class="font-bold text-rose-600 dark:text-rose-400">Rp 0 (0%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </section>
+
+      <!-- Banner Shortcut Cepat ke Data Pelanggan -->
+      <section class="bg-gradient-to-r from-indigo-900/90 via-slate-900 to-indigo-950 border border-indigo-700/50 rounded-2xl p-4 sm:p-5 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md no-print">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-indigo-600/40 border border-indigo-400/30 flex items-center justify-center text-2xl shadow-inner shrink-0">
+            👥
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-white">Manajemen &amp; Data Pelanggan Terpusat</h3>
+            <p class="text-xs text-indigo-200 mt-0.5">Kelola data pelanggan, pencarian cepat, filter wilayah, isolir jaringan MikroTik, dan pemetaan OLT</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2.5 w-full sm:w-auto">
+          <button type="button" id="btnDashboardToCustomers" class="flex-1 sm:flex-initial px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2 cursor-pointer select-none">
+            <span>Buka Halaman Pelanggan</span> <span>➜</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- VIEW 2: PELANGGAN (Khusus Manajemen Pelanggan, Filter, Tabel, Pemetaan OLT) -->
+    <div id="viewCustomers" class="space-y-4 sm:space-y-6 hidden">
+      <!-- Header Halaman Pelanggan -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white dark:bg-slate-900/80 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-xs">
         <div>
-          <h2 class="font-bold text-slate-800 dark:text-slate-100 text-base sm:text-lg flex items-center gap-2">
-            <span>📊</span> Laporan Keuangan & Statistik Pendapatan
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Analisis visual tren pemasukan, piutang tagihan, dan efektivitas penagihan bulanan</p>
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">👥</span>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight">Data Pelanggan</h2>
+            <span id="badgeCount" class="text-xs bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 px-2.5 py-0.5 rounded-full font-bold">0 Pelanggan</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kelola data langganan, tagihan, profil MikroTik, dan pemetaan port OLT EPON / GPON</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
-          <div id="analyticsPeriodWrap" class="flex items-center gap-2">
-            <label for="chartPeriodFilter" class="text-xs font-medium text-slate-600 dark:text-slate-400">Periode:</label>
-            <select id="chartPeriodFilter" class="border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium transition cursor-pointer">
-              <option value="">Periode Berjalan (Bulan Ini)</option>
-            </select>
-            <button type="button" id="btnRefreshCharts" class="p-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 transition active:scale-95" title="Muat Ulang Data Grafik">
-              🔄
+          <button id="btnOltBatchCheck" type="button" class="px-3.5 py-2 text-xs font-semibold rounded-xl border border-teal-500/30 bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/40 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" title="Buka Detail Status & Pemetaan OLT">
+            <span>🔌</span> Setting &amp; Cek OLT
+          </button>
+          <button id="btnAddCustomerTop" type="button" class="px-4 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center gap-1.5 shadow-sm transition cursor-pointer" title="Tambah Pelanggan Baru">
+            <span class="text-sm font-extrabold leading-none">+</span> Tambah Pelanggan
+          </button>
+        </div>
+      </div>
+
+      <!-- Ringkasan Cepat Status Pelanggan -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="customerQuickStats">
+        <div class="bg-white dark:bg-slate-900/60 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 shadow-xs">
+          <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Terdaftar</div>
+          <div id="custStatTotal" class="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">0</div>
+          <div class="text-[11px] text-slate-400 mt-0.5 font-medium">Kapasitas billing aktif</div>
+        </div>
+        <div class="bg-white dark:bg-slate-900/60 border border-emerald-200/70 dark:border-emerald-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs">
+          <div class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Status Aktif</div>
+          <div id="custStatAktif" class="text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0</div>
+          <div class="text-[11px] text-slate-400 mt-0.5 font-medium">Layanan normal</div>
+        </div>
+        <div class="bg-white dark:bg-slate-900/60 border border-amber-200/70 dark:border-amber-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs">
+          <div class="text-[11px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Menunggak</div>
+          <div id="custStatMenunggak" class="text-xl sm:text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">0</div>
+          <div class="text-[11px] text-slate-400 mt-0.5 font-medium">Lewat jatuh tempo</div>
+        </div>
+        <div class="bg-white dark:bg-slate-900/60 border border-rose-200/70 dark:border-rose-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs">
+          <div class="text-[11px] font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wide">Terisolir</div>
+          <div id="custStatTerisolir" class="text-xl sm:text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">0</div>
+          <div class="text-[11px] text-slate-400 mt-0.5 font-medium">Akses diputus</div>
+        </div>
+      </div>
+
+      <!-- Toolbar & Tabel Pelanggan -->
+      <section class="bg-white dark:bg-slate-900/80 rounded-xl shadow border border-slate-200/80 dark:border-slate-800 overflow-hidden" id="sectionCustomers">
+        <!-- Toolbar Atas (No Print) -->
+        <div class="p-3.5 sm:p-4 flex flex-col xl:flex-row gap-3 xl:items-center xl:justify-between border-b border-slate-200/80 dark:border-slate-800 no-print">
+          <div class="flex items-center justify-between gap-3 w-full xl:w-auto">
+            <!-- Tombol Tambah Pelanggan Baru -->
+            <button id="btnAdd" class="w-full sm:w-auto justify-center bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold px-4 py-2.5 sm:py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition whitespace-nowrap cursor-pointer">
+              <span class="text-base font-bold leading-none">+</span> Data Pelanggan Baru
             </button>
+            <h2 class="font-bold text-slate-800 dark:text-slate-100 text-base whitespace-nowrap hidden sm:block">Daftar Pelanggan</h2>
           </div>
-          <button type="button" id="btnToggleAnalytics" class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium flex items-center gap-1.5 shadow-xs transition active:scale-95" title="Sembunyikan / Tampilkan Statistik">
-            <span id="toggleAnalyticsIcon" class="text-[10px] leading-none">▲</span>
-            <span id="toggleAnalyticsText">Sembunyikan</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Kontainer Konten Analytics (Collapsible) -->
-      <div id="analyticsContent" class="space-y-4 sm:space-y-5">
-      <!-- Ringkasan Metrik Finansial Tambahan (Pendapatan, Pengeluaran & Laba Bersih) -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 text-xs sm:text-sm">
-        <div class="bg-white dark:bg-slate-900/60 border border-emerald-200/80 dark:border-emerald-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0"></span> Total Pendapatan Lunas
-          </div>
-          <div id="financeIncomeVal" class="text-base sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1.5 tracking-tight truncate">Rp 0</div>
-          <div id="financeIncomeSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">0 Pelanggan Lunas</div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900/60 border border-amber-200/80 dark:border-amber-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
-            <span class="w-2 h-2 rounded-full bg-amber-500 inline-block shrink-0"></span> Pengeluaran Kas
-          </div>
-          <div id="financeExpenseVal" class="text-base sm:text-xl font-extrabold text-amber-600 dark:text-amber-400 mt-1.5 tracking-tight truncate">Rp 0</div>
-          <div id="financeExpenseSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">0 Pengeluaran</div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900/60 border border-teal-200/80 dark:border-teal-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
-            <span class="w-2 h-2 rounded-full bg-teal-500 inline-block shrink-0"></span> Laba Bersih Operasional
-          </div>
-          <div id="financeNetProfitVal" class="text-base sm:text-xl font-extrabold text-teal-600 dark:text-teal-400 mt-1.5 tracking-tight truncate">Rp 0</div>
-          <div id="financeNetProfitSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Margin: 0%</div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900/60 border border-rose-200/80 dark:border-rose-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
-            <span class="w-2 h-2 rounded-full bg-rose-500 inline-block shrink-0"></span> Estimasi Piutang
-          </div>
-          <div id="financeDebtVal" class="text-base sm:text-xl font-extrabold text-rose-600 dark:text-rose-400 mt-1.5 tracking-tight truncate">Rp 0</div>
-          <div id="financeDebtSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">0 Pelanggan Belum Bayar</div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900/60 border border-blue-200/80 dark:border-blue-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
-            <span class="w-2 h-2 rounded-full bg-blue-500 inline-block shrink-0"></span> Potensi Omzet Total
-          </div>
-          <div id="financePotentialVal" class="text-base sm:text-xl font-extrabold text-blue-600 dark:text-blue-400 mt-1.5 tracking-tight truncate">Rp 0</div>
-          <div id="financePotentialSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Kapasitas billing aktif</div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900/60 border border-purple-200/80 dark:border-purple-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs transition hover:shadow-sm">
-          <div class="text-slate-600 dark:text-slate-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 truncate">
-            <span class="w-2 h-2 rounded-full bg-purple-500 inline-block shrink-0"></span> Collection Rate
-          </div>
-          <div id="financeRateVal" class="text-base sm:text-xl font-extrabold text-purple-600 dark:text-purple-400 mt-1.5 tracking-tight truncate">0%</div>
-          <div id="financeRateSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Efektivitas penagihan</div>
-        </div>
-      </div>
-
-      <!-- Dua Kolom Grafik Chart.js -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-1">
-        <!-- Grafik Batang: Tren Pendapatan & Piutang Beberapa Bulan Terakhir -->
-        <div class="lg:col-span-2 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 rounded-xl p-4 transition-colors">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Grafik Perbandingan Pendapatan Beberapa Bulan Terakhir</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Perbandingan realisasi pendapatan lunas vs piutang berjalan</p>
-            </div>
-            <span class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 bg-indigo-50/70 dark:bg-indigo-950/40 px-2.5 py-1 rounded-lg transition select-none">Multi-Bulan</span>
-          </div>
-          <div class="relative w-full h-64 sm:h-72">
-            <canvas id="chartMonthlyIncome"></canvas>
-          </div>
-        </div>
-
-        <!-- Grafik Lingkaran: Rasio Pembayaran Periode Terpilih -->
-        <div class="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between transition-colors">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Rasio Status Pembayaran</h3>
-              <span id="chartRatioPeriodeLabel" class="text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 bg-slate-100/70 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg transition select-none">Bulan Ini</span>
-            </div>
-            <div class="relative w-full h-52 sm:h-56 flex items-center justify-center">
-              <canvas id="chartPaymentRatio"></canvas>
-            </div>
-          </div>
-          <div id="chartRatioSummary" class="text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-lg p-3 mt-3 space-y-1.5 shadow-xs">
-            <div class="flex justify-between">
-              <span class="text-slate-500 dark:text-slate-400">Realisasi Lunas:</span>
-              <span class="font-bold text-emerald-600 dark:text-emerald-400">Rp 0 (0%)</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500 dark:text-slate-400">Sisa Tunggakan:</span>
-              <span class="font-bold text-rose-600 dark:text-rose-400">Rp 0 (0%)</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      </div>
-    </section>
-
-    <!-- Toolbar & Tabel Pelanggan -->
-    <section class="bg-white dark:bg-slate-900/80 rounded-xl shadow border border-slate-200/80 dark:border-slate-800 overflow-hidden">
-      <!-- Toolbar Atas (No Print) -->
-      <div class="p-3.5 sm:p-4 flex flex-col xl:flex-row gap-3 xl:items-center xl:justify-between border-b border-slate-200/80 dark:border-slate-800 no-print">
-        <div class="flex items-center justify-between gap-3 w-full xl:w-auto">
-          <!-- Tombol Tambah Pelanggan Baru -->
-          <button id="btnAdd" class="w-full sm:w-auto justify-center bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold px-4 py-2.5 sm:py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition whitespace-nowrap cursor-pointer">
-            <span class="text-base font-bold leading-none">+</span> Data Pelanggan Baru
-          </button>
-          <h2 class="font-bold text-slate-800 dark:text-slate-100 text-base whitespace-nowrap hidden sm:block">Daftar Pelanggan</h2>
-        </div>
-        
-        <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
-          <!-- 1. Kotak Pencarian -->
-          <input id="search" type="search" placeholder="Cari nama, alamat, paket..." class="border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm w-full sm:w-52 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
-
-          <!-- 2. Dropdown Wilayah -->
-          <select id="filterWilayah" class="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none w-full sm:w-auto">
-            <option value="">Semua Wilayah</option>
-          </select>
           
-          <!-- 3. Dropdown Status Bayar -->
-          <select id="filter" class="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none w-full sm:w-auto">
-            <option value="">Status Bayar: Semua</option>
-            <option value="Lunas">Lunas</option>
-            <option value="Belum Lunas">Belum Lunas</option>
-          </select>
+          <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
+            <!-- 1. Kotak Pencarian -->
+            <input id="search" type="search" placeholder="Cari nama, alamat, paket..." class="border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm w-full sm:w-52 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
 
-          <!-- 4. Dropdown Status Jaringan -->
-          <select id="filterJaringan" class="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none w-full sm:w-auto">
-            <option value="">Status Jaringan: Semua</option>
-            <option value="Aktif">🟢 Aktif</option>
-            <option value="Menunggak">🟡 Menunggak</option>
-            <option value="Terisolir">🔴 Terisolir</option>
-            <option value="Terisolir / Gangguan">⚠️ Terisolir / Gangguan</option>
-          </select>
+            <!-- 2. Dropdown Wilayah -->
+            <select id="filterWilayah" class="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none w-full sm:w-auto">
+              <option value="">Semua Wilayah</option>
+            </select>
+            
+            <!-- 3. Dropdown Status Bayar -->
+            <select id="filter" class="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none w-full sm:w-auto">
+              <option value="">Status Bayar: Semua</option>
+              <option value="Lunas">Lunas</option>
+              <option value="Belum Lunas">Belum Lunas</option>
+            </select>
 
-          <!-- 5. Tombol Export CSV & Cetak -->
-          <div class="flex items-center justify-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shrink-0 w-full sm:w-auto">
-            <a href="/api/export/csv" id="btnExportCsv" class="flex-1 sm:flex-initial px-3 py-1.5 sm:px-2.5 sm:py-1 text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-700 rounded transition flex items-center justify-center gap-1" title="Download Excel / CSV">
-              <span>📊</span> CSV
-            </a>
-            <span class="text-slate-300 dark:text-slate-600">|</span>
-            <button id="btnPrint" class="flex-1 sm:flex-initial px-3 py-1.5 sm:px-2.5 sm:py-1 text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-700 rounded transition flex items-center justify-center gap-1" title="Cetak Rekap Laporan">
-              <span>🖨️</span> Cetak
-            </button>
-          </div>
+            <!-- 4. Dropdown Status Jaringan -->
+            <select id="filterJaringan" class="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none w-full sm:w-auto">
+              <option value="">Status Jaringan: Semua</option>
+              <option value="Aktif">🟢 Aktif</option>
+              <option value="Menunggak">🟡 Menunggak</option>
+              <option value="Terisolir">🔴 Terisolir</option>
+              <option value="Terisolir / Gangguan">⚠️ Terisolir / Gangguan</option>
+            </select>
 
-          <!-- 6. Quick Filter Buttons Khusus Tim Lapangan -->
-          <div class="flex items-center gap-1.5 w-full sm:w-auto">
-            <button type="button" id="btnQuickTerisolir" class="flex-1 sm:flex-initial px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 flex items-center justify-center gap-1 transition shadow-sm whitespace-nowrap active:scale-95" title="Filter langsung pelanggan terisolir untuk tim lapangan">
-              <span>🔴</span> Terisolir (<span id="quickTerisolirCount">0</span>)
-            </button>
-            <button type="button" id="btnQuickMenunggak" class="flex-1 sm:flex-initial px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center gap-1 transition shadow-sm whitespace-nowrap active:scale-95" title="Filter pelanggan menunggak">
-              <span>🟡</span> Menunggak (<span id="quickMenunggakCount">0</span>)
-            </button>
+            <!-- 5. Tombol Export CSV & Cetak -->
+            <div class="flex items-center justify-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shrink-0 w-full sm:w-auto">
+              <a href="/api/export/csv" id="btnExportCsv" class="flex-1 sm:flex-initial px-3 py-1.5 sm:px-2.5 sm:py-1 text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-700 rounded transition flex items-center justify-center gap-1" title="Download Excel / CSV">
+                <span>📊</span> CSV
+              </a>
+              <span class="text-slate-300 dark:text-slate-600">|</span>
+              <button id="btnPrint" class="flex-1 sm:flex-initial px-3 py-1.5 sm:px-2.5 sm:py-1 text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-700 rounded transition flex items-center justify-center gap-1" title="Cetak Rekap Laporan">
+                <span>🖨️</span> Cetak
+              </button>
+            </div>
+
+            <!-- 6. Quick Filter Buttons Khusus Tim Lapangan -->
+            <div class="flex items-center gap-1.5 w-full sm:w-auto">
+              <button type="button" id="btnQuickTerisolir" class="flex-1 sm:flex-initial px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 flex items-center justify-center gap-1 transition shadow-sm whitespace-nowrap active:scale-95" title="Filter langsung pelanggan terisolir untuk tim lapangan">
+                <span>🔴</span> Terisolir (<span id="quickTerisolirCount">0</span>)
+              </button>
+              <button type="button" id="btnQuickMenunggak" class="flex-1 sm:flex-initial px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center gap-1 transition shadow-sm whitespace-nowrap active:scale-95" title="Filter pelanggan menunggak">
+                <span>🟡</span> Menunggak (<span id="quickMenunggakCount">0</span>)
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Tabel Data dengan Smooth Momentum Scroll -->
-      <div id="tableCustomerWrapper" class="overflow-x-auto custom-scroll" style="-webkit-overflow-scrolling: touch; touch-action: pan-x pan-y;">
-        <table class="w-full min-w-[960px] text-sm select-none" style="touch-action: pan-x pan-y;">
-          <thead class="bg-slate-50 dark:bg-slate-900 text-left text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold uppercase tracking-wider">
-            <tr>
-              <th class="px-3 sm:px-4 py-3 min-w-[190px] sm:min-w-[200px]">Nama & Kontak</th>
-              <th class="px-3 sm:px-4 py-3 min-w-[140px] sm:min-w-[150px]">Alamat & Wilayah</th>
-              <th class="px-3 sm:px-4 py-3 min-w-[140px] sm:min-w-[160px]">Paket & Harga</th>
-              <th class="px-3 sm:px-4 py-3 min-w-[100px] sm:min-w-[110px]">Jatuh Tempo</th>
-              <th class="px-3 sm:px-4 py-3 min-w-[100px] sm:min-w-[110px]">Status Tagihan</th>
-              <th class="px-3 sm:px-4 py-3 min-w-[220px] max-w-[310px]">Status Jaringan & Log</th>
-              <th class="px-3 sm:px-4 py-3 text-right no-print min-w-[220px]">Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
-      </div>
-    </section>
+        <!-- Tabel Data dengan Smooth Momentum Scroll -->
+        <div id="tableCustomerWrapper" class="overflow-x-auto custom-scroll" style="-webkit-overflow-scrolling: touch; touch-action: pan-x pan-y;">
+          <table class="w-full min-w-[960px] text-sm select-none" style="touch-action: pan-x pan-y;">
+            <thead class="bg-slate-50 dark:bg-slate-900 text-left text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold uppercase tracking-wider">
+              <tr>
+                <th class="px-3 sm:px-4 py-3 min-w-[190px] sm:min-w-[200px]">Nama &amp; Kontak</th>
+                <th class="px-3 sm:px-4 py-3 min-w-[140px] sm:min-w-[150px]">Alamat &amp; Wilayah</th>
+                <th class="px-3 sm:px-4 py-3 min-w-[140px] sm:min-w-[160px]">Paket &amp; Harga</th>
+                <th class="px-3 sm:px-4 py-3 min-w-[100px] sm:min-w-[110px]">Jatuh Tempo</th>
+                <th class="px-3 sm:px-4 py-3 min-w-[100px] sm:min-w-[110px]">Status Tagihan</th>
+                <th class="px-3 sm:px-4 py-3 min-w-[220px] max-w-[310px]">Status Jaringan &amp; Log</th>
+                <th class="px-3 sm:px-4 py-3 text-right no-print min-w-[220px]">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </main>
 
   <!-- Footer Halaman Utama Dashboard Admin (No Print) -->
@@ -1329,32 +1430,47 @@
           </div>
         </div>
 
-        <!-- Card 3: Informasi Perangkat / ONT / Modem -->
+        <!-- Card 3: Informasi Perangkat & Pemetaan Port OLT (EPON / GPON) -->
         <div class="bg-slate-50/70 border border-slate-200 rounded-xl p-4 space-y-3">
           <div class="flex items-center justify-between flex-wrap gap-2 border-b pb-2">
             <h4 class="font-bold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <span>📟</span> Informasi Perangkat / ONT / Modem
+              <span>📟</span> Perangkat ONT &amp; Pemetaan Port OLT
             </h4>
             <span id="detailCustDeviceKepemilikan" class="text-xs font-semibold"></span>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs bg-white p-3 rounded-lg border border-slate-200">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs bg-white p-3 rounded-lg border border-slate-200">
             <div>
               <span class="text-slate-400 block font-medium">Tipe / Model Alat:</span>
-              <span id="detailCustDeviceTipe" class="font-bold text-slate-800 mt-0.5 block"></span>
+              <span id="detailCustDeviceTipe" class="font-bold text-slate-800 mt-0.5 block truncate"></span>
             </div>
             <div>
               <span class="text-slate-400 block font-medium">Serial Number (SN):</span>
-              <span id="detailCustDeviceSN" class="font-mono font-bold text-slate-800 mt-0.5 block"></span>
+              <span id="detailCustDeviceSN" class="font-mono font-bold text-slate-800 mt-0.5 block truncate"></span>
             </div>
             <div>
               <span class="text-slate-400 block font-medium">MAC Address:</span>
-              <span id="detailCustDeviceMAC" class="font-mono text-slate-700 mt-0.5 block"></span>
+              <span id="detailCustDeviceMAC" class="font-mono text-slate-700 mt-0.5 block truncate"></span>
+            </div>
+            <div>
+              <span class="text-slate-400 block font-medium">Port OLT (EPON/GPON):</span>
+              <span id="detailCustOltPort" class="font-mono font-bold text-teal-700 mt-0.5 block">-</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block font-medium">ONU ID / ONT No:</span>
+              <span id="detailCustOltOnuId" class="font-mono font-bold text-teal-700 mt-0.5 block">-</span>
             </div>
             <div>
               <span class="text-slate-400 block font-medium">Tanggal Pasang:</span>
-              <span id="detailCustDeviceTglPasang" class="font-medium text-slate-700 mt-0.5 block"></span>
+              <span id="detailCustDeviceTglPasang" class="font-medium text-slate-700 mt-0.5 block truncate"></span>
             </div>
           </div>
+          <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+            <button type="button" id="btnCheckCustOltSignal" class="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-semibold text-xs rounded-lg shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+              <span>⚡</span> Cek Redaman Optik (OLT)
+            </button>
+            <span class="text-[11px] text-slate-500 font-mono" id="detailCustOltSignalBrief">Klik tombol untuk membaca Rx Optical Power &amp; Status LOS</span>
+          </div>
+          <div id="detailCustOltSignalResult" class="hidden p-3 rounded-lg text-xs font-mono transition"></div>
         </div>
 
         <!-- Card 4: Ringkasan Riwayat Tagihan & Riwayat Tiket Gangguan -->
@@ -2715,29 +2831,34 @@
 
           <form id="formPackage" class="space-y-3">
             <input type="hidden" id="packageFormId">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-              <div class="md:col-span-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <div class="sm:col-span-2 md:col-span-1">
                 <label class="block font-semibold text-slate-700 mb-1">Nama Paket <span class="text-red-500">*</span></label>
                 <input type="text" id="pkgInputNama" required placeholder="mis. Paket Warga 10 Mbps" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
               </div>
               <div>
-                <label class="block font-semibold text-slate-700 mb-1">Kecepatan / Speed <span class="text-red-500">*</span></label>
-                <input type="text" id="pkgInputKecepatan" required placeholder="mis. 10 Mbps" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                <label class="block font-semibold text-slate-700 mb-1">Kecepatan Download (Rx) <span class="text-red-500">*</span></label>
+                <input type="text" id="pkgInputDownload" required placeholder="mis. 10M atau 10 Mbps" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
               </div>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Kecepatan Upload (Tx) <span class="text-red-500">*</span></label>
+                <input type="text" id="pkgInputUpload" required placeholder="mis. 5M atau 10 Mbps" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               <div>
                 <label class="block font-semibold text-slate-700 mb-1">Harga Bulanan (Rp) <span class="text-red-500">*</span></label>
                 <input type="text" id="pkgInputHarga" inputmode="numeric" required placeholder="mis. 100.000" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
               </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-semibold text-slate-700 mb-1">Profil MikroTik (Opsional)</label>
-                <input type="text" id="pkgInputProfile" placeholder="mis. 10Mbps / profile-warga-10m" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                <label class="block font-semibold text-slate-700 mb-1">Nama Profile MikroTik <span class="text-red-500">*</span></label>
+                <input type="text" id="pkgInputProfile" placeholder="mis. 10Mbps atau profile-warga-10M" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                <span class="text-[10px] text-slate-400">Rate-limit otomatis dibuat di router: <span id="pkgRateLimitPreview" class="font-mono text-indigo-600 font-bold">10M/10M</span></span>
               </div>
               <div>
                 <label class="block font-semibold text-slate-700 mb-1">Keterangan / Deskripsi</label>
-                <input type="text" id="pkgInputDeskripsi" placeholder="mis. Cocok untuk browsing & streaming 2-3 HP" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                <input type="text" id="pkgInputDeskripsi" placeholder="mis. Cocok untuk browsing & streaming" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
               </div>
             </div>
 
@@ -3308,15 +3429,26 @@ window.fetch = function(url, options = {}) {
   options.headers = options.headers || {};
   
   const token = sessionStorage.getItem('auth_token');
+  let savedUsername = '';
+  try {
+    const rawUser = sessionStorage.getItem('auth_user');
+    if (rawUser) {
+      const parsedUser = JSON.parse(rawUser);
+      if (parsedUser && parsedUser.username) savedUsername = parsedUser.username;
+    }
+  } catch (_) {}
+
   if (token) {
     if (options.headers instanceof Headers) {
       if (!options.headers.has('Authorization')) options.headers.set('Authorization', 'Bearer ' + token);
       const activeTenant = sessionStorage.getItem('active_tenant_id');
       if (activeTenant && !options.headers.has('X-Tenant-Override')) options.headers.set('X-Tenant-Override', activeTenant);
+      if (savedUsername && !options.headers.has('X-Auth-Username')) options.headers.set('X-Auth-Username', savedUsername);
     } else {
       if (!options.headers['Authorization']) options.headers['Authorization'] = 'Bearer ' + token;
       const activeTenant = sessionStorage.getItem('active_tenant_id');
       if (activeTenant && !options.headers['X-Tenant-Override']) options.headers['X-Tenant-Override'] = activeTenant;
+      if (savedUsername && !options.headers['X-Auth-Username']) options.headers['X-Auth-Username'] = savedUsername;
     }
   }
   
@@ -3481,11 +3613,18 @@ function render() {
     return searchTarget.includes(q);
   });
 
-  if ($('badgeCount')) $('badgeCount').textContent = `${list.length} dari ${customers.length}`;
+  if ($('badgeCount')) $('badgeCount').textContent = `${list.length} dari ${customers.length} Pelanggan`;
+  if ($('navCustomersBadge')) $('navCustomersBadge').textContent = customers.length;
+  if ($('custStatTotal')) $('custStatTotal').textContent = customers.length;
 
   const belum = customers.filter((c) => c.status_tagihan !== 'Lunas');
   const terisolirTotal = customers.filter((c) => c.status_jaringan === 'Terisolir' || c.status_jaringan === 'Terisolir / Gangguan').length;
   const menunggakTotal = customers.filter((c) => c.status_tagihan !== 'Lunas' && getDaysDiffClient(c.jatuh_tempo) < 0 && c.status_jaringan !== 'Terisolir').length;
+  const aktifTotal = customers.filter(c => c.status_jaringan !== 'Terisolir' && c.status_jaringan !== 'Terisolir / Gangguan' && (c.status_tagihan === 'Lunas' || getDaysDiffClient(c.jatuh_tempo) >= 0)).length;
+
+  if ($('custStatAktif')) $('custStatAktif').textContent = aktifTotal;
+  if ($('custStatMenunggak')) $('custStatMenunggak').textContent = menunggakTotal;
+  if ($('custStatTerisolir')) $('custStatTerisolir').textContent = terisolirTotal;
 
   if ($('quickTerisolirCount')) $('quickTerisolirCount').textContent = terisolirTotal;
   if ($('quickMenunggakCount')) $('quickMenunggakCount').textContent = menunggakTotal;
@@ -3505,18 +3644,21 @@ function render() {
     }
   }
 
-  const card = (label, val, sub, color, borderCls = 'border-slate-200/80 dark:border-slate-800') => `
-    <div class="bg-white dark:bg-slate-900/60 border ${borderCls} rounded-xl shadow-xs p-3 sm:p-4 transition hover:shadow-sm">
-      <div class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide truncate">${label}</div>
+  const card = (label, val, sub, color, borderCls = 'border-slate-200/80 dark:border-slate-800', filterType = '', filterVal = '') => `
+    <div class="bg-white dark:bg-slate-900/60 border ${borderCls} rounded-xl shadow-xs p-3 sm:p-4 transition hover:shadow-md cursor-pointer hover:border-indigo-500 active:scale-[0.99] select-none stat-card-link" data-filter-type="${filterType}" data-filter-val="${filterVal}" title="Klik untuk membuka & memfilter data pelanggan">
+      <div class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide truncate flex items-center justify-between">
+        <span>${label}</span>
+        <span class="text-[10px] text-indigo-400 opacity-60">Lihat ➔</span>
+      </div>
       <div class="text-lg sm:text-2xl font-extrabold mt-1 tracking-tight ${color} truncate">${val}</div>
       <div class="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium truncate">${sub}</div>
     </div>`;
 
   $('stats').innerHTML =
-    card('Total Pelanggan', customers.length, `${terisolirTotal} Terisolir • ${menunggakTotal} Menunggak`, 'text-slate-800 dark:text-slate-100', 'border-slate-200/90 dark:border-slate-800') +
-    card('Lunas', customers.length - belum.length, rupiah(customers.filter(c => c.status_tagihan === 'Lunas').reduce((a, c) => a + c.harga, 0)), 'text-emerald-600 dark:text-emerald-400', 'border-emerald-200/70 dark:border-emerald-500/20') +
-    card('Belum Lunas', belum.length, `${belum.length} Pelanggan Belum Bayar`, 'text-rose-600 dark:text-rose-400', 'border-rose-200/70 dark:border-rose-500/20') +
-    card('Total Tunggakan', rupiah(belum.reduce((a, c) => a + c.harga, 0)), 'Estimasi Piutang', 'text-amber-600 dark:text-amber-400', 'border-amber-200/70 dark:border-amber-500/20');
+    card('Total Pelanggan', customers.length, `${terisolirTotal} Terisolir • ${menunggakTotal} Menunggak`, 'text-slate-800 dark:text-slate-100', 'border-slate-200/90 dark:border-slate-800', 'all', '') +
+    card('Lunas', customers.length - belum.length, rupiah(customers.filter(c => c.status_tagihan === 'Lunas').reduce((a, c) => a + c.harga, 0)), 'text-emerald-600 dark:text-emerald-400', 'border-emerald-200/70 dark:border-emerald-500/20', 'status', 'Lunas') +
+    card('Belum Lunas', belum.length, `${belum.length} Pelanggan Belum Bayar`, 'text-rose-600 dark:text-rose-400', 'border-rose-200/70 dark:border-rose-500/20', 'status', 'Belum Lunas') +
+    card('Total Tunggakan', rupiah(belum.reduce((a, c) => a + c.harga, 0)), 'Estimasi Piutang', 'text-amber-600 dark:text-amber-400', 'border-amber-200/70 dark:border-amber-500/20', 'jaringan', 'Menunggak');
 
   $('rows').innerHTML = list.map((c) => {
     const lunas = c.status_tagihan === 'Lunas';
@@ -3552,6 +3694,11 @@ function render() {
         <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
           <span>📱</span> ${esc(c.whatsapp)}
         </div>
+        ${(c.olt_port || (c.device && c.device.olt_port)) ? `
+          <div class="text-[11px] text-teal-700 dark:text-teal-400 font-mono font-semibold flex items-center gap-1 mt-0.5">
+            <span>🔌</span> <span>OLT: ${esc(c.olt_port || c.device.olt_port)}${(c.onu_id || (c.device && c.device.onu_id)) ? ` (ONU:${esc(c.onu_id || c.device.onu_id)})` : ''}</span>
+          </div>
+        ` : ''}
       </td>
 
       <!-- Alamat & Wilayah -->
@@ -3635,6 +3782,9 @@ function render() {
       <!-- Aksi -->
       <td class="px-3 sm:px-4 py-3 align-top text-right whitespace-nowrap no-print min-w-[220px]">
         <div class="inline-flex items-center gap-1.5 flex-wrap justify-end">
+          <button data-id="${c.id}" class="edit edit-cust text-xs px-2.5 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800/70 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 font-semibold active:scale-95 inline-flex items-center gap-1" title="Edit Data Pelanggan">
+            <span>✏️</span> Edit
+          </button>
           ${!lunas ? `<button data-id="${c.id}" class="pay-qris text-xs px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-semibold shadow-xs transition inline-flex items-center gap-1" title="Bayar & Tampilkan QRIS DANA Bisnis">
             <span>📱</span> Bayar QRIS
           </button>` : ''}
@@ -3649,6 +3799,10 @@ function render() {
       </td>
     </tr>`;
   }).join('') || '<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Tidak ada data pelanggan yang cocok</td></tr>';
+
+  if (typeof applyCustomerRowRolePermissions === 'function') {
+    applyCustomerRowRolePermissions();
+  }
 }
 
 function fillOptions() {
@@ -3984,7 +4138,19 @@ function initAnalyticsToggle() {
 
 async function load() {
   try { await loadSettings(); } catch (e) { console.error('Settings err:', e); }
-  try { customers = await (await fetch('/api/customers')).json(); } catch (e) { console.error('Customers fetch err:', e); }
+  try {
+    const custData = await (await fetch('/api/customers')).json();
+    if (Array.isArray(custData)) {
+      customers = custData;
+    } else if (custData && Array.isArray(custData.customers)) {
+      customers = custData.customers;
+    } else if (!Array.isArray(customers)) {
+      customers = [];
+    }
+  } catch (e) {
+    console.error('Customers fetch err:', e);
+    if (!Array.isArray(customers)) customers = [];
+  }
   try { await loadPackages(); } catch (e) { console.error('Packages err:', e); }
   try { await loadBankAccounts(); } catch (e) { console.error('Bank err:', e); }
   try { await loadInventoryStock(); } catch (e) { console.error('Stock err:', e); }
@@ -4022,13 +4188,21 @@ function openModal(id) {
   const el = $(id);
   if (!el) return;
 
+  // Tutup drawer mobile secara otomatis jika user sedang membuka modal
+  if (window.innerWidth < 768 && $('btnCloseSidebarMobile')) {
+    const sidebar = $('appSidebar');
+    if (sidebar && sidebar.classList.contains('sidebar-open')) {
+      $('btnCloseSidebarMobile').click();
+    }
+  }
+
   // Hapus dari posisi lama jika sudah ada di stack, lalu tempatkan di urutan teratas
   activeModalStack = activeModalStack.filter(m => m !== id);
   activeModalStack.push(id);
 
-  // Atur z-index secara dinamis berdasarkan urutan layer bertumpuk
-  // Modal pertama: 50, Modal kedua (nested): 60, Modal ketiga: 70, dst.
-  const zIndexVal = 50 + (activeModalStack.length - 1) * 10;
+  // Atur z-index secara dinamis agar selalu di atas sidebar (9999) dan backdrop (9990)
+  // Modal pertama: 10050, Modal kedua (nested): 10070, Modal ketiga: 10090, dst.
+  const zIndexVal = 10050 + (activeModalStack.length - 1) * 20;
   el.style.zIndex = zIndexVal;
 
   el.classList.remove('hidden');
@@ -4244,11 +4418,15 @@ function openForm(c) {
     if ($('form').elements.mikrotikProfile) $('form').elements.mikrotikProfile.value = c.mikrotikProfile || '';
     if ($('form').elements.ipAddress) $('form').elements.ipAddress.value = c.ipAddress || '';
     if ($('form').elements.mikrotikService) $('form').elements.mikrotikService.value = c.mikrotikService || 'pppoe';
+    if ($('form').elements.olt_port) $('form').elements.olt_port.value = c.olt_port || (c.device && c.device.olt_port) || '';
+    if ($('form').elements.onu_id) $('form').elements.onu_id.value = c.onu_id || (c.device && c.device.onu_id) || '';
     if ($('form').elements.kabel_meter) $('form').elements.kabel_meter.value = '';
     if ($('form').elements.fast_connector) $('form').elements.fast_connector.value = '';
   } else {
     $('form').elements.status_jaringan.value = 'Aktif';
     if ($('form').elements.harga) $('form').elements.harga.value = '';
+    if ($('form').elements.olt_port) $('form').elements.olt_port.value = '';
+    if ($('form').elements.onu_id) $('form').elements.onu_id.value = '';
     if ($('form').elements.device_tipe) $('form').elements.device_tipe.value = 'ZTE F609 V3 (GPON ONT)';
     if ($('form').elements.device_kepemilikan) $('form').elements.device_kepemilikan.value = 'Dipinjamkan / Sewa (Aset RT/RW.net)';
     if ($('form').elements.device_kondisi) $('form').elements.device_kondisi.value = 'Normal / Bagus';
@@ -4915,6 +5093,21 @@ function openCustomerDetailModal(c) {
     $('detailCustDeviceKepemilikan').textContent = isDipinjamkan ? '📦 Dipinjamkan / Sewa (Aset RT/RW)' : '🏷️ Milik Pribadi Pelanggan';
   }
 
+  // Pemetaan Port OLT (EPON / GPON) & ONU ID
+  const oltPortVal = c.olt_port || (c.device && c.device.olt_port) || '-';
+  const oltOnuIdVal = c.onu_id || (c.device && c.device.onu_id) || '-';
+  if ($('detailCustOltPort')) $('detailCustOltPort').textContent = oltPortVal;
+  if ($('detailCustOltOnuId')) $('detailCustOltOnuId').textContent = oltOnuIdVal;
+  if ($('detailCustOltSignalResult')) {
+    $('detailCustOltSignalResult').classList.add('hidden');
+    $('detailCustOltSignalResult').innerHTML = '';
+  }
+  if ($('detailCustOltSignalBrief')) {
+    $('detailCustOltSignalBrief').textContent = (oltPortVal !== '-' && oltOnuIdVal !== '-')
+      ? `Port ${oltPortVal} (ONU ID: ${oltOnuIdVal}) - Siap diuji`
+      : 'Port OLT belum diatur di data pelanggan';
+  }
+
   // Riwayat Tagihan (Ringkasan 4 Terakhir)
   if ($('detailCustInvoicesSummary')) {
     const inv = [...(c.invoices || [])].sort((a, b) => (b.periode || '').localeCompare(a.periode || '')).slice(0, 4);
@@ -4996,6 +5189,64 @@ if ($('btnDetailOpenHistoryLogs')) {
     if (currentDetailCustomer) {
       closeModal('modalCustomerDetail');
       renderHistoryModal(currentDetailCustomer, 'logs');
+    }
+  });
+}
+
+// Cek Redaman Optik OLT Pelanggan Langsung dari Modal Detail
+if ($('btnCheckCustOltSignal')) {
+  $('btnCheckCustOltSignal').addEventListener('click', async () => {
+    if (!currentDetailCustomer) return;
+    const c = currentDetailCustomer;
+    const port = c.olt_port || (c.device && c.device.olt_port);
+    const onuId = c.onu_id || (c.device && c.device.onu_id);
+    const resultBox = $('detailCustOltSignalResult');
+    const brief = $('detailCustOltSignalBrief');
+    const btn = $('btnCheckCustOltSignal');
+
+    if (!port || !onuId) {
+      if (resultBox) {
+        resultBox.className = 'p-3 rounded-lg text-xs bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300';
+        resultBox.innerHTML = '⚠️ <strong>Port OLT belum ditentukan:</strong> Silakan klik tombol "Edit Data" dan tentukan nomor Port OLT serta ONU ID pelanggan ini.';
+        resultBox.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (btn) setBtnLoading(btn, true, 'Membaca Sinyal OLT...');
+    try {
+      const res = await fetch(`/api/customers/${c.id}/olt?olt_port=${encodeURIComponent(port)}&onu_id=${encodeURIComponent(onuId)}`);
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Gagal membaca status OLT');
+
+      const rx = (data.rx_power_dbm !== null && data.rx_power_dbm !== undefined) ? `${data.rx_power_dbm} dBm` : (data.optical_power || 'N/A');
+      const statusOptik = data.status || 'ONLINE';
+      const isLos = statusOptik === 'LOS' || statusOptik === 'DOWN' || data.is_critical;
+
+      if (brief) brief.textContent = `Rx Power: ${rx} • Status: ${statusOptik}`;
+      if (resultBox) {
+        resultBox.className = isLos
+          ? 'p-3 rounded-lg text-xs bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300'
+          : 'p-3 rounded-lg text-xs bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300';
+        resultBox.innerHTML = `
+          <div class="flex items-center justify-between font-bold">
+            <span>${isLos ? '🔴 GANGGUAN / KABEL OPTIK PUTUS (LOS)' : '🟢 SINYAL REDAMAN OPTIK NORMAL'}</span>
+            <span>Rx Power: ${rx}</span>
+          </div>
+          <p class="mt-1 text-[11px] leading-relaxed">${data.message || (isLos ? 'Terdeteksi redaman kritis atau status ONU LOS' : 'Redaman ONU normal dan transmisi optik stabil.')}</p>
+        `;
+        resultBox.classList.remove('hidden');
+      }
+      toast(`Status OLT ${c.nama}: ${statusOptik} (${rx})`);
+    } catch (err) {
+      if (resultBox) {
+        resultBox.className = 'p-3 rounded-lg text-xs bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300';
+        resultBox.innerHTML = `❌ <strong>Gagal cek OLT:</strong> ${err.message}`;
+        resultBox.classList.remove('hidden');
+      }
+      toast('Gagal cek status OLT: ' + err.message);
+    } finally {
+      if (btn) setBtnLoading(btn, false, '<span>⚡</span> Cek Redaman Optik (OLT)');
     }
   });
 }
@@ -7129,6 +7380,19 @@ function renderPackagesModal() {
   `).join('');
 }
 
+function updateRateLimitPreview() {
+  const dl = ($('pkgInputDownload') ? $('pkgInputDownload').value : '').trim().toUpperCase();
+  const ul = ($('pkgInputUpload') ? $('pkgInputUpload').value : '').trim().toUpperCase();
+  const dlNorm = dl ? (dl.includes('M') ? dl : dl + 'M').replace(/\s*MBPS/i, 'M') : '10M';
+  const ulNorm = ul ? (ul.includes('M') ? ul : ul + 'M').replace(/\s*MBPS/i, 'M') : dlNorm;
+  const combined = `${ulNorm}/${dlNorm}`;
+  if ($('pkgRateLimitPreview')) $('pkgRateLimitPreview').textContent = combined;
+  return combined;
+}
+
+if ($('pkgInputDownload')) $('pkgInputDownload').addEventListener('input', updateRateLimitPreview);
+if ($('pkgInputUpload')) $('pkgInputUpload').addEventListener('input', updateRateLimitPreview);
+
 function showPackageForm(pkg = null) {
   const box = $('boxPackageForm');
   if (!box) return;
@@ -7140,14 +7404,30 @@ function showPackageForm(pkg = null) {
     $('packageFormId').value = pkg.id;
     $('packageFormTitle').innerHTML = `<span>✏️</span> Edit Paket Internet: <span class="text-indigo-600 font-mono">${esc(pkg.id)}</span>`;
     $('pkgInputNama').value = pkg.nama || '';
-    $('pkgInputKecepatan').value = pkg.kecepatan || '';
+    
+    // Pecah kecepatan jika ada pemisah upload/download
+    const speed = pkg.kecepatan || '';
+    if (speed.includes('/')) {
+      const parts = speed.split('/');
+      $('pkgInputUpload').value = parts[0].trim();
+      $('pkgInputDownload').value = parts[1].trim();
+    } else {
+      $('pkgInputDownload').value = speed;
+      $('pkgInputUpload').value = speed;
+    }
+    
     $('pkgInputHarga').value = pkg.harga !== undefined && pkg.harga !== null ? formatRibuan(pkg.harga) : '';
     $('pkgInputProfile').value = pkg.mikrotik_profile || '';
     $('pkgInputDeskripsi').value = pkg.deskripsi || '';
+    updateRateLimitPreview();
   } else {
     $('packageFormId').value = '';
     $('packageFormTitle').innerHTML = `<span>➕</span> Tambah Paket Internet Baru`;
+    $('pkgInputDownload').value = '10 Mbps';
+    $('pkgInputUpload').value = '10 Mbps';
     $('pkgInputHarga').value = '';
+    $('pkgInputProfile').value = '10Mbps';
+    updateRateLimitPreview();
   }
   $('pkgInputNama').focus();
 }
@@ -7182,11 +7462,16 @@ if ($('formPackage')) {
   $('formPackage').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = $('packageFormId').value;
+    const dl = $('pkgInputDownload').value.trim();
+    const ul = $('pkgInputUpload').value.trim();
+    const speedLabel = (ul && ul !== dl) ? `${ul} / ${dl}` : dl;
+    const profileName = $('pkgInputProfile').value.trim() || dl.replace(/\s+/g, '');
+
     const payload = {
       nama: $('pkgInputNama').value.trim(),
-      kecepatan: $('pkgInputKecepatan').value.trim(),
+      kecepatan: speedLabel,
       harga: parseRibuan($('pkgInputHarga').value),
-      mikrotik_profile: $('pkgInputProfile').value.trim(),
+      mikrotik_profile: profileName,
       deskripsi: $('pkgInputDeskripsi').value.trim(),
     };
 
@@ -7211,7 +7496,8 @@ if ($('formPackage')) {
       await loadPackages();
 
       // Jika ada perubahan nama paket, muat ulang data pelanggan
-      customers = await (await fetch('/api/customers')).json();
+      const custRes = await (await fetch('/api/customers')).json();
+      if (Array.isArray(custRes)) customers = custRes;
       render();
     } catch (err) {
       alert('Error: ' + err.message);
@@ -7895,20 +8181,131 @@ async function checkAuthSession() {
     const data = await res.json();
     currentUser = data.user;
     currentActiveTenant = data.active_tenant;
+    window.currentRolePermissions = data.permissions || null;
 
     if ($('headerTenantName')) $('headerTenantName').textContent = currentActiveTenant.nama_usaha;
-    if ($('headerTenantBadge')) $('headerTenantBadge').classList.remove('hidden');
+    if ($('headerTenantBadge')) {
+      $('headerTenantBadge').classList.remove('hidden');
+      if (currentUser.role === 'superadmin') $('headerTenantBadge').textContent = '👑 Super';
+      else if (currentUser.role === 'kasir') $('headerTenantBadge').textContent = '💼 Kasir';
+      else if (currentUser.role === 'teknisi') $('headerTenantBadge').textContent = '🛠️ Teknisi';
+      else $('headerTenantBadge').textContent = '🛡️ Admin';
+    }
     if ($('headerUserName')) $('headerUserName').textContent = currentUser.nama;
 
-    if (currentUser.role === 'superadmin' && $('btnSuperAdmin')) {
-      $('btnSuperAdmin').classList.remove('hidden');
-      $('btnSuperAdmin').classList.add('flex');
-    }
+    applyRolePermissionsUI(currentUser, data.permissions);
 
     return true;
   } catch (_) {
     window.location.replace('/login.html');
     return false;
+  }
+}
+
+// Penyesuaian hak akses menu & tombol berdasarkan Role (Superadmin, Admin, Kasir, Teknisi)
+function applyRolePermissionsUI(user, permissions) {
+  if (!user) return;
+  const role = String(user.role || 'admin').toLowerCase();
+
+  // Super Admin tombol master tenant
+  if ($('btnSuperAdmin')) {
+    if (role === 'superadmin') {
+      $('btnSuperAdmin').classList.remove('hidden');
+      $('btnSuperAdmin').classList.add('flex');
+    } else {
+      $('btnSuperAdmin').classList.add('hidden');
+      $('btnSuperAdmin').classList.remove('flex');
+    }
+  }
+
+  const hiddenMenus = (permissions && Array.isArray(permissions.hidden_menus))
+    ? permissions.hidden_menus
+    : (role === 'kasir'
+      ? ['btnSuperAdmin', 'btnAutoIsolir', 'btnInventoryStock', 'btnSettings', 'btnSyncMikrotik', 'btnRouterDetail', 'btnOltBatchCheck']
+      : role === 'teknisi'
+        ? ['btnSuperAdmin', 'btnGenerate', 'btnExpenses', 'btnBankAccounts', 'btnBroadcast', 'btnBulkReminder', 'btnSettings']
+        : ['btnSuperAdmin']);
+
+  const allManagedMenuIds = [
+    'navDashboard',
+    'navCustomers',
+    'btnGenerate',
+    'btnAutoIsolir',
+    'btnPackages',
+    'btnInventoryStock',
+    'btnExpenses',
+    'btnBankAccounts',
+    'btnBroadcast',
+    'btnBulkReminder',
+    'btnSettings',
+    'btnActivityLogs',
+    'btnSyncMikrotik',
+    'btnRouterDetail',
+    'btnOltBatchCheck',
+    'btnAddCustomerTop'
+  ];
+
+  allManagedMenuIds.forEach((id) => {
+    const el = $(id);
+    if (!el) return;
+    if (hiddenMenus.includes(id)) {
+      el.classList.add('hidden');
+      el.style.display = 'none';
+    } else {
+      el.classList.remove('hidden');
+      el.style.display = '';
+    }
+  });
+
+  // Sembunyikan grup kategori accordion jika seluruh tombol di dalamnya disembunyikan untuk role tersebut
+  ['accordionOperasional', 'accordionKeuangan', 'accordionWhatsapp', 'accordionSistem'].forEach((accId) => {
+    const contentEl = $(accId);
+    if (!contentEl) return;
+    const groupEl = contentEl.closest('.accordion-group');
+    if (!groupEl) return;
+    const visibleBtns = Array.from(contentEl.querySelectorAll('button')).filter(
+      (b) => !b.classList.contains('hidden') && b.style.display !== 'none'
+    );
+    groupEl.style.display = visibleBtns.length === 0 ? 'none' : '';
+  });
+
+  // Jika Teknisi login, arahkan fokus ke halaman Pelanggan & sembunyikan laporan keuangan sensitif
+  if (role === 'teknisi') {
+    if ($('sectionAnalytics')) $('sectionAnalytics').style.display = 'none';
+    if (typeof switchPageView === 'function') switchPageView('customers');
+  } else {
+    if ($('sectionAnalytics')) $('sectionAnalytics').style.display = '';
+  }
+
+  applyCustomerRowRolePermissions();
+}
+
+function applyCustomerRowRolePermissions() {
+  if (!currentUser) return;
+  const role = String(currentUser.role || 'admin').toLowerCase();
+  const rowsEl = $('rows');
+  if (!rowsEl) return;
+
+  // Kasir: sembunyikan tombol teknis isolir router & sync mikrotik
+  if (role === 'kasir') {
+    rowsEl.querySelectorAll('.toggle-isolir, .btn-mt-quick-sync').forEach((btn) => {
+      btn.style.display = 'none';
+    });
+  }
+
+  // Teknisi: sembunyikan tombol kasir pembayaran QRIS & tandai lunas
+  if (role === 'teknisi') {
+    rowsEl.querySelectorAll('.pay-qris, button.toggle').forEach((btn) => {
+      btn.style.display = 'none';
+    });
+  }
+
+  // Sembunyikan tombol Hapus Pelanggan di modal edit untuk Kasir & Teknisi (hanya Admin/Superadmin yang boleh hapus pelanggan)
+  if ($('btnDelete')) {
+    if (role === 'kasir' || role === 'teknisi') {
+      $('btnDelete').classList.add('hidden');
+      $('btnDelete').style.display = 'none';
+    }
   }
 }
 
@@ -8517,9 +8914,20 @@ function initTheme() {
 function initSidebarAccordion() {
   const toggles = document.querySelectorAll('.accordion-toggle');
   toggles.forEach(btn => {
-    btn.addEventListener('click', () => {
+    // Pastikan setiap grup terbuka secara default saat pertama dimuat
+    const initTargetId = btn.getAttribute('data-target');
+    const initContent = initTargetId ? document.getElementById(initTargetId) : null;
+    const initChevron = btn.querySelector('.accordion-chevron');
+    if (initContent) {
+      initContent.classList.remove('hidden');
+      if (initChevron) initChevron.style.transform = 'rotate(0deg)';
+    }
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const targetId = btn.getAttribute('data-target');
-      const content = document.getElementById(targetId);
+      const content = targetId ? document.getElementById(targetId) : null;
       const chevron = btn.querySelector('.accordion-chevron');
       if (content) {
         const isHidden = content.classList.contains('hidden');
@@ -8602,7 +9010,9 @@ function initSidebarCollapse() {
       backdrop.style.pointerEvents = 'none';
     }
     document.body.classList.remove('overflow-hidden');
-    updateToggleUI(false);
+    if (isMobileView()) {
+      updateToggleUI(false);
+    }
   }
 
   function toggleDesktopSidebar() {
@@ -8643,14 +9053,9 @@ function initSidebarCollapse() {
     }
   }
 
-  // Pulihkan status collapse tersimpan saat pertama kali dimuat di layar desktop
-  const isSavedCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
-  if (isSavedCollapsed && !isMobileView()) {
-    document.body.classList.add('sidebar-collapsed');
-    updateToggleUI(false);
-  } else {
-    updateToggleUI(!isMobileView());
-  }
+  // Pastikan di layar desktop sidebar terbuka dan interaktif saat dimuat
+  document.body.classList.remove('sidebar-collapsed');
+  localStorage.setItem('sidebar_collapsed', 'false');
 
   if (btnToggle) {
     btnToggle.addEventListener('click', handleToggle);
@@ -8714,7 +9119,14 @@ function initSidebarCollapse() {
   // Sinkronisasi saat ukuran layar / orientasi berubah
   window.addEventListener('resize', () => {
     if (!isMobileView()) {
-      closeMobileDrawer();
+      if (backdrop) {
+        backdrop.classList.add('hidden');
+        backdrop.classList.remove('active');
+        backdrop.style.display = 'none';
+        backdrop.style.opacity = '0';
+        backdrop.style.pointerEvents = 'none';
+      }
+      document.body.classList.remove('overflow-hidden');
       const isCollapsed = document.body.classList.contains('sidebar-collapsed');
       updateToggleUI(!isCollapsed);
     } else {
@@ -8722,6 +9134,20 @@ function initSidebarCollapse() {
       updateToggleUI(isDrawerOpen);
     }
   });
+
+  // Inisialisasi awal sesuai mode layar
+  if (isMobileView()) {
+    closeMobileDrawer();
+  } else {
+    if (backdrop) {
+      backdrop.classList.add('hidden');
+      backdrop.classList.remove('active');
+      backdrop.style.display = 'none';
+      backdrop.style.opacity = '0';
+      backdrop.style.pointerEvents = 'none';
+    }
+    updateToggleUI(true);
+  }
 }
 
 // ---- Smooth Drag-to-Scroll Horizontal untuk Tabel Pelanggan ----
@@ -8768,8 +9194,13 @@ function initTableDragScroll() {
     slider.scrollLeft = scrollLeft - walk;
   });
 
-  // Mencegah trigger klik pada baris/nama customer jika user sedang melakukan drag-scroll
+  // Mencegah trigger klik pada baris/nama customer HANYA jika benar-benar sedang drag-scroll
+  // dan JANGAN PERNAH blokir tombol aksi, link, atau input form
   slider.addEventListener('click', (e) => {
+    if (e.target.closest('button, a, input, select, textarea, [data-id]')) {
+      hasMoved = false;
+      return;
+    }
     if (hasMoved) {
       e.preventDefault();
       e.stopPropagation();
@@ -8778,9 +9209,115 @@ function initTableDragScroll() {
   }, true);
 }
 
+// ========================================================
+// MANAJEMEN NAVIGASI TAMPILAN (DASHBOARD VS PELANGGAN)
+// ========================================================
+function switchPageView(viewName) {
+  const isCustomers = viewName === 'customers';
+  const viewDash = $('viewDashboard');
+  const viewCust = $('viewCustomers');
+  const btnDash = $('navDashboard');
+  const btnCust = $('navCustomers');
+
+  if (viewDash) viewDash.classList.toggle('hidden', isCustomers);
+  if (viewCust) viewCust.classList.toggle('hidden', !isCustomers);
+
+  // Perbarui style tombol navigasi aktif di Sidebar
+  if (btnDash) {
+    if (isCustomers) {
+      btnDash.className = 'w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none text-slate-300 hover:text-white hover:bg-slate-800/80';
+    } else {
+      btnDash.className = 'w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none bg-indigo-600 text-white shadow-sm';
+    }
+  }
+
+  if (btnCust) {
+    if (isCustomers) {
+      btnCust.className = 'w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none bg-indigo-600 text-white shadow-sm';
+    } else {
+      btnCust.className = 'w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none text-slate-300 hover:text-white hover:bg-slate-800/80';
+    }
+  }
+
+  // Simpan preferensi halaman ke sessionStorage
+  sessionStorage.setItem('activeView', isCustomers ? 'customers' : 'dashboard');
+
+  // Trigger resize grafis dan render ulang data
+  if (isCustomers) {
+    render();
+  } else {
+    setTimeout(() => {
+      if (chartMonthlyInstance) chartMonthlyInstance.resize();
+      if (chartRatioInstance) chartRatioInstance.resize();
+    }, 50);
+  }
+
+  // Tutup drawer mobile secara otomatis jika user sedang di layar HP
+  if (window.innerWidth < 768 && $('btnCloseSidebarMobile')) {
+    const sidebar = $('appSidebar');
+    if (sidebar && sidebar.classList.contains('sidebar-open')) {
+      $('btnCloseSidebarMobile').click();
+    }
+  }
+}
+
+function initPageViewNavigation() {
+  if ($('navDashboard')) {
+    $('navDashboard').addEventListener('click', () => switchPageView('dashboard'));
+  }
+  if ($('navCustomers')) {
+    $('navCustomers').addEventListener('click', () => switchPageView('customers'));
+  }
+  if ($('btnDashboardToCustomers')) {
+    $('btnDashboardToCustomers').addEventListener('click', () => switchPageView('customers'));
+  }
+  if ($('btnAddCustomerTop')) {
+    $('btnAddCustomerTop').addEventListener('click', () => openForm());
+  }
+  if ($('btnOltBatchCheck')) {
+    $('btnOltBatchCheck').addEventListener('click', () => {
+      switchNetworkTab('olt');
+      openModal('modalMikrotik');
+      loadOltConfigFromApi();
+    });
+  }
+
+  // Interaktivitas kartu statistik Dashboard: klik langsung beralih ke daftar pelanggan dengan filter otomatis
+  if ($('stats')) {
+    $('stats').addEventListener('click', (e) => {
+      const cardEl = e.target.closest('.stat-card-link');
+      if (!cardEl) return;
+      const fType = cardEl.dataset.filterType;
+      const fVal = cardEl.dataset.filterVal;
+      if (fType === 'status') {
+        if ($('filter')) $('filter').value = fVal;
+        if ($('filterJaringan')) $('filterJaringan').value = '';
+      } else if (fType === 'jaringan') {
+        if ($('filterJaringan')) $('filterJaringan').value = fVal;
+        if ($('filter')) $('filter').value = '';
+      } else {
+        if ($('filter')) $('filter').value = '';
+        if ($('filterJaringan')) $('filterJaringan').value = '';
+        if ($('filterWilayah')) $('filterWilayah').value = '';
+        if ($('search')) $('search').value = '';
+      }
+      switchPageView('customers');
+    });
+  }
+
+  // Muat state view tersimpan (default ke 'customers' agar tabel data langsung tampil dan siap digunakan)
+  const savedView = sessionStorage.getItem('activeView');
+  if (savedView === 'dashboard') {
+    switchPageView('dashboard');
+  } else {
+    switchPageView('customers');
+  }
+}
+
 // Inisialisasi Sidebar Navigasi
 initSidebarAccordion();
 initSidebarCollapse();
+initPageViewNavigation();
 
 // Inisialisasi Drag Scroll Horizontal Tabel Pelanggan
 initTableDragScroll();

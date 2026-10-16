@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "id": 1,
+    "tanggal": "2026-10-01",
+    "kategori": "Bandwidth & Upstream ISP",
+    "nominal": 750000,
+    "keterangan": "Biaya langganan dedicated upstream ISP 100 Mbps (Okt 2026)",
+    "petugas": "Admin Utama"
+  },
+  {
+    "id": 2,
+    "tanggal": "2026-10-03",
+    "kategori": "Pembelian Kabel FO & Dropcore",
+    "nominal": 420000,
+    "keterangan": "Beli kabel dropcore 1 roll 1000 meter & pigtail SC",
+    "petugas": "Rian (Teknisi Lapangan)"
+  },
+  {
+    "id": 3,
+    "tanggal": "2026-10-06",
+    "kategori": "Modem & Router ONT",
+    "nominal": 380000,
+    "keterangan": "Restock 2 unit ONT GPON ZTE F609 V3 cadangan",
+    "petugas": "Deni (Teknisi)"
+  },
+  {
+    "id": 4,
+    "tanggal": "2026-10-08",
+    "kategori": "Konsumsi & Transport Teknisi",
+    "nominal": 120000,
+    "keterangan": "BBM motor operasional teknisi keliling & konsumsi penarikan kabel",
+    "petugas": "Rian (Teknisi Lapangan)"
+  },
+  {
+    "id": 5,
+    "tanggal": "2026-10-10",
+    "kategori": "Operasional & Listrik",
+    "nominal": 150000,
+    "keterangan": "Token listrik server OLT & UPS gardu RT 02",
+    "petugas": "Admin Utama"
+  }
+]

@@ -22,5 +22,37 @@
     "nama": "Admin Berkah Network",
     "role": "admin",
     "tenant_id": "tenant_berkah_network"
+  },
+  {
+    "id": 4,
+    "username": "kasir",
+    "password": "kasir123",
+    "nama": "Siti Rahma (Kasir Utama)",
+    "role": "kasir",
+    "tenant_id": "default"
+  },
+  {
+    "id": 5,
+    "username": "teknisi",
+    "password": "teknisi123",
+    "nama": "Rian Pratama (Teknisi Lapangan)",
+    "role": "teknisi",
+    "tenant_id": "default"
+  },
+  {
+    "id": 6,
+    "username": "kasirberkah",
+    "password": "kasir123",
+    "nama": "Dewi (Kasir Berkah Network)",
+    "role": "kasir",
+    "tenant_id": "tenant_berkah_network"
+  },
+  {
+    "id": 7,
+    "username": "teknisiberkah",
+    "password": "teknisi123",
+    "nama": "Agus (Teknisi Berkah Network)",
+    "role": "teknisi",
+    "tenant_id": "tenant_berkah_network"
   }
 ]

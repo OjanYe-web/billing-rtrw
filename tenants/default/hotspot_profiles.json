@@ -1,0 +1,50 @@
+[
+  {
+    "id": "HSP-01",
+    "nama": "Voucher 3 Jam Hemat",
+    "mikrotik_profile": "VCR-3JAM",
+    "rate_limit": "5M/5M",
+    "uptime_limit": "3h",
+    "durasi_label": "3 Jam",
+    "shared_users": 1,
+    "harga_modal": 1000,
+    "harga_jual": 2000,
+    "deskripsi": "Voucher Wi-Fi eceran warkop / warung durasi 3 jam nonstop"
+  },
+  {
+    "id": "HSP-02",
+    "nama": "Voucher Harian 24 Jam",
+    "mikrotik_profile": "VCR-HARIAN",
+    "rate_limit": "7M/7M",
+    "uptime_limit": "1d",
+    "durasi_label": "24 Jam (1 Hari)",
+    "shared_users": 1,
+    "harga_modal": 3000,
+    "harga_jual": 5000,
+    "deskripsi": "Voucher internet harian bebas kuota selama 24 jam"
+  },
+  {
+    "id": "HSP-03",
+    "nama": "Voucher Mingguan 7 Hari",
+    "mikrotik_profile": "VCR-MINGGUAN",
+    "rate_limit": "10M/10M",
+    "uptime_limit": "7d",
+    "durasi_label": "7 Hari",
+    "shared_users": 1,
+    "harga_modal": 15000,
+    "harga_jual": 20000,
+    "deskripsi": "Voucher mingguan cocok untuk tamu atau pekerja mingguan"
+  },
+  {
+    "id": "HSP-04",
+    "nama": "Voucher Bulanan 30 Hari",
+    "mikrotik_profile": "VCR-BULANAN",
+    "rate_limit": "15M/15M",
+    "uptime_limit": "30d",
+    "durasi_label": "30 Hari",
+    "shared_users": 2,
+    "harga_modal": 40000,
+    "harga_jual": 50000,
+    "deskripsi": "Voucher bulanan anak kos bisa untuk 2 perangkat sekaligus"
+  }
+]

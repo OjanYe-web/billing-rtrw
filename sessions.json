@@ -1,0 +1,22 @@
+{
+  "test_token_123": {
+    "userId": 1,
+    "username": "superadmin",
+    "nama": "Super Admin Pusat",
+    "role": "superadmin",
+    "role_label": "Super Admin Pusat",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "login_time": 1792168116765
+  },
+  "cba2f348f11d69ce11276b6f060e4707739bbe55ffd4059bd45c41a075394fc4": {
+    "userId": 1,
+    "username": "superadmin",
+    "nama": "Super Admin Pusat",
+    "role": "superadmin",
+    "role_label": "Super Admin Pusat",
+    "tenant_id": "default",
+    "tenant_name": "Pusat (Super Admin)",
+    "login_time": 1792168264522
+  }
+}
