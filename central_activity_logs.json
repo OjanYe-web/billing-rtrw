@@ -1,5 +1,57 @@
 [
   {
+    "id": 1792207407048,
+    "aksi": "MIKROTIK_HOTSPOT_SYNC",
+    "kategori": "Jaringan",
+    "keterangan": "Sinkronisasi 4 profil & 13 voucher Hotspot ke Router MikroTik-CCR1009-Billing (192.168.88.1:8728)",
+    "admin": "Admin Utama",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "17 Oktober 2026, 10:23 WIB",
+    "timestamp": 1792207406812,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1792207324402,
+    "aksi": "MIKROTIK_HOTSPOT_SYNC",
+    "kategori": "Jaringan",
+    "keterangan": "Sinkronisasi 4 profil & 13 voucher Hotspot ke Router MikroTik-CCR1009-Billing (192.168.88.1:8728)",
+    "admin": "Admin Utama",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "17 Oktober 2026, 10:22 WIB",
+    "timestamp": 1792207324160,
+    "target_id": null,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1792206207596,
+    "aksi": "GENERATE_VOUCHER_HOTSPOT",
+    "kategori": "Hotspot",
+    "keterangan": "Membuat 2 voucher Hotspot paket \"Voucher 3 Jam Hemat\" (Batch: BATCH-20261017-6900, Reseller: Loket Utama)",
+    "admin": "Admin Utama",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "17 Oktober 2026, 10:03 WIB",
+    "timestamp": 1792206207061,
+    "target_id": "BATCH-20261017-6900",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": 1792205894810,
+    "aksi": "GENERATE_VOUCHER_HOTSPOT",
+    "kategori": "Hotspot",
+    "keterangan": "Membuat 3 voucher Hotspot paket \"Voucher 3 Jam Hemat\" (Batch: BATCH-20261017-3723, Reseller: Warung Berkah)",
+    "admin": "Admin Utama",
+    "tenant_id": "default",
+    "tenant_name": "RT/RW Net Nusantara (Utama)",
+    "waktu": "17 Oktober 2026, 09:58 WIB",
+    "timestamp": 1792205893919,
+    "target_id": "BATCH-20261017-3723",
+    "ip": "127.0.0.1"
+  },
+  {
     "id": 1792166520091,
     "aksi": "BALAS_LIVE_CHAT",
     "kategori": "Komunikasi",

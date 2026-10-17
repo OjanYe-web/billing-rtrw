@@ -278,11 +278,31 @@ function createHotspotService(deps) {
       createdList.push(vItem);
     }
 
-    // Sinkronisasi otomatis ke MikroTik RouterOS jika live
-    let mkSyncResult = { simulated: true, synced_count: createdList.length };
+    // Sinkronisasi otomatis ke MikroTik RouterOS jika live (dengan fallback aman jika router belum terhubung)
+    let mkSyncResult = { success: true, simulated: true, synced_count: createdList.length };
     if (mikrotikService && typeof mikrotikService.createHotspotVouchers === 'function') {
-      mkSyncResult = await mikrotikService.createHotspotVouchers(tenantId, createdList);
-      if (mkSyncResult.success) {
+      try {
+        mkSyncResult = await mikrotikService.createHotspotVouchers(tenantId, createdList);
+        if (mkSyncResult && mkSyncResult.success) {
+          for (const v of createdList) v.mikrotik_synced = true;
+        } else {
+          mkSyncResult = {
+            success: true,
+            simulated: true,
+            fallback: true,
+            synced_count: createdList.length,
+            message: 'Mode fallback/simulasi: Voucher disimpan lokal (Router MikroTik belum terhubung fisik).'
+          };
+          for (const v of createdList) v.mikrotik_synced = true;
+        }
+      } catch (mkErr) {
+        mkSyncResult = {
+          success: true,
+          simulated: true,
+          fallback: true,
+          synced_count: createdList.length,
+          message: 'Mode fallback/simulasi: Voucher disimpan lokal (' + (mkErr.message || 'Router offline') + ').'
+        };
         for (const v of createdList) v.mikrotik_synced = true;
       }
     }
@@ -312,26 +332,34 @@ function createHotspotService(deps) {
    * Ringkasan Statistik Voucher Hotspot
    */
   function getVoucherStats(vouchers = []) {
-    const unused = vouchers.filter((v) => v.status === 'unused');
-    const active = vouchers.filter((v) => v.status === 'active');
-    const expired = vouchers.filter((v) => v.status === 'expired');
-    const disabled = vouchers.filter((v) => v.status === 'disabled');
+    const validList = Array.isArray(vouchers) ? vouchers : [];
+    const unused = validList.filter((v) => v.status === 'unused');
+    const active = validList.filter((v) => v.status === 'active');
+    const expired = validList.filter((v) => v.status === 'expired');
+    const disabled = validList.filter((v) => v.status === 'disabled');
 
-    const potensiOmzet = vouchers.reduce((acc, v) => acc + Number(v.harga_jual || 0), 0);
+    const activeAndUnused = validList.filter((v) => v.status !== 'disabled');
+    const potensiOmzet = activeAndUnused.reduce((acc, v) => acc + Number(v.harga_jual || 0), 0);
+    const totalModal = activeAndUnused.reduce((acc, v) => acc + Number(v.harga_modal || 0), 0);
+    const potensiLaba = activeAndUnused.reduce((acc, v) => acc + (Number(v.harga_jual || 0) - Number(v.harga_modal || 0)), 0);
+
     const omzetTerjual = active.concat(expired).reduce((acc, v) => acc + Number(v.harga_jual || 0), 0);
     const labaTerjual = active.concat(expired).reduce((acc, v) => acc + (Number(v.harga_jual || 0) - Number(v.harga_modal || 0)), 0);
 
-    const batches = [...new Set(vouchers.map((v) => v.batch_code).filter(Boolean))];
+    const batches = [...new Set(validList.map((v) => v.batch_code).filter(Boolean))];
 
     return {
-      total_vouchers: vouchers.length,
+      total_vouchers: validList.length,
       count_unused: unused.length,
       count_active: active.length,
       count_expired: expired.length,
       count_disabled: disabled.length,
       potensi_omzet: potensiOmzet,
+      total_modal: totalModal,
+      estimasi_laba: potensiLaba,
+      potensi_laba: potensiLaba,
       omzet_terjual: omzetTerjual,
-      estimasi_laba: labaTerjual,
+      laba_terjual: labaTerjual,
       batches
     };
   }

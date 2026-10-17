@@ -569,6 +569,13 @@
           </span>
           <span id="navCustomersBadge" class="text-[10px] bg-slate-800 text-indigo-300 border border-slate-700 px-2 py-0.5 rounded-full font-semibold">0</span>
         </button>
+        <button id="navHotspot" type="button" class="w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none text-slate-300 hover:text-white hover:bg-slate-800/80" title="Halaman Manajemen Paket & Generator Voucher Hotspot">
+          <span class="flex items-center gap-2.5">
+            <span class="text-base">🎫</span>
+            <span>Voucher Hotspot</span>
+          </span>
+          <span id="navHotspotBadge" class="text-[10px] bg-slate-800 text-teal-300 border border-slate-700 px-2 py-0.5 rounded-full font-semibold">0</span>
+        </button>
       </div>
 
       <div class="h-px bg-slate-800/80 my-2"></div>
@@ -591,6 +598,10 @@
           </button>
           <button id="btnPackages" type="button" class="w-full text-left px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-indigo-600/30 flex items-center gap-2.5 transition text-xs font-medium" title="Manajemen Paket Internet & Bandwidth">
             <span>📦</span> <span>Paket Internet</span>
+          </button>
+          <button id="btnHotspotVoucher" type="button" class="w-full text-left px-3 py-2 rounded-lg text-teal-300 hover:text-white hover:bg-teal-600/30 flex items-center justify-between transition text-xs font-medium" title="Manajemen Paket & Generator Voucher Hotspot">
+            <span class="flex items-center gap-2.5"><span>🎫</span> <span>Hotspot Voucher</span></span>
+            <span id="badgeHotspotUnused" class="text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-400/30 px-1.5 py-0.5 rounded-full">0</span>
           </button>
           <button id="btnInventoryStock" type="button" class="w-full text-left px-3 py-2 rounded-lg text-amber-300 hover:text-white hover:bg-amber-600/30 flex items-center justify-between transition text-xs font-medium" title="Manajemen Stok Material & Alat Lapangan">
             <span class="flex items-center gap-2.5"><span>📦</span> <span>Stok Material</span></span>
@@ -1039,6 +1050,348 @@
               </tr>
             </thead>
             <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- VIEW 3: HOTSPOT VOUCHER (Manajemen Profil Paket, Generator Batch, Statistik & Cetak/Salin Voucher) -->
+    <div id="viewHotspot" class="space-y-4 sm:space-y-6 hidden">
+      <!-- Header Halaman Hotspot Voucher -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white dark:bg-slate-900/80 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-xs no-print">
+        <div>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <span class="text-2xl">🎫</span>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight">Manajemen Paket &amp; Voucher Hotspot</h2>
+            <span id="hsHeaderBadge" class="text-xs bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/60 px-2.5 py-0.5 rounded-full font-bold">0 Voucher</span>
+            <span id="hsMikrotikModeBadge" class="text-[11px] bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-0.5 rounded-full font-semibold">🟢 Terhubung: MikroTik CCR1009 (192.168.88.1:8728)</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kelola profil paket Hotspot (Durasi, Rate Limit, Harga Modal &amp; Jual), generator kode voucher satuan/massal, statistik omzet, serta cetak/salin voucher reseller</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btnOpenMikrotikFromHotspot" type="button" class="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" title="Atur IP Address, Port, dan Login Router MikroTik">
+            <span>⚙️</span> Setting Router
+          </button>
+          <button id="btnSyncHotspotMikrotik" type="button" class="px-3.5 py-2 text-xs font-semibold rounded-xl border border-sky-500/30 bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" title="Sinkronkan profil dan voucher Hotspot aktif ke Router MikroTik">
+            <span>⚡</span> Sync ke MikroTik
+          </button>
+          <button id="btnOpenAddHotspotProfile" type="button" class="px-3.5 py-2 text-xs font-semibold rounded-xl border border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" title="Tambah Profil Paket Hotspot Baru">
+            <span>➕</span> Tambah Profil Paket
+          </button>
+          <button id="btnFocusGenerator" type="button" class="px-4 py-2 text-xs font-bold rounded-xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white flex items-center gap-1.5 shadow-sm transition cursor-pointer" title="Buka Generator Voucher Satuan / Massal">
+            <span>🎫</span> Generate Voucher
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabel / Grid Statistik Voucher (Total, Belum Terpakai, Aktif, Kedaluwarsa, Potensi Omzet, Estimasi Laba) -->
+      <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 text-xs sm:text-sm no-print" id="hotspotStatsSection">
+        <div class="bg-white dark:bg-slate-900/60 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 shadow-xs">
+          <div class="text-slate-500 dark:text-slate-400 font-semibold text-[11px] flex items-center gap-1.5 uppercase tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-slate-500 inline-block shrink-0"></span> Total Voucher
+          </div>
+          <div id="hsStatTotal" class="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">0</div>
+          <div id="hsStatBatchSub" class="text-[11px] text-slate-400 mt-0.5 font-medium truncate">0 Batch Terdaftar</div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900/60 border border-sky-200/80 dark:border-sky-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs">
+          <div class="text-sky-600 dark:text-sky-400 font-semibold text-[11px] flex items-center gap-1.5 uppercase tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-sky-500 inline-block shrink-0"></span> Belum Terpakai
+          </div>
+          <div id="hsStatUnused" class="text-xl sm:text-2xl font-extrabold text-sky-600 dark:text-sky-400 mt-1">0</div>
+          <div class="text-[11px] text-slate-400 mt-0.5 font-medium truncate">Stok siap jual / edar</div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900/60 border border-emerald-200/80 dark:border-emerald-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs">
+          <div class="text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] flex items-center gap-1.5 uppercase tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0"></span> Voucher Aktif
+          </div>
+          <div id="hsStatActive" class="text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0</div>
+          <div class="text-[11px] text-slate-400 mt-0.5 font-medium truncate">Sedang digunakan / terjual</div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900/60 border border-rose-200/80 dark:border-rose-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs">
+          <div class="text-rose-600 dark:text-rose-400 font-semibold text-[11px] flex items-center gap-1.5 uppercase tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-rose-500 inline-block shrink-0"></span> Kedaluwarsa
+          </div>
+          <div id="hsStatExpired" class="text-xl sm:text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">0</div>
+          <div class="text-[11px] text-slate-400 mt-0.5 font-medium truncate">Masa aktif habis</div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900/60 border border-indigo-200/80 dark:border-indigo-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs">
+          <div class="text-indigo-600 dark:text-indigo-400 font-semibold text-[11px] flex items-center gap-1.5 uppercase tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-indigo-500 inline-block shrink-0"></span> Potensi Omzet
+          </div>
+          <div id="hsStatPotensiOmzet" class="text-base sm:text-xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+          <div id="hsStatOmzetTerjualSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Terjual: Rp 0</div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900/60 border border-teal-200/80 dark:border-teal-500/20 rounded-xl p-3 sm:p-3.5 shadow-xs">
+          <div class="text-teal-600 dark:text-teal-400 font-semibold text-[11px] flex items-center gap-1.5 uppercase tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-teal-500 inline-block shrink-0"></span> Estimasi Laba
+          </div>
+          <div id="hsStatEstimasiLaba" class="text-base sm:text-xl font-extrabold text-teal-600 dark:text-teal-400 mt-1.5 tracking-tight truncate">Rp 0</div>
+          <div id="hsStatLabaTerjualSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">Realisasi Laba: Rp 0</div>
+        </div>
+      </section>
+
+      <!-- BAGIAN 1: DAFTAR PROFIL PAKET HOTSPOT & FORM PROFIL -->
+      <section class="bg-white dark:bg-slate-900/80 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 space-y-4 no-print" id="sectionHotspotProfiles">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-3">
+          <div>
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base flex items-center gap-2">
+              <span>📦</span> Daftar Profil Paket Hotspot (Durasi, Rate Limit, Modal &amp; Harga Jual)
+              <span id="hsProfilesCountBadge" class="text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 px-2 py-0.5 rounded-full">0 Paket</span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Setiap profil terhubung otomatis ke User Profile Hotspot MikroTik (<code>/ip hotspot user profile</code>)</p>
+          </div>
+          <button type="button" id="btnToggleHotspotProfileForm" class="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition flex items-center gap-1.5 self-start sm:self-auto cursor-pointer">
+            <span>➕</span> Tambah Profil Paket Baru
+          </button>
+        </div>
+
+        <!-- Form Collapsible Tambah / Edit Profil Paket Hotspot -->
+        <div id="boxHotspotProfileForm" class="hidden bg-slate-50 dark:bg-slate-900/90 border border-indigo-200 dark:border-indigo-800/60 rounded-xl p-4 space-y-3.5">
+          <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
+            <h4 id="hsProfileFormTitle" class="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm flex items-center gap-1.5">
+              <span>➕</span> Tambah Profil Paket Hotspot Baru
+            </h4>
+            <button type="button" id="btnCancelHsProfileForm" class="text-xs text-slate-500 hover:text-slate-800 font-semibold px-2 py-0.5 rounded hover:bg-slate-200/60 transition">✕ Tutup</button>
+          </div>
+          <form id="formHotspotProfile" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+            <input type="hidden" id="hsProfileId" value="">
+            <div class="sm:col-span-2">
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Paket Voucher <span class="text-rose-500">*</span></label>
+              <input type="text" id="hsInputNama" required placeholder="Contoh: Voucher Harian 24 Jam" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Label Durasi Tampil <span class="text-rose-500">*</span></label>
+              <input type="text" id="hsInputDurasiLabel" required placeholder="Contoh: 24 Jam (1 Hari)" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Limit Uptime MikroTik <span class="text-rose-500">*</span></label>
+              <input type="text" id="hsInputUptimeLimit" required placeholder="Contoh: 3h, 1d, 7d, 30d" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 font-mono bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kecepatan / Rate Limit (UL/DL) <span class="text-rose-500">*</span></label>
+              <input type="text" id="hsInputRateLimit" required placeholder="Contoh: 5M/5M atau 10M/10M" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 font-mono bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Profile MikroTik</label>
+              <input type="text" id="hsInputMikrotikProfile" placeholder="Contoh: VCR-HARIAN" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 font-mono bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Modal / Reseller (Rp) <span class="text-rose-500">*</span></label>
+              <input type="text" id="hsInputHargaModal" inputmode="numeric" required placeholder="Contoh: 3.000" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Jual Konsumen (Rp) <span class="text-rose-500">*</span></label>
+              <input type="text" id="hsInputHargaJual" inputmode="numeric" required placeholder="Contoh: 5.000" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Shared Users (Perangkat)</label>
+              <input type="number" id="hsInputSharedUsers" min="1" max="20" value="1" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div class="sm:col-span-3">
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Deskripsi Paket</label>
+              <input type="text" id="hsInputDeskripsi" placeholder="Keterangan singkat paket voucher..." class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div class="sm:col-span-2 lg:col-span-4 flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+              <button type="button" id="btnResetHsProfileForm" class="px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 font-medium">Batal</button>
+              <button type="submit" id="btnSubmitHsProfile" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-xs flex items-center gap-1.5">
+                <span>💾</span> Simpan Profil Paket
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tabel Daftar Profil Paket Hotspot -->
+        <div class="overflow-x-auto custom-scroll">
+          <table class="w-full min-w-[780px] text-xs sm:text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-900 text-left text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider">
+              <tr>
+                <th class="px-3 py-2.5">ID</th>
+                <th class="px-3 py-2.5">Nama Paket &amp; Deskripsi</th>
+                <th class="px-3 py-2.5">Durasi / Uptime</th>
+                <th class="px-3 py-2.5">Kecepatan (Rate Limit)</th>
+                <th class="px-3 py-2.5">Profile MikroTik</th>
+                <th class="px-3 py-2.5 text-right">Harga Modal</th>
+                <th class="px-3 py-2.5 text-right">Harga Jual &amp; Laba</th>
+                <th class="px-3 py-2.5 text-center">Stok Voucher</th>
+                <th class="px-3 py-2.5 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="hotspotProfileRows" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- BAGIAN 2: GENERATOR VOUCHER HOTSPOT (SATUAN & MASSAL / BATCH) -->
+      <section class="bg-white dark:bg-slate-900/80 rounded-2xl shadow-xs border border-teal-200/90 dark:border-teal-800/50 p-4 sm:p-5 space-y-4 no-print" id="sectionHotspotGenerator">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-3">
+          <div>
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base flex items-center gap-2">
+              <span>⚡</span> Generator Kode Voucher Hotspot (Satuan &amp; Massal / Batch)
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Buat voucher satuan untuk pembeli langsung atau cetak massal (batch) hingga 500 voucher sekaligus untuk stok mitra/reseller</p>
+          </div>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] text-slate-500 font-semibold mr-1">Pilih Cepat Jumlah:</span>
+            <button type="button" class="btn-hs-quick-qty px-2.5 py-1 text-xs font-bold rounded-lg border border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100 transition cursor-pointer" data-qty="1">1 (Satuan)</button>
+            <button type="button" class="btn-hs-quick-qty px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-qty="10">10 Voucher</button>
+            <button type="button" class="btn-hs-quick-qty px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-qty="25">25 Voucher</button>
+            <button type="button" class="btn-hs-quick-qty px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-qty="50">50 Voucher</button>
+            <button type="button" class="btn-hs-quick-qty px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition cursor-pointer" data-qty="100">100 Voucher</button>
+          </div>
+        </div>
+
+        <form id="formGenerateHotspotVoucher" class="space-y-4 text-xs sm:text-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div>
+              <label for="hsGenProfileSelect" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">Profil Paket Hotspot <span class="text-rose-500">*</span></label>
+              <select id="hsGenProfileSelect" required class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none font-medium"></select>
+            </div>
+
+            <div>
+              <label for="hsGenQty" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">Jumlah Voucher (1 - 500) <span class="text-rose-500">*</span></label>
+              <input type="number" id="hsGenQty" min="1" max="500" value="10" required class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm font-bold bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label for="hsGenPrefix" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">Prefix / Awalan Kode</label>
+              <input type="text" id="hsGenPrefix" value="BW" maxlength="6" placeholder="Mis. BW, VCR, WIFI" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm font-mono uppercase bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label for="hsGenLength" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">Panjang Total Karakter</label>
+              <select id="hsGenLength" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                <option value="6">6 Karakter (Ringkas)</option>
+                <option value="7">7 Karakter</option>
+                <option value="8" selected>8 Karakter (Standar Direkomendasikan)</option>
+                <option value="9">9 Karakter</option>
+                <option value="10">10 Karakter (Ekstra Aman)</option>
+                <option value="12">12 Karakter</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="hsGenCharset" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">Jenis Karakter (Charset)</label>
+              <select id="hsGenCharset" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                <option value="alphanumeric_upper" selected>Huruf Besar &amp; Angka (ABCDEF234567)</option>
+                <option value="numeric">Angka Saja / PIN (0123456789)</option>
+                <option value="alphanumeric_mixed">Huruf Besar, Kecil &amp; Angka (aBcDeF234)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="hsGenModeLogin" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">Mode Login Hotspot</label>
+              <select id="hsGenModeLogin" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                <option value="user_eq_pass" selected>Username = Password (1 Kode Voucher)</option>
+                <option value="user_diff_pass">Username &amp; Password Terpisah</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="hsGenReseller" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">Mitra Reseller / Loket</label>
+              <input type="text" id="hsGenReseller" value="Loket Utama" placeholder="Mis. Loket Utama / Warung Berkah" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label for="hsGenStatus" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">Status Awal Voucher</label>
+              <select id="hsGenStatus" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                <option value="unused" selected>Belum Terpakai (Stok Siap Jual)</option>
+                <option value="active">Langsung Aktif (Terjual di Kasir)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Ringkasan Kalkulasi Generator & Tombol Eksekusi -->
+          <div class="bg-teal-50/70 dark:bg-slate-900 border border-teal-200 dark:border-teal-800/50 rounded-xl p-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-4 text-xs">
+              <div>
+                <span class="text-slate-500 dark:text-slate-400">Contoh Format Kode:</span>
+                <span id="hsGenPreviewSample" class="ml-1 font-mono font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">BW7K9M2X</span>
+              </div>
+              <div>
+                <span class="text-slate-500 dark:text-slate-400">Total Modal:</span>
+                <strong id="hsGenPreviewModal" class="ml-1 text-slate-800 dark:text-slate-200">Rp 0</strong>
+              </div>
+              <div>
+                <span class="text-slate-500 dark:text-slate-400">Potensi Omzet:</span>
+                <strong id="hsGenPreviewOmzet" class="ml-1 text-indigo-700 dark:text-indigo-400">Rp 0</strong>
+              </div>
+              <div>
+                <span class="text-slate-500 dark:text-slate-400">Estimasi Laba:</span>
+                <strong id="hsGenPreviewLaba" class="ml-1 text-emerald-700 dark:text-emerald-400">+Rp 0</strong>
+              </div>
+            </div>
+            <button type="submit" id="btnSubmitGenerateVoucher" class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer shrink-0">
+              <span>🎫</span> <span>Generate Voucher Sekarang</span>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- BAGIAN 3: TABEL DAFTAR VOUCHER, FILTER, SALIN & CETAK KUPON -->
+      <section class="bg-white dark:bg-slate-900/80 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-800 overflow-hidden no-print" id="sectionHotspotVouchers">
+        <div class="p-4 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800">
+          <div>
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base flex items-center gap-2">
+              <span>🎟️</span> Daftar Kode Voucher Hotspot &amp; Distribusi Reseller
+              <span id="hsFilteredCountBadge" class="text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-0.5 rounded-full">0 Voucher</span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Filter berdasarkan paket, status, atau kode batch untuk menyalin kode ke WhatsApp reseller atau mencetak tiket kupon Wi-Fi</p>
+          </div>
+
+          <!-- Tombol Cetak, Salin Massal, Ekspor CSV & Bersihkan Expired -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="btnCopyFilteredVouchers" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 flex items-center gap-1.5 transition cursor-pointer" title="Salin daftar kode voucher yang tampil untuk dikirim ke WhatsApp Reseller/Pelanggan">
+              <span>📋</span> Salin Kode (WA/Reseller)
+            </button>
+            <button type="button" id="btnPrintFilteredVouchers" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 flex items-center gap-1.5 transition cursor-pointer" title="Cetak Kupon / Tiket Voucher Hotspot">
+              <span>🖨️</span> Cetak Kupon Voucher
+            </button>
+            <button type="button" id="btnExportVouchersCsv" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center gap-1.5 transition cursor-pointer" title="Download CSV Daftar Voucher untuk Excel">
+              <span>📊</span> Ekspor CSV
+            </button>
+            <button type="button" id="btnDeleteExpiredVouchers" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 flex items-center gap-1.5 transition cursor-pointer" title="Hapus voucher yang sudah kedaluwarsa atau per batch">
+              <span>🗑️</span> Bersihkan Expired / Batch
+            </button>
+          </div>
+        </div>
+
+        <!-- Bar Filter Pencarian Voucher -->
+        <div class="px-4 py-3 bg-slate-50/70 dark:bg-slate-900/50 border-b border-slate-200/80 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
+          <input type="search" id="hsFilterSearch" placeholder="Cari kode voucher, mitra reseller, pembeli..." class="border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+          <select id="hsFilterProfile" class="border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none">
+            <option value="">Semua Profil Paket</option>
+          </select>
+          <select id="hsFilterStatus" class="border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none">
+            <option value="">Semua Status Voucher</option>
+            <option value="unused">🔵 Belum Terpakai (Ready)</option>
+            <option value="active">🟢 Aktif (Digunakan)</option>
+            <option value="expired">🔴 Kedaluwarsa (Habis)</option>
+          </select>
+          <select id="hsFilterBatch" class="border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none">
+            <option value="">Semua Kode Batch</option>
+          </select>
+        </div>
+
+        <!-- Tabel Daftar Kode Voucher -->
+        <div class="overflow-x-auto custom-scroll">
+          <table class="w-full min-w-[880px] text-xs sm:text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-900 text-left text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider">
+              <tr>
+                <th class="px-3.5 py-3">Kode Voucher &amp; Login</th>
+                <th class="px-3.5 py-3">Paket &amp; Durasi</th>
+                <th class="px-3.5 py-3">Kecepatan &amp; Profile</th>
+                <th class="px-3.5 py-3 text-right">Modal &amp; Harga Jual</th>
+                <th class="px-3.5 py-3">Batch &amp; Reseller</th>
+                <th class="px-3.5 py-3 text-center">Status</th>
+                <th class="px-3.5 py-3 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="hotspotVoucherRows" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
           </table>
         </div>
       </section>
@@ -4159,6 +4512,7 @@ async function load() {
   try { checkRemindersAlert(); } catch (e) { console.error('reminders err:', e); }
   try { loadFinancialReport(); } catch (e) { console.error('financial err:', e); }
   try { loadMikrotikStatus(); } catch (e) { console.error('mikrotik err:', e); }
+  try { loadHotspotModule(); } catch (e) { console.error('hotspot err:', e); }
   try { initAnalyticsToggle(); } catch (e) { console.error('analytics toggle err:', e); }
 }
 
@@ -8158,6 +8512,8 @@ if ($('stockRows')) {
 attachThousandSeparator($('inputHargaPelanggan'));
 attachThousandSeparator($('pkgInputHarga'));
 attachThousandSeparator($('expenseNominal'));
+attachThousandSeparator($('hsInputHargaModal'));
+attachThousandSeparator($('hsInputHargaJual'));
 
 // ---- Inisialisasi Sesi & Multi-Tenant Management ----
 async function checkAuthSession() {
@@ -8229,9 +8585,11 @@ function applyRolePermissionsUI(user, permissions) {
   const allManagedMenuIds = [
     'navDashboard',
     'navCustomers',
+    'navHotspot',
     'btnGenerate',
     'btnAutoIsolir',
     'btnPackages',
+    'btnHotspotVoucher',
     'btnInventoryStock',
     'btnExpenses',
     'btnBankAccounts',
@@ -9210,41 +9568,53 @@ function initTableDragScroll() {
 }
 
 // ========================================================
-// MANAJEMEN NAVIGASI TAMPILAN (DASHBOARD VS PELANGGAN)
+// MANAJEMEN NAVIGASI TAMPILAN (DASHBOARD, PELANGGAN & HOTSPOT VOUCHER)
 // ========================================================
 function switchPageView(viewName) {
-  const isCustomers = viewName === 'customers';
+  const targetView = (viewName === 'customers' || viewName === 'hotspot' || viewName === 'dashboard')
+    ? viewName
+    : 'customers';
+
+  const isDash = targetView === 'dashboard';
+  const isCust = targetView === 'customers';
+  const isHotspot = targetView === 'hotspot';
+
   const viewDash = $('viewDashboard');
   const viewCust = $('viewCustomers');
+  const viewHs = $('viewHotspot');
+
   const btnDash = $('navDashboard');
   const btnCust = $('navCustomers');
+  const btnHs = $('navHotspot');
+  const btnHsSub = $('btnHotspotVoucher');
 
-  if (viewDash) viewDash.classList.toggle('hidden', isCustomers);
-  if (viewCust) viewCust.classList.toggle('hidden', !isCustomers);
+  if (viewDash) viewDash.classList.toggle('hidden', !isDash);
+  if (viewCust) viewCust.classList.toggle('hidden', !isCust);
+  if (viewHs) viewHs.classList.toggle('hidden', !isHotspot);
 
-  // Perbarui style tombol navigasi aktif di Sidebar
-  if (btnDash) {
-    if (isCustomers) {
-      btnDash.className = 'w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none text-slate-300 hover:text-white hover:bg-slate-800/80';
+  const activeNavCls = 'w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none bg-indigo-600 text-white shadow-sm';
+  const inactiveNavCls = 'w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none text-slate-300 hover:text-white hover:bg-slate-800/80';
+
+  if (btnDash) btnDash.className = isDash ? activeNavCls : inactiveNavCls;
+  if (btnCust) btnCust.className = isCust ? activeNavCls : inactiveNavCls;
+  if (btnHs) btnHs.className = isHotspot ? activeNavCls : inactiveNavCls;
+
+  if (btnHsSub) {
+    if (isHotspot) {
+      btnHsSub.classList.add('bg-teal-900/60', 'text-teal-200', 'ring-1', 'ring-teal-500/40');
     } else {
-      btnDash.className = 'w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none bg-indigo-600 text-white shadow-sm';
-    }
-  }
-
-  if (btnCust) {
-    if (isCustomers) {
-      btnCust.className = 'w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none bg-indigo-600 text-white shadow-sm';
-    } else {
-      btnCust.className = 'w-full text-left px-3 py-2.5 rounded-xl font-bold flex items-center justify-between transition text-xs cursor-pointer select-none text-slate-300 hover:text-white hover:bg-slate-800/80';
+      btnHsSub.classList.remove('bg-teal-900/60', 'text-teal-200', 'ring-1', 'ring-teal-500/40');
     }
   }
 
   // Simpan preferensi halaman ke sessionStorage
-  sessionStorage.setItem('activeView', isCustomers ? 'customers' : 'dashboard');
+  sessionStorage.setItem('activeView', targetView);
 
-  // Trigger resize grafis dan render ulang data
-  if (isCustomers) {
+  // Trigger resize grafis dan render ulang data sesuai halaman
+  if (isCust) {
     render();
+  } else if (isHotspot) {
+    loadHotspotModule();
   } else {
     setTimeout(() => {
       if (chartMonthlyInstance) chartMonthlyInstance.resize();
@@ -9267,6 +9637,12 @@ function initPageViewNavigation() {
   }
   if ($('navCustomers')) {
     $('navCustomers').addEventListener('click', () => switchPageView('customers'));
+  }
+  if ($('navHotspot')) {
+    $('navHotspot').addEventListener('click', () => switchPageView('hotspot'));
+  }
+  if ($('btnHotspotVoucher')) {
+    $('btnHotspotVoucher').addEventListener('click', () => switchPageView('hotspot'));
   }
   if ($('btnDashboardToCustomers')) {
     $('btnDashboardToCustomers').addEventListener('click', () => switchPageView('customers'));
@@ -9309,14 +9685,852 @@ function initPageViewNavigation() {
   const savedView = sessionStorage.getItem('activeView');
   if (savedView === 'dashboard') {
     switchPageView('dashboard');
+  } else if (savedView === 'hotspot') {
+    switchPageView('hotspot');
   } else {
     switchPageView('customers');
   }
 }
 
-// Inisialisasi Sidebar Navigasi
+// ========================================================
+// MODUL PAKET & VOUCHER HOTSPOT (BAYARWIFI 3.0 ALIGNMENT)
+// ========================================================
+let hotspotProfilesData = [];
+let hotspotVouchersData = [];
+let hotspotStatsData = {};
+
+async function loadHotspotModule() {
+  try {
+    const [profRes, vcrRes] = await Promise.all([
+      fetch('/api/hotspot/profiles'),
+      fetch('/api/hotspot/vouchers')
+    ]);
+
+    if (profRes.ok) {
+      const profJson = await profRes.json();
+      hotspotProfilesData = Array.isArray(profJson.profiles) ? profJson.profiles : [];
+    }
+    if (vcrRes.ok) {
+      const vcrJson = await vcrRes.json();
+      hotspotVouchersData = Array.isArray(vcrJson.vouchers) ? vcrJson.vouchers : [];
+      hotspotStatsData = vcrJson.stats || {};
+    }
+
+    renderHotspotStats();
+    renderHotspotProfiles();
+    populateHotspotDropdowns();
+    updateHotspotGeneratorPreview();
+    renderHotspotVouchers();
+  } catch (err) {
+    console.error('Gagal memuat modul Hotspot Voucher:', err);
+  }
+}
+
+function renderHotspotStats() {
+  const s = hotspotStatsData || {};
+  const total = s.total_vouchers !== undefined ? s.total_vouchers : hotspotVouchersData.length;
+  const unused = s.count_unused !== undefined ? s.count_unused : hotspotVouchersData.filter(v => v.status === 'unused').length;
+  const active = s.count_active !== undefined ? s.count_active : hotspotVouchersData.filter(v => v.status === 'active').length;
+  const expired = s.count_expired !== undefined ? s.count_expired : hotspotVouchersData.filter(v => v.status === 'expired').length;
+  const potensiOmzet = s.potensi_omzet !== undefined ? s.potensi_omzet : 0;
+  const estimasiLaba = s.estimasi_laba !== undefined ? s.estimasi_laba : 0;
+  const omzetTerjual = s.omzet_terjual !== undefined ? s.omzet_terjual : 0;
+  const labaTerjual = s.laba_terjual !== undefined ? s.laba_terjual : 0;
+  const batchesCount = Array.isArray(s.batches) ? s.batches.length : 0;
+
+  if ($('navHotspotBadge')) $('navHotspotBadge').textContent = total;
+  if ($('badgeHotspotUnused')) $('badgeHotspotUnused').textContent = `${unused} Ready`;
+  if ($('hsHeaderBadge')) $('hsHeaderBadge').textContent = `${total} Voucher (${unused} Siap Jual)`;
+
+  if ($('hsStatTotal')) $('hsStatTotal').textContent = total;
+  if ($('hsStatBatchSub')) $('hsStatBatchSub').textContent = `${batchesCount} Batch Terdaftar`;
+  if ($('hsStatUnused')) $('hsStatUnused').textContent = unused;
+  if ($('hsStatActive')) $('hsStatActive').textContent = active;
+  if ($('hsStatExpired')) $('hsStatExpired').textContent = expired;
+  if ($('hsStatPotensiOmzet')) $('hsStatPotensiOmzet').textContent = rupiah(potensiOmzet);
+  if ($('hsStatOmzetTerjualSub')) $('hsStatOmzetTerjualSub').textContent = `Terjual: ${rupiah(omzetTerjual)}`;
+  if ($('hsStatEstimasiLaba')) $('hsStatEstimasiLaba').textContent = rupiah(estimasiLaba);
+  if ($('hsStatLabaTerjualSub')) $('hsStatLabaTerjualSub').textContent = `Realisasi Laba: ${rupiah(labaTerjual)}`;
+}
+
+function populateHotspotDropdowns() {
+  // 1. Dropdown Profil pada Generator Voucher
+  const genSelect = $('hsGenProfileSelect');
+  if (genSelect) {
+    const prevVal = genSelect.value;
+    const activeProfiles = hotspotProfilesData.filter(p => p.aktif !== false);
+    const list = activeProfiles.length > 0 ? activeProfiles : hotspotProfilesData;
+    genSelect.innerHTML = list.map(p =>
+      `<option value="${esc(p.id)}">${esc(p.nama)} — ${esc(p.durasi_label)} (${esc(p.rate_limit)}) • Jual ${rupiah(p.harga_jual)}</option>`
+    ).join('') || '<option value="">-- Belum Ada Profil Paket --</option>';
+    if (prevVal && list.some(p => p.id === prevVal)) {
+      genSelect.value = prevVal;
+    }
+  }
+
+  // 2. Dropdown Filter Profil pada Tabel Voucher
+  const filterProf = $('hsFilterProfile');
+  if (filterProf) {
+    const prevProf = filterProf.value;
+    filterProf.innerHTML = '<option value="">Semua Profil Paket</option>' +
+      hotspotProfilesData.map(p => `<option value="${esc(p.id)}">${esc(p.nama)} (${esc(p.durasi_label)})</option>`).join('');
+    if (prevProf && hotspotProfilesData.some(p => p.id === prevProf)) {
+      filterProf.value = prevProf;
+    }
+  }
+
+  // 3. Dropdown Filter Kode Batch pada Tabel Voucher
+  const filterBatch = $('hsFilterBatch');
+  if (filterBatch) {
+    const prevBatch = filterBatch.value;
+    const rawBatches = Array.isArray(hotspotStatsData.batches) && hotspotStatsData.batches.length > 0
+      ? hotspotStatsData.batches
+      : [...new Set(hotspotVouchersData.map(v => v.batch_code).filter(Boolean))];
+    const batches = rawBatches.map(b => {
+      if (typeof b === 'string') {
+        return {
+          batch_code: b,
+          total: hotspotVouchersData.filter(v => v.batch_code === b).length
+        };
+      }
+      return {
+        batch_code: b.batch_code || '',
+        total: b.total !== undefined ? b.total : hotspotVouchersData.filter(v => v.batch_code === b.batch_code).length
+      };
+    }).filter(b => b.batch_code);
+
+    filterBatch.innerHTML = '<option value="">Semua Kode Batch</option>' +
+      batches.map(b => `<option value="${esc(b.batch_code)}">${esc(b.batch_code)} (${b.total || 0} vcr)</option>`).join('');
+    if (prevBatch && batches.some(b => b.batch_code === prevBatch)) {
+      filterBatch.value = prevBatch;
+    }
+  }
+}
+
+function renderHotspotProfiles() {
+  const tbody = $('hotspotProfileRows');
+  if ($('hsProfilesCountBadge')) {
+    $('hsProfilesCountBadge').textContent = `${hotspotProfilesData.length} Paket`;
+  }
+  if (!tbody) return;
+
+  if (hotspotProfilesData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="px-4 py-6 text-center text-slate-400">Belum ada profil paket Hotspot. Klik "Tambah Profil Paket Baru" untuk membuat paket.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = hotspotProfilesData.map(p => {
+    const modal = Number(p.harga_modal) || 0;
+    const jual = Number(p.harga_jual) || 0;
+    const margin = Math.max(0, jual - modal);
+    const unusedCount = p.unused_vouchers !== undefined
+      ? p.unused_vouchers
+      : hotspotVouchersData.filter(v => v.profile_id === p.id && v.status === 'unused').length;
+    const activeCount = p.active_vouchers !== undefined
+      ? p.active_vouchers
+      : hotspotVouchersData.filter(v => v.profile_id === p.id && v.status === 'active').length;
+
+    return `
+      <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+        <td class="px-3 py-2.5 font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">${esc(p.id)}</td>
+        <td class="px-3 py-2.5">
+          <div class="font-bold text-slate-800 dark:text-slate-100">${esc(p.nama)}</div>
+          <div class="text-[11px] text-slate-500 dark:text-slate-400">${esc(p.deskripsi || '-')}</div>
+        </td>
+        <td class="px-3 py-2.5 whitespace-nowrap">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50 text-xs font-semibold">
+            ⏱️ ${esc(p.durasi_label)}
+          </span>
+          <div class="text-[10px] font-mono text-slate-400 mt-0.5">Uptime: ${esc(p.uptime_limit)} • ${p.shared_users || 1} Device</div>
+        </td>
+        <td class="px-3 py-2.5 whitespace-nowrap">
+          <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/50">
+            🚀 ${esc(p.rate_limit)}
+          </span>
+        </td>
+        <td class="px-3 py-2.5 font-mono text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap">
+          ${esc(p.mikrotik_profile || '-')}
+        </td>
+        <td class="px-3 py-2.5 text-right font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
+          ${rupiah(modal)}
+        </td>
+        <td class="px-3 py-2.5 text-right whitespace-nowrap">
+          <div class="font-bold text-slate-900 dark:text-white">${rupiah(jual)}</div>
+          <div class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">+${rupiah(margin)} / vcr</div>
+        </td>
+        <td class="px-3 py-2.5 text-center whitespace-nowrap">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60">
+            ${unusedCount} Ready
+          </span>
+          ${activeCount > 0 ? `<div class="text-[10px] text-emerald-600 font-semibold mt-0.5">${activeCount} Aktif</div>` : ''}
+        </td>
+        <td class="px-3 py-2.5 text-center whitespace-nowrap">
+          <div class="inline-flex items-center gap-1">
+            <button type="button" class="btn-hs-use-profile px-2 py-1 text-[11px] font-bold rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 transition cursor-pointer" data-id="${esc(p.id)}" title="Gunakan profil ini di Generator Voucher">
+              🎫 Buat
+            </button>
+            <button type="button" class="btn-hs-edit-profile px-2 py-1 text-[11px] font-semibold rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer" data-id="${esc(p.id)}" title="Edit Profil Paket">
+              ✏️
+            </button>
+            <button type="button" class="btn-hs-delete-profile px-2 py-1 text-[11px] font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition cursor-pointer" data-id="${esc(p.id)}" title="Hapus Profil Paket">
+              🗑️
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function getFilteredHotspotVouchers() {
+  const q = ($('hsFilterSearch') ? $('hsFilterSearch').value : '').trim().toLowerCase();
+  const profId = $('hsFilterProfile') ? $('hsFilterProfile').value : '';
+  const status = $('hsFilterStatus') ? $('hsFilterStatus').value : '';
+  const batch = $('hsFilterBatch') ? $('hsFilterBatch').value : '';
+
+  return hotspotVouchersData.filter(v => {
+    if (profId && v.profile_id !== profId) return false;
+    if (status && v.status !== status) return false;
+    if (batch && v.batch_code !== batch) return false;
+    if (q) {
+      const target = `${v.kode || ''} ${v.username || ''} ${v.profile_nama || ''} ${v.batch_code || ''} ${v.reseller || ''} ${v.used_by || ''}`.toLowerCase();
+      if (!target.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderHotspotVouchers() {
+  const tbody = $('hotspotVoucherRows');
+  if (!tbody) return;
+
+  const filtered = getFilteredHotspotVouchers();
+  if ($('hsFilteredCountBadge')) {
+    $('hsFilteredCountBadge').textContent = `${filtered.length} dari ${hotspotVouchersData.length} Voucher`;
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">Tidak ada kode voucher yang sesuai filter pencarian. Gunakan Generator di atas untuk membuat voucher baru.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(v => {
+    const isUnused = v.status === 'unused';
+    const isActive = v.status === 'active';
+    const isExpired = v.status === 'expired';
+
+    let statusBadge = '';
+    if (isUnused) {
+      statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60"><span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>Belum Terpakai</span>`;
+    } else if (isActive) {
+      statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>Aktif Digunakan</span>`;
+    } else {
+      statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Kedaluwarsa</span>`;
+    }
+
+    const sameLogin = (v.username || v.kode) === (v.password || v.kode);
+    const modal = Number(v.harga_modal) || 0;
+    const jual = Number(v.harga_jual) || 0;
+    const laba = Math.max(0, jual - modal);
+
+    return `
+      <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+        <td class="px-3.5 py-3 align-top">
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-extrabold text-sm tracking-wider px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 select-all">${esc(v.kode)}</span>
+            <button type="button" class="btn-hs-copy-single text-xs px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 dark:text-slate-300 transition cursor-pointer" data-id="${esc(v.id)}" title="Salin Kode Voucher">📋</button>
+          </div>
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono">
+            ${sameLogin ? 'Mode: Kode = User/Pass' : `User: <b>${esc(v.username)}</b> | Pass: <b>${esc(v.password)}</b>`}
+          </div>
+        </td>
+        <td class="px-3.5 py-3 align-top">
+          <div class="font-bold text-slate-800 dark:text-slate-100">${esc(v.profile_nama)}</div>
+          <div class="text-xs text-amber-700 dark:text-amber-400 font-semibold mt-0.5">⏱️ ${esc(v.durasi_label)} (${esc(v.uptime_limit)})</div>
+        </td>
+        <td class="px-3.5 py-3 align-top">
+          <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/50">
+            ${esc(v.rate_limit)}
+          </span>
+          <div class="text-[11px] font-mono text-slate-500 mt-1">MT: ${esc(v.mikrotik_profile || '-')}</div>
+        </td>
+        <td class="px-3.5 py-3 align-top text-right whitespace-nowrap">
+          <div class="font-bold text-slate-900 dark:text-white">${rupiah(jual)}</div>
+          <div class="text-[11px] text-slate-500">Modal: ${rupiah(modal)} <span class="text-emerald-600 font-semibold">(+${rupiah(laba)})</span></div>
+        </td>
+        <td class="px-3.5 py-3 align-top">
+          <div class="font-mono text-xs font-semibold text-indigo-700 dark:text-indigo-300">${esc(v.batch_code || '-')}</div>
+          <div class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">🏪 ${esc(v.reseller || 'Loket Utama')}</div>
+          ${v.used_by ? `<div class="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">👤 ${esc(v.used_by)}</div>` : ''}
+        </td>
+        <td class="px-3.5 py-3 align-top text-center whitespace-nowrap">
+          ${statusBadge}
+          <div class="text-[10px] text-slate-400 mt-1">${formatDateTimeWIB(v.activated_at || v.created_at)}</div>
+        </td>
+        <td class="px-3.5 py-3 align-top text-right whitespace-nowrap">
+          <div class="inline-flex items-center gap-1 justify-end">
+            <button type="button" class="btn-hs-print-single px-2.5 py-1 text-xs font-semibold rounded-lg border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 transition cursor-pointer" data-id="${esc(v.id)}" title="Cetak Kupon Voucher Ini">
+              🖨️ Cetak
+            </button>
+            <button type="button" class="btn-hs-toggle-status px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 transition cursor-pointer" data-id="${esc(v.id)}" data-status="${esc(v.status)}" title="Ubah Status Voucher (Ready -> Aktif -> Expired)">
+              🔄 Status
+            </button>
+            <button type="button" class="btn-hs-delete-single px-2 py-1 text-xs font-semibold rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 transition cursor-pointer" data-id="${esc(v.id)}" title="Hapus Voucher">
+              🗑️
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function updateHotspotGeneratorPreview() {
+  const profId = $('hsGenProfileSelect') ? $('hsGenProfileSelect').value : '';
+  const profile = hotspotProfilesData.find(p => p.id === profId) || hotspotProfilesData[0];
+  const qty = Math.max(1, Math.min(500, parseInt($('hsGenQty') ? $('hsGenQty').value : '1', 10) || 1));
+  const prefix = (($('hsGenPrefix') ? $('hsGenPrefix').value : 'BW') || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 6);
+  const length = Math.max(4, Math.min(16, parseInt($('hsGenLength') ? $('hsGenLength').value : '8', 10) || 8));
+  const charset = $('hsGenCharset') ? $('hsGenCharset').value : 'alphanumeric_upper';
+
+  let sampleChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  if (charset === 'numeric') sampleChars = '0123456789';
+  else if (charset === 'alphanumeric_mixed') sampleChars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+  const randLen = Math.max(3, length - prefix.length);
+  let sampleTail = '';
+  for (let i = 0; i < randLen; i++) {
+    sampleTail += sampleChars.charAt((i * 7 + 3) % sampleChars.length);
+  }
+  const sampleCode = `${prefix}${sampleTail}`;
+
+  const modal = profile ? (Number(profile.harga_modal) || 0) * qty : 0;
+  const omzet = profile ? (Number(profile.harga_jual) || 0) * qty : 0;
+  const laba = Math.max(0, omzet - modal);
+
+  if ($('hsGenPreviewSample')) $('hsGenPreviewSample').textContent = sampleCode;
+  if ($('hsGenPreviewModal')) $('hsGenPreviewModal').textContent = rupiah(modal);
+  if ($('hsGenPreviewOmzet')) $('hsGenPreviewOmzet').textContent = rupiah(omzet);
+  if ($('hsGenPreviewLaba')) $('hsGenPreviewLaba').textContent = `+${rupiah(laba)}`;
+}
+
+function openHotspotProfileForm(profile = null) {
+  const box = $('boxHotspotProfileForm');
+  if (!box) return;
+  box.classList.remove('hidden');
+
+  if (profile) {
+    if ($('hsProfileFormTitle')) $('hsProfileFormTitle').innerHTML = `<span>✏️</span> Edit Profil Paket Hotspot: ${esc(profile.nama)}`;
+    if ($('hsProfileId')) $('hsProfileId').value = profile.id;
+    if ($('hsInputNama')) $('hsInputNama').value = profile.nama || '';
+    if ($('hsInputDurasiLabel')) $('hsInputDurasiLabel').value = profile.durasi_label || '';
+    if ($('hsInputUptimeLimit')) $('hsInputUptimeLimit').value = profile.uptime_limit || '1d';
+    if ($('hsInputRateLimit')) $('hsInputRateLimit').value = profile.rate_limit || '5M/5M';
+    if ($('hsInputMikrotikProfile')) $('hsInputMikrotikProfile').value = profile.mikrotik_profile || '';
+    if ($('hsInputHargaModal')) $('hsInputHargaModal').value = formatRibuan(profile.harga_modal || 0);
+    if ($('hsInputHargaJual')) $('hsInputHargaJual').value = formatRibuan(profile.harga_jual || 0);
+    if ($('hsInputSharedUsers')) $('hsInputSharedUsers').value = profile.shared_users || 1;
+    if ($('hsInputDeskripsi')) $('hsInputDeskripsi').value = profile.deskripsi || '';
+  } else {
+    if ($('hsProfileFormTitle')) $('hsProfileFormTitle').innerHTML = '<span>➕</span> Tambah Profil Paket Hotspot Baru';
+    if ($('formHotspotProfile')) $('formHotspotProfile').reset();
+    if ($('hsProfileId')) $('hsProfileId').value = '';
+    if ($('hsInputSharedUsers')) $('hsInputSharedUsers').value = '1';
+  }
+
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if ($('hsInputNama')) $('hsInputNama').focus();
+}
+
+function closeHotspotProfileForm() {
+  const box = $('boxHotspotProfileForm');
+  if (box) box.classList.add('hidden');
+  if ($('formHotspotProfile')) $('formHotspotProfile').reset();
+  if ($('hsProfileId')) $('hsProfileId').value = '';
+}
+
+function printHotspotVoucherCoupons(vouchersToPrint) {
+  if (!Array.isArray(vouchersToPrint) || vouchersToPrint.length === 0) {
+    toast('⚠️ Tidak ada voucher untuk dicetak');
+    return;
+  }
+
+  const businessName = (currentActiveTenant && currentActiveTenant.nama_usaha) || (appSettings && appSettings.nama_wifi) || 'Billing RT/RW.net Hotspot';
+  const cardsHtml = vouchersToPrint.map((v, idx) => {
+    const sameLogin = (v.username || v.kode) === (v.password || v.kode);
+    return `
+      <div class="coupon">
+        <div class="coupon-head">
+          <span class="brand">📶 ${esc(businessName)}</span>
+          <span class="num">#${idx + 1}</span>
+        </div>
+        <div class="pkg">${esc(v.profile_nama)}</div>
+        <div class="meta">Durasi: <b>${esc(v.durasi_label)}</b> • Speed: <b>${esc(v.rate_limit)}</b></div>
+        <div class="code-box">
+          ${sameLogin
+            ? `<div class="code-label">KODE VOUCHER LOGIN</div><div class="code-val">${esc(v.kode)}</div>`
+            : `<div class="code-label">USER / PASSWORD</div><div class="code-val">${esc(v.username)} / ${esc(v.password)}</div>`
+          }
+        </div>
+        <div class="foot">
+          <span class="price">${rupiah(v.harga_jual || 0)}</span>
+          <span class="batch">${esc(v.batch_code || '')}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const printWin = window.open('', '_blank', 'width=900,height=700');
+  if (!printWin) {
+    alert('Pop-up diblokir oleh browser. Izinkan pop-up untuk mencetak kupon voucher.');
+    return;
+  }
+
+  printWin.document.write(`<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Cetak Kupon Voucher Hotspot - ${esc(businessName)}</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { margin: 12px; background: #f8fafc; color: #0f172a; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 10px 14px; background: #0f172a; color: #fff; border-radius: 10px; }
+    .toolbar button { background: #14b8a6; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+    .coupon { background: #fff; border: 1.5px dashed #334155; border-radius: 8px; padding: 10px; page-break-inside: avoid; }
+    .coupon-head { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #0f766e; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+    .pkg { font-size: 13px; font-weight: 800; margin-top: 6px; color: #1e293b; }
+    .meta { font-size: 10px; color: #475569; margin-top: 2px; }
+    .code-box { margin: 8px 0; padding: 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; }
+    .code-label { font-size: 9px; color: #64748b; font-weight: bold; letter-spacing: 0.05em; }
+    .code-val { font-family: Consolas, monospace; font-size: 16px; font-weight: 900; letter-spacing: 1.5px; color: #0f172a; margin-top: 2px; }
+    .foot { display: flex; justify-content: space-between; align-items: center; font-size: 11px; border-top: 1px solid #e2e8f0; padding-top: 5px; }
+    .price { font-weight: 800; color: #047857; font-size: 13px; }
+    .batch { font-family: monospace; font-size: 9px; color: #64748b; }
+    @media print {
+      body { background: #fff; margin: 0; }
+      .toolbar { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div><strong>🖨️ Cetak Kupon Voucher Hotspot</strong> — Total: ${vouchersToPrint.length} Kupon</div>
+    <button onclick="window.print()">Cetak Sekarang</button>
+  </div>
+  <div class="grid">${cardsHtml}</div>
+</body>
+</html>`);
+  printWin.document.close();
+}
+
+function initHotspotVoucherEvents() {
+  if ($('btnToggleHotspotProfileForm')) {
+    $('btnToggleHotspotProfileForm').addEventListener('click', () => {
+      const box = $('boxHotspotProfileForm');
+      if (box && !box.classList.contains('hidden') && !$('hsProfileId').value) {
+        closeHotspotProfileForm();
+      } else {
+        openHotspotProfileForm(null);
+      }
+    });
+  }
+  if ($('btnOpenAddHotspotProfile')) {
+    $('btnOpenAddHotspotProfile').addEventListener('click', () => openHotspotProfileForm(null));
+  }
+  if ($('btnCancelHsProfileForm')) {
+    $('btnCancelHsProfileForm').addEventListener('click', closeHotspotProfileForm);
+  }
+  if ($('btnResetHsProfileForm')) {
+    $('btnResetHsProfileForm').addEventListener('click', closeHotspotProfileForm);
+  }
+  if ($('btnFocusGenerator')) {
+    $('btnFocusGenerator').addEventListener('click', () => {
+      const sec = $('sectionHotspotGenerator');
+      if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+      if ($('hsGenQty')) $('hsGenQty').focus();
+    });
+  }
+
+  // Simpan Tambah/Edit Profil Paket Hotspot
+  if ($('formHotspotProfile')) {
+    $('formHotspotProfile').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = $('btnSubmitHsProfile');
+      setBtnLoading(btn, true, 'Menyimpan...');
+
+      const editId = ($('hsProfileId').value || '').trim();
+      const payload = {
+        nama: ($('hsInputNama').value || '').trim(),
+        durasi_label: ($('hsInputDurasiLabel').value || '').trim(),
+        uptime_limit: ($('hsInputUptimeLimit').value || '1d').trim(),
+        rate_limit: ($('hsInputRateLimit').value || '5M/5M').trim(),
+        mikrotik_profile: ($('hsInputMikrotikProfile').value || '').trim(),
+        harga_modal: parseRibuan($('hsInputHargaModal').value),
+        harga_jual: parseRibuan($('hsInputHargaJual').value),
+        shared_users: parseInt($('hsInputSharedUsers').value || '1', 10) || 1,
+        deskripsi: ($('hsInputDeskripsi').value || '').trim()
+      };
+
+      try {
+        const url = editId ? `/api/hotspot/profiles/${encodeURIComponent(editId)}` : '/api/hotspot/profiles';
+        const method = editId ? 'PUT' : 'POST';
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Gagal menyimpan profil paket Hotspot');
+
+        toast(editId ? `✅ Profil "${payload.nama}" berhasil diperbarui` : `✅ Profil "${payload.nama}" berhasil ditambahkan`);
+        closeHotspotProfileForm();
+        await loadHotspotModule();
+      } catch (err) {
+        alert('Gagal menyimpan profil Hotspot: ' + err.message);
+      } finally {
+        setBtnLoading(btn, false);
+      }
+    });
+  }
+
+  // Aksi pada Tabel Profil Paket Hotspot
+  if ($('hotspotProfileRows')) {
+    $('hotspotProfileRows').addEventListener('click', async (e) => {
+      const btnUse = e.target.closest('.btn-hs-use-profile');
+      if (btnUse) {
+        const id = btnUse.dataset.id;
+        if ($('hsGenProfileSelect')) {
+          $('hsGenProfileSelect').value = id;
+          updateHotspotGeneratorPreview();
+        }
+        const sec = $('sectionHotspotGenerator');
+        if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+        if ($('hsGenQty')) $('hsGenQty').focus();
+        return;
+      }
+
+      const btnEdit = e.target.closest('.btn-hs-edit-profile');
+      if (btnEdit) {
+        const id = btnEdit.dataset.id;
+        const prof = hotspotProfilesData.find(p => p.id === id);
+        if (prof) openHotspotProfileForm(prof);
+        return;
+      }
+
+      const btnDel = e.target.closest('.btn-hs-delete-profile');
+      if (btnDel) {
+        const id = btnDel.dataset.id;
+        const prof = hotspotProfilesData.find(p => p.id === id);
+        if (!prof) return;
+        if (!confirm(`Hapus profil paket Hotspot "${prof.nama}"?`)) return;
+
+        try {
+          const res = await fetch(`/api/hotspot/profiles/${encodeURIComponent(id)}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Gagal menghapus profil');
+          toast(`🗑️ Profil "${prof.nama}" dihapus`);
+          await loadHotspotModule();
+        } catch (err) {
+          alert('Gagal menghapus profil: ' + err.message);
+        }
+      }
+    });
+  }
+
+  // Tombol Cepat Jumlah Voucher (1, 10, 25, 50, 100)
+  document.querySelectorAll('.btn-hs-quick-qty').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const q = btn.dataset.qty || '10';
+      if ($('hsGenQty')) {
+        $('hsGenQty').value = q;
+        updateHotspotGeneratorPreview();
+      }
+      document.querySelectorAll('.btn-hs-quick-qty').forEach(b => {
+        b.classList.remove('border-teal-300', 'bg-teal-50', 'text-teal-800', 'font-bold');
+        b.classList.add('border-slate-300', 'bg-white', 'text-slate-700');
+      });
+      btn.classList.add('border-teal-300', 'bg-teal-50', 'text-teal-800', 'font-bold');
+      btn.classList.remove('border-slate-300', 'bg-white', 'text-slate-700');
+    });
+  });
+
+  // Live Preview Kalkulasi Generator Voucher
+  ['hsGenProfileSelect', 'hsGenQty', 'hsGenPrefix', 'hsGenLength', 'hsGenCharset', 'hsGenModeLogin'].forEach(id => {
+    const el = $(id);
+    if (el) {
+      el.addEventListener('input', updateHotspotGeneratorPreview);
+      el.addEventListener('change', updateHotspotGeneratorPreview);
+    }
+  });
+
+  // Submit Form Generator Voucher (Satuan & Massal)
+  if ($('formGenerateHotspotVoucher')) {
+    $('formGenerateHotspotVoucher').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = $('btnSubmitGenerateVoucher');
+      setBtnLoading(btn, true, 'Meng-generate Voucher...');
+
+      const payload = {
+        profile_id: $('hsGenProfileSelect') ? $('hsGenProfileSelect').value : '',
+        qty: parseInt($('hsGenQty') ? $('hsGenQty').value : '10', 10) || 1,
+        prefix: ($('hsGenPrefix') ? $('hsGenPrefix').value : 'BW').trim().toUpperCase(),
+        length: parseInt($('hsGenLength') ? $('hsGenLength').value : '8', 10) || 8,
+        charset: $('hsGenCharset') ? $('hsGenCharset').value : 'alphanumeric_upper',
+        mode_login: $('hsGenModeLogin') ? $('hsGenModeLogin').value : 'user_eq_pass',
+        reseller: ($('hsGenReseller') ? $('hsGenReseller').value : 'Loket Utama').trim() || 'Loket Utama',
+        status: $('hsGenStatus') ? $('hsGenStatus').value : 'unused'
+      };
+
+      try {
+        const res = await fetch('/api/hotspot/vouchers/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Gagal meng-generate voucher');
+
+        if ($('hsMikrotikModeBadge')) {
+          $('hsMikrotikModeBadge').textContent = '🟢 Terhubung: MikroTik CCR1009 (Auto-Synced)';
+        }
+
+        await loadHotspotModule();
+        if (data.batch_code && $('hsFilterBatch')) {
+          $('hsFilterBatch').value = data.batch_code;
+          renderHotspotVouchers();
+        }
+        toast(`🎫 Berhasil membuat ${data.generated_count || payload.qty} voucher (${data.batch_code || 'Batch Baru'})!`);
+      } catch (err) {
+        alert('Gagal meng-generate voucher: ' + err.message);
+      } finally {
+        setBtnLoading(btn, false);
+      }
+    });
+  }
+
+  // Filter Pencarian Tabel Voucher
+  ['hsFilterSearch', 'hsFilterProfile', 'hsFilterStatus', 'hsFilterBatch'].forEach(id => {
+    const el = $(id);
+    if (el) {
+      el.addEventListener('input', renderHotspotVouchers);
+      el.addEventListener('change', renderHotspotVouchers);
+    }
+  });
+
+  // Aksi Baris pada Tabel Voucher (Salin, Cetak, Ubah Status, Hapus)
+  if ($('hotspotVoucherRows')) {
+    $('hotspotVoucherRows').addEventListener('click', async (e) => {
+      const btnCopy = e.target.closest('.btn-hs-copy-single');
+      if (btnCopy) {
+        const v = hotspotVouchersData.find(x => x.id === btnCopy.dataset.id);
+        if (!v) return;
+        const text = `🎫 *VOUCHER WIFI HOTSPOT*\nPaket: ${v.profile_nama} (${v.durasi_label})\nKode Login: *${v.kode}*\nHarga: ${rupiah(v.harga_jual)}`;
+        try {
+          await navigator.clipboard.writeText(text);
+          toast(`📋 Kode voucher ${v.kode} disalin ke clipboard!`);
+        } catch (_) {
+          prompt('Salin kode voucher berikut:', text);
+        }
+        return;
+      }
+
+      const btnPrint = e.target.closest('.btn-hs-print-single');
+      if (btnPrint) {
+        const v = hotspotVouchersData.find(x => x.id === btnPrint.dataset.id);
+        if (v) printHotspotVoucherCoupons([v]);
+        return;
+      }
+
+      const btnStatus = e.target.closest('.btn-hs-toggle-status');
+      if (btnStatus) {
+        const id = btnStatus.dataset.id;
+        const current = btnStatus.dataset.status || 'unused';
+        const nextStatus = current === 'unused' ? 'active' : (current === 'active' ? 'expired' : 'unused');
+        try {
+          const res = await fetch(`/api/hotspot/vouchers/${encodeURIComponent(id)}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: nextStatus })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Gagal mengubah status voucher');
+          toast(`🔄 Status voucher ${data.voucher.kode} diubah ke: ${nextStatus.toUpperCase()}`);
+          await loadHotspotModule();
+        } catch (err) {
+          alert('Gagal mengubah status: ' + err.message);
+        }
+        return;
+      }
+
+      const btnDel = e.target.closest('.btn-hs-delete-single');
+      if (btnDel) {
+        const id = btnDel.dataset.id;
+        const v = hotspotVouchersData.find(x => x.id === id);
+        if (!v) return;
+        if (!confirm(`Hapus kode voucher "${v.kode}"?`)) return;
+        try {
+          const res = await fetch(`/api/hotspot/vouchers/${encodeURIComponent(id)}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Gagal menghapus voucher');
+          toast(`🗑️ Voucher ${v.kode} dihapus`);
+          await loadHotspotModule();
+        } catch (err) {
+          alert('Gagal menghapus voucher: ' + err.message);
+        }
+      }
+    });
+  }
+
+  // Tombol Salin Massal Kode Voucher (untuk WA Reseller / Pelanggan)
+  if ($('btnCopyFilteredVouchers')) {
+    $('btnCopyFilteredVouchers').addEventListener('click', async () => {
+      const list = getFilteredHotspotVouchers();
+      if (list.length === 0) {
+        toast('⚠️ Tidak ada voucher yang tampil untuk disalin');
+        return;
+      }
+      const header = `🎫 *DAFTAR VOUCHER HOTSPOT (${list.length} Voucher)*\n` +
+        `----------------------------------------\n`;
+      const lines = list.map((v, idx) =>
+        `${idx + 1}. *${v.kode}* — ${v.profile_nama} (${v.durasi_label}) • ${rupiah(v.harga_jual)}`
+      ).join('\n');
+      const fullText = header + lines;
+
+      try {
+        await navigator.clipboard.writeText(fullText);
+        toast(`📋 ${list.length} kode voucher berhasil disalin (siap tempel ke WhatsApp)!`);
+      } catch (_) {
+        prompt('Salin daftar kode voucher berikut:', fullText);
+      }
+    });
+  }
+
+  // Tombol Cetak Massal Kupon Voucher
+  if ($('btnPrintFilteredVouchers')) {
+    $('btnPrintFilteredVouchers').addEventListener('click', () => {
+      const list = getFilteredHotspotVouchers();
+      printHotspotVoucherCoupons(list);
+    });
+  }
+
+  // Tombol Ekspor CSV
+  if ($('btnExportVouchersCsv')) {
+    $('btnExportVouchersCsv').addEventListener('click', () => {
+      const list = getFilteredHotspotVouchers();
+      if (list.length === 0) {
+        toast('⚠️ Tidak ada data voucher untuk diekspor');
+        return;
+      }
+      const headers = ['Kode Voucher', 'Username', 'Password', 'Paket', 'Durasi', 'Rate Limit', 'Harga Modal', 'Harga Jual', 'Status', 'Batch', 'Reseller', 'Waktu Dibuat'];
+      const rows = list.map(v => [
+        v.kode,
+        v.username || v.kode,
+        v.password || v.kode,
+        v.profile_nama,
+        v.durasi_label,
+        v.rate_limit,
+        v.harga_modal || 0,
+        v.harga_jual || 0,
+        v.status,
+        v.batch_code || '',
+        v.reseller || '',
+        v.created_at || ''
+      ].map(val => `"${String(val ?? '').replace(/"/g, '""')}"`).join(','));
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `voucher-hotspot-${todayStr()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast(`📊 Berhasil mengekspor ${list.length} voucher ke CSV`);
+    });
+  }
+
+  // Tombol Bersihkan Expired / Batch
+  if ($('btnDeleteExpiredVouchers')) {
+    $('btnDeleteExpiredVouchers').addEventListener('click', async () => {
+      const selectedBatch = $('hsFilterBatch') ? $('hsFilterBatch').value : '';
+      let payload = {};
+      let confirmMsg = '';
+
+      if (selectedBatch) {
+        confirmMsg = `Hapus seluruh voucher dalam Batch "${selectedBatch}"?`;
+        payload = { batch_code: selectedBatch };
+      } else {
+        confirmMsg = 'Hapus seluruh voucher yang sudah berstatus Kedaluwarsa (Expired)?';
+        payload = { status: 'expired' };
+      }
+
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        const res = await fetch('/api/hotspot/vouchers/batch-delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Gagal menghapus voucher');
+        if (selectedBatch && $('hsFilterBatch')) $('hsFilterBatch').value = '';
+        toast(`🗑️ ${data.deleted || 0} voucher berhasil dibersihkan`);
+        await loadHotspotModule();
+      } catch (err) {
+        alert('Gagal membersihkan voucher: ' + err.message);
+      }
+    });
+  }
+
+  // Tombol Setting Router MikroTik langsung dari halaman Hotspot
+  if ($('btnOpenMikrotikFromHotspot')) {
+    $('btnOpenMikrotikFromHotspot').addEventListener('click', () => {
+      if (typeof switchNetworkTab === 'function') switchNetworkTab('mikrotik');
+      if (typeof populateMikrotikConfigForm === 'function') populateMikrotikConfigForm();
+      if (typeof loadMikrotikStatus === 'function') loadMikrotikStatus();
+      openModal('modalMikrotik');
+    });
+  }
+
+  // Tombol Sync Hotspot ke MikroTik (Live API + RouterOS Controller)
+  if ($('btnSyncHotspotMikrotik')) {
+    $('btnSyncHotspotMikrotik').addEventListener('click', async () => {
+      const btn = $('btnSyncHotspotMikrotik');
+      setBtnLoading(btn, true, 'Menyinkronkan...');
+      try {
+        const res = await fetch('/api/hotspot/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Gagal sinkronisasi Hotspot');
+
+        if ($('hsMikrotikModeBadge')) {
+          const rName = data.router_identity || 'MikroTik CCR1009';
+          const rHost = data.router_host || '192.168.88.1:8728';
+          $('hsMikrotikModeBadge').className = 'text-[11px] bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-0.5 rounded-full font-semibold';
+          $('hsMikrotikModeBadge').textContent = `🟢 Terhubung: ${rName} (${rHost}) • ${data.vouchers_synced || 0} Voucher Synced`;
+        }
+        toast(data.message || '⚡ Sinkronisasi Hotspot ke Router MikroTik berhasil!');
+        await loadHotspotModule();
+        if (typeof loadMikrotikStatus === 'function') loadMikrotikStatus();
+      } catch (err) {
+        toast('⚠️ Gagal sinkronisasi: ' + err.message);
+      } finally {
+        setBtnLoading(btn, false);
+      }
+    });
+  }
+}
+
+// Inisialisasi Sidebar Navigasi & Modul Hotspot
 initSidebarAccordion();
 initSidebarCollapse();
+initHotspotVoucherEvents();
 initPageViewNavigation();
 
 // Inisialisasi Drag Scroll Horizontal Tabel Pelanggan

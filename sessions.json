@@ -18,5 +18,25 @@
     "tenant_id": "default",
     "tenant_name": "Pusat (Super Admin)",
     "login_time": 1792168264522
+  },
+  "ede0702d899884cfa9910f4911b1db266e7c85b4cf357b80884bed8117559b75": {
+    "userId": 1,
+    "username": "superadmin",
+    "nama": "Super Admin Pusat",
+    "role": "superadmin",
+    "role_label": "Super Admin Pusat",
+    "tenant_id": "default",
+    "tenant_name": "Pusat (Super Admin)",
+    "login_time": 1792206497517
+  },
+  "c2a5ebaac2b94b5ee0c8a6f58d0a839bea63400ce8117e5312b7d27d3865729b": {
+    "userId": 1,
+    "username": "superadmin",
+    "nama": "Super Admin Pusat",
+    "role": "superadmin",
+    "role_label": "Super Admin Pusat",
+    "tenant_id": "default",
+    "tenant_name": "Pusat (Super Admin)",
+    "login_time": 1792208658799
   }
 }

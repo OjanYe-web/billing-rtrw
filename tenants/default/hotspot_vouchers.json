@@ -1,5 +1,120 @@
 [
   {
+    "id": "VCR-1792206206901-1",
+    "kode_voucher": "BW6DZZ3B",
+    "password": "BW6DZZ3B",
+    "mode_login": "user_eq_pass",
+    "profile_id": "HSP-01",
+    "nama_paket": "Voucher 3 Jam Hemat",
+    "mikrotik_profile": "VCR-3JAM",
+    "rate_limit": "5M/5M",
+    "uptime_limit": "3h",
+    "durasi_label": "3 Jam",
+    "harga_modal": 1000,
+    "harga_jual": 2000,
+    "batch_code": "BATCH-20261017-6900",
+    "status": "unused",
+    "reseller": "Loket Utama",
+    "kasir": "Super Admin Pusat",
+    "pembeli": "",
+    "created_at": "17 Oktober 2026, 10:03 WIB",
+    "activated_at": null,
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
+  },
+  {
+    "id": "VCR-1792206206901-2",
+    "kode_voucher": "BWJYHBCG",
+    "password": "BWJYHBCG",
+    "mode_login": "user_eq_pass",
+    "profile_id": "HSP-01",
+    "nama_paket": "Voucher 3 Jam Hemat",
+    "mikrotik_profile": "VCR-3JAM",
+    "rate_limit": "5M/5M",
+    "uptime_limit": "3h",
+    "durasi_label": "3 Jam",
+    "harga_modal": 1000,
+    "harga_jual": 2000,
+    "batch_code": "BATCH-20261017-6900",
+    "status": "unused",
+    "reseller": "Loket Utama",
+    "kasir": "Super Admin Pusat",
+    "pembeli": "",
+    "created_at": "17 Oktober 2026, 10:03 WIB",
+    "activated_at": null,
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
+  },
+  {
+    "id": "VCR-1792205893724-1",
+    "kode_voucher": "BW948H3Q",
+    "password": "BW948H3Q",
+    "mode_login": "user_eq_pass",
+    "profile_id": "HSP-01",
+    "nama_paket": "Voucher 3 Jam Hemat",
+    "mikrotik_profile": "VCR-3JAM",
+    "rate_limit": "5M/5M",
+    "uptime_limit": "3h",
+    "durasi_label": "3 Jam",
+    "harga_modal": 1000,
+    "harga_jual": 2000,
+    "batch_code": "BATCH-20261017-3723",
+    "status": "unused",
+    "reseller": "Warung Berkah",
+    "kasir": "Super Admin Pusat",
+    "pembeli": "",
+    "created_at": "17 Oktober 2026, 09:58 WIB",
+    "activated_at": null,
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
+  },
+  {
+    "id": "VCR-1792205893724-2",
+    "kode_voucher": "BWPVSBK5",
+    "password": "BWPVSBK5",
+    "mode_login": "user_eq_pass",
+    "profile_id": "HSP-01",
+    "nama_paket": "Voucher 3 Jam Hemat",
+    "mikrotik_profile": "VCR-3JAM",
+    "rate_limit": "5M/5M",
+    "uptime_limit": "3h",
+    "durasi_label": "3 Jam",
+    "harga_modal": 1000,
+    "harga_jual": 2000,
+    "batch_code": "BATCH-20261017-3723",
+    "status": "unused",
+    "reseller": "Warung Berkah",
+    "kasir": "Super Admin Pusat",
+    "pembeli": "",
+    "created_at": "17 Oktober 2026, 09:58 WIB",
+    "activated_at": null,
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
+  },
+  {
+    "id": "VCR-1792205893724-3",
+    "kode_voucher": "BWZ53X54",
+    "password": "BWZ53X54",
+    "mode_login": "user_eq_pass",
+    "profile_id": "HSP-01",
+    "nama_paket": "Voucher 3 Jam Hemat",
+    "mikrotik_profile": "VCR-3JAM",
+    "rate_limit": "5M/5M",
+    "uptime_limit": "3h",
+    "durasi_label": "3 Jam",
+    "harga_modal": 1000,
+    "harga_jual": 2000,
+    "batch_code": "BATCH-20261017-3723",
+    "status": "unused",
+    "reseller": "Warung Berkah",
+    "kasir": "Super Admin Pusat",
+    "pembeli": "",
+    "created_at": "17 Oktober 2026, 09:58 WIB",
+    "activated_at": null,
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
+  },
+  {
     "id": "VCR-1792166519449-1",
     "kode_voucher": "BW756TJV",
     "password": "BW756TJV",
@@ -13,13 +128,14 @@
     "harga_modal": 1000,
     "harga_jual": 2000,
     "batch_code": "BATCH-20261016-9449",
-    "status": "active",
+    "status": "unused",
     "reseller": "POS Toko",
     "kasir": "Siti Rahma (Kasir Utama)",
     "pembeli": "Warkop Maju Jaya",
     "created_at": "16 Oktober 2026, 23:01 WIB",
     "activated_at": "16 Oktober 2026, 23:01 WIB",
-    "mikrotik_synced": true
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
   },
   {
     "id": "VCR-1792166519450-2",
@@ -35,13 +151,14 @@
     "harga_modal": 1000,
     "harga_jual": 2000,
     "batch_code": "BATCH-20261016-9449",
-    "status": "active",
+    "status": "unused",
     "reseller": "POS Toko",
     "kasir": "Siti Rahma (Kasir Utama)",
     "pembeli": "Warkop Maju Jaya",
     "created_at": "16 Oktober 2026, 23:01 WIB",
     "activated_at": "16 Oktober 2026, 23:01 WIB",
-    "mikrotik_synced": true
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
   },
   {
     "id": "VCR-1792166519310-1",
@@ -63,7 +180,8 @@
     "pembeli": "",
     "created_at": "16 Oktober 2026, 23:01 WIB",
     "activated_at": null,
-    "mikrotik_synced": true
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
   },
   {
     "id": "VCR-1792166519310-2",
@@ -85,7 +203,8 @@
     "pembeli": "",
     "created_at": "16 Oktober 2026, 23:01 WIB",
     "activated_at": null,
-    "mikrotik_synced": true
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
   },
   {
     "id": "VCR-1792166519310-3",
@@ -107,7 +226,8 @@
     "pembeli": "",
     "created_at": "16 Oktober 2026, 23:01 WIB",
     "activated_at": null,
-    "mikrotik_synced": true
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
   },
   {
     "id": "VCR-1001",
@@ -129,7 +249,8 @@
     "pembeli": "",
     "created_at": "16 Oktober 2026, 23:01 WIB",
     "activated_at": null,
-    "mikrotik_synced": true
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
   },
   {
     "id": "VCR-1002",
@@ -151,7 +272,8 @@
     "pembeli": "Warkop Pojok RT 02",
     "created_at": "16 Oktober 2026, 23:01 WIB",
     "activated_at": "16 Oktober 2026, 23:01 WIB",
-    "mikrotik_synced": true
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
   },
   {
     "id": "VCR-1003",
@@ -173,6 +295,7 @@
     "pembeli": "",
     "created_at": "16 Oktober 2026, 23:01 WIB",
     "activated_at": null,
-    "mikrotik_synced": true
+    "mikrotik_synced": true,
+    "mikrotik_last_sync": "17 Oktober 2026, 10:23 WIB"
   }
 ]

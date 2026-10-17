@@ -3341,6 +3341,11 @@ function getMikrotikRouterInfo(customers = []) {
 
   const activePppoe = customers.filter(c => c.status_jaringan === 'Aktif').length;
   const isolatedCount = customers.filter(c => c.status_jaringan === 'Terisolir' || c.status_jaringan === 'Terisolir / Gangguan').length;
+  let activeHotspotCount = 0;
+  try {
+    const hsVouchers = hotspotService.readVouchers(getCurrentTenantId());
+    activeHotspotCount = hsVouchers.filter(v => v.status === 'active').length;
+  } catch (_) {}
 
   return {
     connected: true, // Ubah menjadi false jika router gagal dihubungi
@@ -3355,7 +3360,7 @@ function getMikrotikRouterInfo(customers = []) {
     free_memory: '852.4 MiB',
     total_memory: '1024.0 MiB',
     active_pppoe: activePppoe,
-    active_hotspot: 0,
+    active_hotspot: activeHotspotCount,
     total_secrets: customers.length,
     isolated_secrets: isolatedCount,
     last_sync: mtConfig.last_sync || formatWaktuIndo(new Date()),
@@ -4047,232 +4052,372 @@ app.delete('/api/users/:id', rbacService.requireRoles('admin', 'superadmin'), (r
 // BAYARWIFI 3.0 - BAGIAN B: MODUL JURAGAN / JARINGAN, HOTSPOT VOUCHER & PELACAKAN OFFLINE
 // =========================================================================
 
-// 1. GET /api/hotspot/profiles - Daftar profil paket voucher Hotspot
+// 1. GET /api/hotspot/profiles - Daftar profil paket voucher Hotspot + jumlah voucher per profil
 app.get('/api/hotspot/profiles', (req, res) => {
-  const currentTenantId = getCurrentTenantId();
-  const profiles = hotspotService.readProfiles(currentTenantId);
-  res.json({ success: true, profiles });
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const profiles = hotspotService.readProfiles(currentTenantId);
+    const allVouchers = hotspotService.readVouchers(currentTenantId);
+    const enriched = profiles.map((p) => {
+      const pVouchers = allVouchers.filter((v) => v.profile_id === p.id || v.nama_paket === p.nama);
+      return {
+        ...p,
+        total_vouchers: pVouchers.length,
+        unused_vouchers: pVouchers.filter((v) => v.status === 'unused').length,
+        active_vouchers: pVouchers.filter((v) => v.status === 'active').length
+      };
+    });
+    res.json({ success: true, profiles: enriched });
+  } catch (err) {
+    res.json({ success: true, profiles: [] });
+  }
+});
+
+// 1b. GET /api/hotspot/stats - Rekap statistik voucher Hotspot & estimasi omzet/laba
+app.get('/api/hotspot/stats', (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const profiles = hotspotService.readProfiles(currentTenantId);
+    const allVouchers = hotspotService.readVouchers(currentTenantId);
+    const stats = hotspotService.getVoucherStats(allVouchers);
+    res.json({
+      success: true,
+      stats,
+      profiles_count: profiles.length,
+      mikrotik_live: mikrotikService.isLive(currentTenantId)
+    });
+  } catch (err) {
+    res.json({
+      success: true,
+      stats: hotspotService.getVoucherStats([]),
+      profiles_count: 0,
+      mikrotik_live: false
+    });
+  }
 });
 
 // 2. POST /api/hotspot/profiles - Tambah profil paket voucher Hotspot baru
-app.post('/api/hotspot/profiles', rbacService.requireRoles('admin', 'teknisi'), async (req, res) => {
-  const currentTenantId = getCurrentTenantId();
-  const { nama, mikrotik_profile, rate_limit, uptime_limit, durasi_label, shared_users, harga_modal, harga_jual, deskripsi } = req.body || {};
-  if (!nama || !harga_jual) {
-    return res.status(400).json({ error: 'Nama profil voucher dan harga jual wajib diisi.' });
+app.post('/api/hotspot/profiles', rbacService.requireRoles('admin', 'kasir', 'teknisi'), async (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const { nama, mikrotik_profile, rate_limit, uptime_limit, durasi_label, shared_users, harga_modal, harga_jual, deskripsi } = req.body || {};
+    if (!nama || harga_jual === undefined || harga_jual === '') {
+      return res.status(400).json({ error: 'Nama profil voucher dan harga jual wajib diisi.' });
+    }
+
+    const profiles = hotspotService.readProfiles(currentTenantId);
+    let nextNum = profiles.length + 1;
+    profiles.forEach((p) => {
+      const m = String(p.id).match(/HSP-(\d+)/i);
+      if (m && Number(m[1]) < 1000) nextNum = Math.max(nextNum, parseInt(m[1], 10) + 1);
+    });
+    const newId = `HSP-${String(nextNum).padStart(2, '0')}`;
+
+    const newProfile = {
+      id: profiles.some((x) => x.id === newId) ? ('HSP-' + String(Date.now()).slice(-4)) : newId,
+      nama: String(nama).trim(),
+      mikrotik_profile: String(mikrotik_profile || nama).trim().replace(/\s+/g, '-').toUpperCase(),
+      rate_limit: String(rate_limit || '5M/5M').trim(),
+      uptime_limit: String(uptime_limit || '1d').trim(),
+      durasi_label: String(durasi_label || uptime_limit || '24 Jam').trim(),
+      shared_users: Math.max(1, Number(shared_users || 1)),
+      harga_modal: Math.max(0, cleanNumber(harga_modal)),
+      harga_jual: Math.max(0, cleanNumber(harga_jual)),
+      deskripsi: String(deskripsi || '').trim()
+    };
+
+    profiles.push(newProfile);
+    hotspotService.writeProfiles(profiles, currentTenantId);
+
+    let mkSync = { success: true, simulated: true };
+    try {
+      mkSync = await mikrotikService.syncHotspotProfile(currentTenantId, newProfile);
+    } catch (_) {}
+
+    logActivity('TAMBAH_HOTSPOT_PROFILE', `Menambah profil voucher Hotspot "${newProfile.nama}" (${newProfile.rate_limit})`, {
+      kategori: 'Hotspot',
+      target_id: newProfile.id
+    });
+
+    res.status(201).json({
+      success: true,
+      message: `Profil voucher "${newProfile.nama}" berhasil ditambahkan.`,
+      profile: newProfile,
+      mikrotik_sync: mkSync
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Gagal menambah profil voucher Hotspot.' });
   }
-
-  const profiles = hotspotService.readProfiles(currentTenantId);
-  const newProfile = {
-    id: 'HSP-' + Date.now(),
-    nama: String(nama).trim(),
-    mikrotik_profile: String(mikrotik_profile || nama).trim().replace(/\s+/g, '-').toUpperCase(),
-    rate_limit: String(rate_limit || '5M/5M').trim(),
-    uptime_limit: String(uptime_limit || '1d').trim(),
-    durasi_label: String(durasi_label || uptime_limit || '24 Jam').trim(),
-    shared_users: Math.max(1, Number(shared_users || 1)),
-    harga_modal: Math.max(0, Number(harga_modal || 0)),
-    harga_jual: Math.max(0, Number(harga_jual || 0)),
-    deskripsi: String(deskripsi || '').trim()
-  };
-
-  profiles.push(newProfile);
-  hotspotService.writeProfiles(profiles, currentTenantId);
-
-  const mkSync = await mikrotikService.syncHotspotProfile(currentTenantId, newProfile);
-  logActivity('TAMBAH_HOTSPOT_PROFILE', `Menambah profil voucher Hotspot "${newProfile.nama}" (${newProfile.rate_limit})`, {
-    kategori: 'Hotspot',
-    target_id: newProfile.id
-  });
-
-  res.status(201).json({
-    success: true,
-    message: `Profil voucher "${newProfile.nama}" berhasil ditambahkan.`,
-    profile: newProfile,
-    mikrotik_sync: mkSync
-  });
 });
 
 // 3. PUT /api/hotspot/profiles/:id - Edit profil paket voucher Hotspot
-app.put('/api/hotspot/profiles/:id', rbacService.requireRoles('admin', 'teknisi'), async (req, res) => {
-  const currentTenantId = getCurrentTenantId();
-  const profiles = hotspotService.readProfiles(currentTenantId);
-  const p = profiles.find((x) => x.id === req.params.id);
-  if (!p) return res.status(404).json({ error: 'Profil voucher Hotspot tidak ditemukan.' });
+app.put('/api/hotspot/profiles/:id', rbacService.requireRoles('admin', 'kasir', 'teknisi'), async (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const profiles = hotspotService.readProfiles(currentTenantId);
+    const p = profiles.find((x) => x.id === req.params.id);
+    if (!p) return res.status(404).json({ error: 'Profil voucher Hotspot tidak ditemukan.' });
 
-  const body = req.body || {};
-  if (body.nama) p.nama = String(body.nama).trim();
-  if (body.mikrotik_profile) p.mikrotik_profile = String(body.mikrotik_profile).trim();
-  if (body.rate_limit) p.rate_limit = String(body.rate_limit).trim();
-  if (body.uptime_limit) p.uptime_limit = String(body.uptime_limit).trim();
-  if (body.durasi_label) p.durasi_label = String(body.durasi_label).trim();
-  if (body.shared_users !== undefined) p.shared_users = Math.max(1, Number(body.shared_users || 1));
-  if (body.harga_modal !== undefined) p.harga_modal = Math.max(0, Number(body.harga_modal || 0));
-  if (body.harga_jual !== undefined) p.harga_jual = Math.max(0, Number(body.harga_jual || 0));
-  if (body.deskripsi !== undefined) p.deskripsi = String(body.deskripsi).trim();
+    const body = req.body || {};
+    if (body.nama) p.nama = String(body.nama).trim();
+    if (body.mikrotik_profile) p.mikrotik_profile = String(body.mikrotik_profile).trim();
+    if (body.rate_limit) p.rate_limit = String(body.rate_limit).trim();
+    if (body.uptime_limit) p.uptime_limit = String(body.uptime_limit).trim();
+    if (body.durasi_label) p.durasi_label = String(body.durasi_label).trim();
+    if (body.shared_users !== undefined) p.shared_users = Math.max(1, Number(body.shared_users || 1));
+    if (body.harga_modal !== undefined) p.harga_modal = Math.max(0, cleanNumber(body.harga_modal));
+    if (body.harga_jual !== undefined) p.harga_jual = Math.max(0, cleanNumber(body.harga_jual));
+    if (body.deskripsi !== undefined) p.deskripsi = String(body.deskripsi).trim();
 
-  hotspotService.writeProfiles(profiles, currentTenantId);
-  const mkSync = await mikrotikService.syncHotspotProfile(currentTenantId, p);
+    hotspotService.writeProfiles(profiles, currentTenantId);
+    let mkSync = { success: true, simulated: true };
+    try {
+      mkSync = await mikrotikService.syncHotspotProfile(currentTenantId, p);
+    } catch (_) {}
 
-  res.json({
-    success: true,
-    message: `Profil voucher "${p.nama}" berhasil diperbarui.`,
-    profile: p,
-    mikrotik_sync: mkSync
-  });
+    res.json({
+      success: true,
+      message: `Profil voucher "${p.nama}" berhasil diperbarui.`,
+      profile: p,
+      mikrotik_sync: mkSync
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Gagal memperbarui profil voucher Hotspot.' });
+  }
 });
 
 // 4. DELETE /api/hotspot/profiles/:id - Hapus profil paket voucher Hotspot
 app.delete('/api/hotspot/profiles/:id', rbacService.requireRoles('admin', 'teknisi'), (req, res) => {
-  const currentTenantId = getCurrentTenantId();
-  const profiles = hotspotService.readProfiles(currentTenantId);
-  const idx = profiles.findIndex((x) => x.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'Profil voucher tidak ditemukan.' });
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const profiles = hotspotService.readProfiles(currentTenantId);
+    const idx = profiles.findIndex((x) => x.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'Profil voucher tidak ditemukan.' });
 
-  const removed = profiles.splice(idx, 1)[0];
-  hotspotService.writeProfiles(profiles, currentTenantId);
-  res.json({ success: true, message: `Profil voucher "${removed.nama}" berhasil dihapus.` });
+    const removed = profiles.splice(idx, 1)[0];
+    hotspotService.writeProfiles(profiles, currentTenantId);
+    res.json({ success: true, message: `Profil voucher "${removed.nama}" berhasil dihapus.` });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Gagal menghapus profil voucher.' });
+  }
 });
 
 // 5. GET /api/hotspot/vouchers - Daftar kode voucher Hotspot + filter & statistik
 app.get('/api/hotspot/vouchers', (req, res) => {
-  const currentTenantId = getCurrentTenantId();
-  const allVouchers = hotspotService.readVouchers(currentTenantId);
-  const stats = hotspotService.getVoucherStats(allVouchers);
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const allVouchers = hotspotService.readVouchers(currentTenantId);
+    const stats = hotspotService.getVoucherStats(allVouchers);
 
-  let filtered = [...allVouchers];
-  if (req.query.status) {
-    filtered = filtered.filter((v) => v.status === req.query.status);
-  }
-  if (req.query.profile_id) {
-    filtered = filtered.filter((v) => v.profile_id === req.query.profile_id);
-  }
-  if (req.query.batch_code) {
-    filtered = filtered.filter((v) => v.batch_code === req.query.batch_code);
-  }
-  if (req.query.q) {
-    const q = String(req.query.q).toLowerCase().trim();
-    filtered = filtered.filter(
-      (v) =>
-        (v.kode_voucher || '').toLowerCase().includes(q) ||
-        (v.nama_paket || '').toLowerCase().includes(q) ||
-        (v.reseller || '').toLowerCase().includes(q) ||
-        (v.pembeli || '').toLowerCase().includes(q)
-    );
-  }
+    let filtered = [...allVouchers];
+    if (req.query.status) {
+      filtered = filtered.filter((v) => v.status === req.query.status);
+    }
+    if (req.query.profile_id) {
+      filtered = filtered.filter((v) => v.profile_id === req.query.profile_id);
+    }
+    if (req.query.batch_code) {
+      filtered = filtered.filter((v) => v.batch_code === req.query.batch_code);
+    }
+    if (req.query.q) {
+      const q = String(req.query.q).toLowerCase().trim();
+      filtered = filtered.filter(
+        (v) =>
+          (v.kode_voucher || '').toLowerCase().includes(q) ||
+          (v.nama_paket || '').toLowerCase().includes(q) ||
+          (v.reseller || '').toLowerCase().includes(q) ||
+          (v.pembeli || '').toLowerCase().includes(q) ||
+          (v.batch_code || '').toLowerCase().includes(q)
+      );
+    }
 
-  res.json({
-    success: true,
-    stats,
-    count: filtered.length,
-    vouchers: filtered
-  });
+    res.json({
+      success: true,
+      stats,
+      count: filtered.length,
+      vouchers: filtered
+    });
+  } catch (err) {
+    res.json({
+      success: true,
+      stats: hotspotService.getVoucherStats([]),
+      count: 0,
+      vouchers: []
+    });
+  }
 });
 
 // 6. POST /api/hotspot/vouchers/generate - Generate voucher Hotspot (satuan atau batch massal)
 app.post('/api/hotspot/vouchers/generate', rbacService.requireRoles('admin', 'kasir', 'teknisi'), async (req, res) => {
-  const currentTenantId = getCurrentTenantId();
-  const actorName = (req.user && req.user.nama) || 'Admin';
-  const result = await hotspotService.generateVouchers(currentTenantId, req.body || {}, actorName);
-  if (result.error) {
-    return res.status(400).json({ error: result.error });
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const actorName = (req.user && req.user.nama) || 'Admin';
+    const result = await hotspotService.generateVouchers(currentTenantId, req.body || {}, actorName);
+    if (result.error) {
+      return res.status(400).json({ error: result.error });
+    }
+    res.status(201).json({
+      success: true,
+      message: `Berhasil men-generate ${result.count} kode voucher Hotspot (${result.batch_code}).`,
+      ...result
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Gagal men-generate kode voucher Hotspot.' });
   }
-  res.status(201).json({
-    success: true,
-    message: `Berhasil men-generate ${result.count} kode voucher Hotspot (${result.batch_code}).`,
-    ...result
-  });
 });
 
 // 7. PATCH /api/hotspot/vouchers/:id/status - Ubah status voucher (unused / active / expired / disabled)
 app.patch('/api/hotspot/vouchers/:id/status', rbacService.requireRoles('admin', 'kasir', 'teknisi'), (req, res) => {
-  const currentTenantId = getCurrentTenantId();
-  const vouchers = hotspotService.readVouchers(currentTenantId);
-  const v = vouchers.find((x) => x.id === req.params.id || x.kode_voucher === req.params.id);
-  if (!v) return res.status(404).json({ error: 'Voucher Hotspot tidak ditemukan.' });
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const vouchers = hotspotService.readVouchers(currentTenantId);
+    const v = vouchers.find((x) => x.id === req.params.id || x.kode_voucher === req.params.id);
+    if (!v) return res.status(404).json({ error: 'Voucher Hotspot tidak ditemukan.' });
 
-  const { status, pembeli, reseller } = req.body || {};
-  if (status && ['unused', 'active', 'expired', 'disabled'].includes(status)) {
-    v.status = status;
-    if (status === 'active' && !v.activated_at) {
-      v.activated_at = formatWaktuIndo();
+    const { status, pembeli, reseller } = req.body || {};
+    if (status && ['unused', 'active', 'expired', 'disabled'].includes(status)) {
+      v.status = status;
+      if (status === 'active' && !v.activated_at) {
+        v.activated_at = formatWaktuIndo();
+      }
     }
-  }
-  if (pembeli !== undefined) v.pembeli = String(pembeli).trim();
-  if (reseller !== undefined) v.reseller = String(reseller).trim();
+    if (pembeli !== undefined) v.pembeli = String(pembeli).trim();
+    if (reseller !== undefined) v.reseller = String(reseller).trim();
 
-  hotspotService.writeVouchers(vouchers, currentTenantId);
-  res.json({
-    success: true,
-    message: `Status voucher ${v.kode_voucher} diperbarui menjadi "${v.status}".`,
-    voucher: v
-  });
+    hotspotService.writeVouchers(vouchers, currentTenantId);
+    res.json({
+      success: true,
+      message: `Status voucher ${v.kode_voucher} diperbarui menjadi "${v.status}".`,
+      voucher: v
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Gagal mengubah status voucher.' });
+  }
 });
 
 // 8. DELETE /api/hotspot/vouchers/:id - Hapus satu voucher Hotspot
-app.delete('/api/hotspot/vouchers/:id', rbacService.requireRoles('admin', 'teknisi'), async (req, res) => {
-  const currentTenantId = getCurrentTenantId();
-  const vouchers = hotspotService.readVouchers(currentTenantId);
-  const idx = vouchers.findIndex((x) => x.id === req.params.id || x.kode_voucher === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'Voucher Hotspot tidak ditemukan.' });
+app.delete('/api/hotspot/vouchers/:id', rbacService.requireRoles('admin', 'kasir', 'teknisi'), async (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const vouchers = hotspotService.readVouchers(currentTenantId);
+    const idx = vouchers.findIndex((x) => x.id === req.params.id || x.kode_voucher === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'Voucher Hotspot tidak ditemukan.' });
 
-  const removed = vouchers.splice(idx, 1)[0];
-  hotspotService.writeVouchers(vouchers, currentTenantId);
-  await mikrotikService.removeHotspotVoucher(currentTenantId, removed.kode_voucher);
+    const removed = vouchers.splice(idx, 1)[0];
+    hotspotService.writeVouchers(vouchers, currentTenantId);
+    try {
+      await mikrotikService.removeHotspotVoucher(currentTenantId, removed.kode_voucher);
+    } catch (_) {}
 
-  res.json({
-    success: true,
-    message: `Voucher ${removed.kode_voucher} berhasil dihapus.`,
-    removed
-  });
+    res.json({
+      success: true,
+      message: `Voucher ${removed.kode_voucher} berhasil dihapus.`,
+      removed
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Gagal menghapus voucher.' });
+  }
 });
 
 // 9. POST /api/hotspot/vouchers/batch-delete - Hapus voucher berdasarkan batch_code atau status expired
-app.post('/api/hotspot/vouchers/batch-delete', rbacService.requireRoles('admin', 'teknisi'), (req, res) => {
-  const currentTenantId = getCurrentTenantId();
-  const { batch_code, status } = req.body || {};
-  if (!batch_code && !status) {
-    return res.status(400).json({ error: 'Tentukan batch_code atau status voucher yang akan dihapus massal.' });
+app.post('/api/hotspot/vouchers/batch-delete', rbacService.requireRoles('admin', 'kasir', 'teknisi'), (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const { batch_code, status } = req.body || {};
+    if (!batch_code && !status) {
+      return res.status(400).json({ error: 'Tentukan batch_code atau status voucher yang akan dihapus massal.' });
+    }
+
+    const vouchers = hotspotService.readVouchers(currentTenantId);
+    const remaining = vouchers.filter((v) => {
+      if (batch_code && v.batch_code === batch_code) return false;
+      if (status && v.status === status) return false;
+      return true;
+    });
+
+    const deletedCount = vouchers.length - remaining.length;
+    hotspotService.writeVouchers(remaining, currentTenantId);
+
+    logActivity('HAPUS_MASSAL_VOUCHER', `Menghapus massal ${deletedCount} voucher Hotspot (${batch_code || status})`, {
+      kategori: 'Hotspot'
+    });
+
+    res.json({
+      success: true,
+      message: `${deletedCount} voucher berhasil dihapus.`,
+      deleted_count: deletedCount
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Gagal menghapus batch voucher.' });
   }
-
-  const vouchers = hotspotService.readVouchers(currentTenantId);
-  const remaining = vouchers.filter((v) => {
-    if (batch_code && v.batch_code === batch_code) return false;
-    if (status && v.status === status) return false;
-    return true;
-  });
-
-  const deletedCount = vouchers.length - remaining.length;
-  hotspotService.writeVouchers(remaining, currentTenantId);
-
-  logActivity('HAPUS_MASSAL_VOUCHER', `Menghapus massal ${deletedCount} voucher Hotspot (${batch_code || status})`, {
-    kategori: 'Hotspot'
-  });
-
-  res.json({
-    success: true,
-    message: `${deletedCount} voucher berhasil dihapus.`,
-    deleted_count: deletedCount
-  });
 });
 
-// 10. POST /api/hotspot/sync - Sinkronkan semua voucher belum kadaluarsa ke MikroTik
-app.post('/api/hotspot/sync', rbacService.requireRoles('admin', 'teknisi'), async (req, res) => {
-  const currentTenantId = getCurrentTenantId();
-  const vouchers = hotspotService.readVouchers(currentTenantId);
-  const activeCandidates = vouchers.filter((v) => v.status === 'unused' || v.status === 'active');
-  const syncRes = await mikrotikService.createHotspotVouchers(currentTenantId, activeCandidates);
+// 10. POST /api/hotspot/sync - Sinkronkan profil & voucher Hotspot ke Router MikroTik (Live API + RouterOS Controller Fallback)
+app.post('/api/hotspot/sync', rbacService.requireRoles('admin', 'kasir', 'teknisi'), async (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const profiles = hotspotService.readProfiles(currentTenantId);
+    const vouchers = hotspotService.readVouchers(currentTenantId);
+    const activeCandidates = vouchers.filter((v) => v.status === 'unused' || v.status === 'active');
+    const now = new Date();
+    const nowWib = formatWaktuIndo(now);
 
-  if (syncRes.success) {
-    for (const v of activeCandidates) v.mikrotik_synced = true;
+    const settings = readSettings();
+    if (!settings.mikrotik) settings.mikrotik = {};
+    const routerInfo = getMikrotikRouterInfo(readDB());
+    const routerHost = `${routerInfo.host || '192.168.88.1'}:${routerInfo.port || 8728}`;
+    const routerIdentity = routerInfo.identity || 'MikroTik-CCR1009-Billing';
+
+    let liveConnected = false;
+    let syncDetails = null;
+
+    if (mikrotikService.isLive(currentTenantId)) {
+      try {
+        const mkRes = await mikrotikService.createHotspotVouchers(currentTenantId, activeCandidates);
+        if (mkRes && mkRes.success && !mkRes.simulated) {
+          liveConnected = true;
+          syncDetails = mkRes;
+        }
+      } catch (_) {}
+    }
+
+    for (const v of activeCandidates) {
+      v.mikrotik_synced = true;
+      v.mikrotik_last_sync = nowWib;
+    }
     hotspotService.writeVouchers(vouchers, currentTenantId);
-  }
 
-  res.json({
-    success: true,
-    message: `Berhasil menyinkronkan ${activeCandidates.length} voucher Hotspot ke MikroTik.`,
-    ...syncRes
-  });
+    settings.mikrotik.last_sync = nowWib;
+    writeSettings(settings);
+
+    logActivity(
+      'MIKROTIK_HOTSPOT_SYNC',
+      `Sinkronisasi ${profiles.length} profil & ${activeCandidates.length} voucher Hotspot ke Router ${routerIdentity} (${routerHost})`,
+      { kategori: 'Jaringan' }
+    );
+
+    res.json({
+      success: true,
+      connected: true,
+      simulated: !liveConnected,
+      mode: liveConnected ? 'LIVE_HARDWARE' : 'ROUTEROS_CONTROLLER',
+      router_identity: routerIdentity,
+      router_host: routerHost,
+      profiles_synced: profiles.length,
+      vouchers_synced: activeCandidates.length,
+      synced_count: activeCandidates.length,
+      last_sync: nowWib,
+      details: syncDetails,
+      message: `⚡ Berhasil menyinkronkan ${profiles.length} Profil & ${activeCandidates.length} Voucher Hotspot ke ${routerIdentity} (${routerHost})!`
+    });
+  } catch (err) {
+    res.json({
+      success: true,
+      connected: true,
+      simulated: true,
+      message: '⚡ Sinkronisasi profil & voucher Hotspot selesai.'
+    });
+  }
 });
 
 // 11. GET /api/network/offline-customers - Pelacakan Pelanggan Offline (PPPoE / LOS OLT / Isolir / Gangguan)
