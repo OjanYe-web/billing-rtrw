@@ -38,5 +38,45 @@
     "tenant_id": "default",
     "tenant_name": "Pusat (Super Admin)",
     "login_time": 1792208658799
+  },
+  "448fa27267ce95afb852fe7d4423c47f34e82ff050d7faced8efde19f8f7ddee": {
+    "userId": 1,
+    "username": "superadmin",
+    "nama": "Super Admin Pusat",
+    "role": "superadmin",
+    "role_label": "Super Admin Pusat",
+    "tenant_id": "default",
+    "tenant_name": "Pusat (Super Admin)",
+    "login_time": 1792211994860
+  },
+  "1549e8b65737cac36b1e1fdd3d541a0abf97947fc527917aa604a6a6d770aeb3": {
+    "userId": 1,
+    "username": "superadmin",
+    "nama": "Super Admin Pusat",
+    "role": "superadmin",
+    "role_label": "Super Admin Pusat",
+    "tenant_id": "default",
+    "tenant_name": "Pusat (Super Admin)",
+    "login_time": 1792212705565
+  },
+  "37357277aaed8c44a4f312cd8ea0983c2d96877c86a13f5fc143eb538d0e3ea6": {
+    "userId": 1,
+    "username": "superadmin",
+    "nama": "Super Admin Pusat",
+    "role": "superadmin",
+    "role_label": "Super Admin Pusat",
+    "tenant_id": "default",
+    "tenant_name": "Pusat (Super Admin)",
+    "login_time": 1792216196974
+  },
+  "4bc30a1e255458fa156de8033ce203a4d1c1069daa1e2f156ffdbc7a6fea04ff": {
+    "userId": 1,
+    "username": "superadmin",
+    "nama": "Super Admin Pusat",
+    "role": "superadmin",
+    "role_label": "Super Admin Pusat",
+    "tenant_id": "default",
+    "tenant_name": "Pusat (Super Admin)",
+    "login_time": 1792219445787
   }
 }

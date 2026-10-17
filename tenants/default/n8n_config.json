@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "webhook_url": "http://localhost:5678/webhook/billing-rtrw-events",
+  "secret_key": "bw3_n8n_secret_rtrwnet_2026",
+  "timeout_ms": 5000,
+  "teknisi_channel": "telegram",
+  "telegram_bot_token": "8916663349:AAETtPRhbLfmp9MeRq4E6ETBlSNw-TO9Nd0",
+  "telegram_chat_id": "-5315993120",
+  "telegram_group_name": "TEKNISI BILLING RT/RW.net",
+  "wa_group_target": "6281234567890",
+  "fonnte_token": "",
+  "events": {
+    "payment_paid": true,
+    "customer_isolated": true,
+    "customer_restored": true,
+    "voucher_generated": true,
+    "ticket_created": true
+  },
+  "updated_at": "17 Oktober 2026, 13:54 WIB"
+}

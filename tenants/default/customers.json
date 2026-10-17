@@ -251,9 +251,21 @@
         "metode_bayar": "QRIS DANA"
       }
     ],
-    "status_jaringan": "Aktif",
-    "catatan_kendala": "",
+    "status_jaringan": "Terisolir",
+    "catatan_kendala": "Sambungan Terisolir",
     "network_logs": [
+      {
+        "id": 1792217611847,
+        "status": "DOWN",
+        "waktu": "17 Oktober 2026, 13:13 WIB",
+        "keterangan": "Sambungan Terisolir",
+        "tiket_id": "TKT-611847",
+        "status_penanganan": "Pending",
+        "jenis_kendala": "Sambungan Terisolir",
+        "teknisi": "Menunggu Penugasan",
+        "catatan_perbaikan": "Sambungan Terisolir",
+        "durasi": "Sedang Berlangsung"
+      },
       {
         "id": 1791664745236,
         "status": "UP",
@@ -268,15 +280,17 @@
       },
       {
         "id": 1791664721480,
-        "status": "DOWN",
+        "status": "UP",
         "waktu": "11 Oktober 2026, 03:38 WIB",
         "keterangan": "[Laporan Pelanggan] INTERNET GA BISA NIH",
         "tiket_id": "TKT-721480",
-        "status_penanganan": "Pending",
+        "status_penanganan": "Selesai",
         "jenis_kendala": "[Laporan Pelanggan] INTERNET GA BISA NIH",
         "teknisi": "Menunggu Penugasan",
         "catatan_perbaikan": "[Laporan Pelanggan] INTERNET GA BISA NIH",
-        "durasi": "Sedang Berlangsung"
+        "durasi": "Sedang Berlangsung",
+        "resolved_at": 1792217539626,
+        "waktu_selesai": "17 Oktober 2026, 13:12 WIB"
       }
     ],
     "customer_id": "PLG003",
@@ -344,9 +358,25 @@
         "metode_bayar": "QRIS DANA"
       }
     ],
-    "status_jaringan": "Aktif",
-    "catatan_kendala": "",
-    "network_logs": [],
+    "status_jaringan": "Terisolir / Gangguan",
+    "catatan_kendala": "Kabel Fiber Optic Putus (LOS Merah) (Teknisi: Brian)",
+    "network_logs": [
+      {
+        "id": 1792217457624,
+        "tiket_id": "TKT-457624",
+        "status": "DOWN",
+        "jenis_kendala": "Kabel Fiber Optic Putus (LOS Merah)",
+        "teknisi": "Brian",
+        "status_penanganan": "Pending",
+        "catatan_perbaikan": "",
+        "waktu": "17 Oktober 2026, 13:10 WIB",
+        "waktu_selesai": null,
+        "durasi": "Sedang Berlangsung",
+        "created_at": 1792217457624,
+        "resolved_at": null,
+        "keterangan": "Kabel Fiber Optic Putus (LOS Merah)"
+      }
+    ],
     "customer_id": "PLG004",
     "device": {
       "tipe": "VSOL V2801SG (1GE XPON ONT)",
@@ -374,7 +404,7 @@
     "wilayah": "Kel. Kebayoran Baru",
     "paket": "Paket Warga 10 Mbps",
     "harga": 100000,
-    "status_tagihan": "Belum Lunas",
+    "status_tagihan": "Lunas",
     "jatuh_tempo": "2026-10-01",
     "invoices": [
       {
@@ -401,13 +431,26 @@
       {
         "periode": "2026-10",
         "nominal": 100000,
-        "status": "Belum Lunas",
-        "tanggal_bayar": null
+        "status": "Lunas",
+        "tanggal_bayar": "2026-10-17",
+        "metode_bayar": "QRIS DANA"
       }
     ],
-    "status_jaringan": "Terisolir",
-    "catatan_kendala": "Terisolir otomatis (Menunggak 10 hari)",
+    "status_jaringan": "Aktif",
+    "catatan_kendala": "",
     "network_logs": [
+      {
+        "id": 1792217394212,
+        "status": "UP",
+        "waktu": "17 Oktober 2026, 13:09 WIB",
+        "keterangan": "Buka isolir otomatis: Tagihan telah dilunasi",
+        "tiket_id": "TKT-394212",
+        "status_penanganan": "Selesai",
+        "jenis_kendala": "Buka isolir otomatis: Tagihan telah dilunasi",
+        "teknisi": "Tim Lapangan",
+        "catatan_perbaikan": "Buka isolir otomatis: Tagihan telah dilunasi",
+        "durasi": "Selesai"
+      },
       {
         "id": 1791664000000,
         "status": "DOWN",
@@ -437,7 +480,8 @@
     "ipAddress": "192.168.88.15",
     "mikrotikService": "pppoe",
     "mikrotikStatus": "isolated",
-    "mikrotikLastSync": "2026-10-12T18:47:18.129Z"
+    "mikrotikLastSync": "2026-10-12T18:47:18.129Z",
+    "metode_bayar": "QRIS DANA"
   },
   {
     "id": 6,
@@ -1496,8 +1540,8 @@
     "paket": "Paket Bisnis 50 Mbps",
     "harga": 350000,
     "jatuh_tempo": "2026-10-13",
-    "status_jaringan": "Aktif",
-    "catatan_kendala": "",
+    "status_jaringan": "Terisolir",
+    "catatan_kendala": "Sambungan Terisolir",
     "mikrotikUsername": "Fauzan_123",
     "mikrotikProfile": "50Mbps",
     "ipAddress": "192.168.88.31",
@@ -1515,7 +1559,20 @@
       "catatan_perangkat": "Hanya kabel optik yang menjadi garansi"
     },
     "status_tagihan": "Belum Lunas",
-    "network_logs": [],
+    "network_logs": [
+      {
+        "id": 1792219542356,
+        "status": "DOWN",
+        "waktu": "17 Oktober 2026, 13:45 WIB",
+        "keterangan": "Sambungan Terisolir",
+        "tiket_id": "TKT-542356",
+        "status_penanganan": "Pending",
+        "jenis_kendala": "Sambungan Terisolir",
+        "teknisi": "Menunggu Penugasan",
+        "catatan_perbaikan": "Sambungan Terisolir",
+        "durasi": "Sedang Berlangsung"
+      }
+    ],
     "invoices": [
       {
         "periode": "2026-10",

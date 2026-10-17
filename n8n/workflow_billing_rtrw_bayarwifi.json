@@ -1,0 +1,229 @@
+{
+  "name": "Billing RT/RW.net (BayarWifi 3.0) - Otomasi WhatsApp, QRIS & Alert Teknisi",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "billing-rtrw-events",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "b101a001-0001-4000-8000-000000000001",
+      "name": "Webhook Event dari Billing",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "billing-rtrw-events"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.body ? $json.body.event : $json.event }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "payment.paid",
+              "output": 0
+            },
+            {
+              "value2": "ticket.created",
+              "output": 1
+            },
+            {
+              "value2": "customer.isolated",
+              "output": 2
+            },
+            {
+              "value2": "hotspot.voucher_generated",
+              "output": 3
+            }
+          ]
+        },
+        "fallbackOutput": 0
+      },
+      "id": "b101a001-0002-4000-8000-000000000002",
+      "name": "Router Event Billing",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/n8n/notify-relay",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "wa_struk_lunas"
+            },
+            {
+              "name": "target",
+              "value": "={{ ($json.body ? $json.body.data.whatsapp : $json.data.whatsapp) || '6281234567890' }}"
+            },
+            {
+              "name": "message",
+              "value": "=✅ *STRUK PEMBAYARAN LUNAS*\n\nTerima kasih *{{ $json.body ? $json.body.data.nama : $json.data.nama }}* ({{ $json.body ? $json.body.data.customer_id : $json.data.customer_id }}).\nPembayaran internet paket *{{ $json.body ? $json.body.data.paket : $json.data.paket }}* sebesar *Rp {{ $json.body ? $json.body.data.harga : $json.data.harga }}* telah kami terima via *{{ $json.body ? $json.body.data.metode_bayar : $json.data.metode_bayar }}*.\n\nStatus Jaringan: *AKTIF*."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b101a001-0003-4000-8000-000000000003",
+      "name": "Kirim Struk Lunas via WA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 140]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/n8n/notify-relay",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "teknisi_alert"
+            },
+            {
+              "name": "target",
+              "value": "={{ ($json.body && $json.body.targets ? $json.body.targets.wa_group_target : '') || '6281299998888' }}"
+            },
+            {
+              "name": "message",
+              "value": "=🚨 *ALERT TIKET GANGGUAN / OLT LOS*\n\nPelanggan: *{{ $json.body ? $json.body.data.nama : $json.data.nama }}* ({{ $json.body ? $json.body.data.customer_id : $json.data.customer_id }})\nWilayah/Alamat: {{ ($json.body ? $json.body.data.alamat : $json.data.alamat) || ($json.body ? $json.body.data.wilayah : '-') }}\nPort OLT: `{{ ($json.body ? $json.body.data.olt_port : $json.data.olt_port) || '-' }}`\nKendala: *{{ ($json.body ? ($json.body.data.keluhan || $json.body.data.jenis_kendala) : ($json.data.keluhan || $json.data.jenis_kendala)) || 'Gangguan Jaringan' }}*"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b101a001-0004-4000-8000-000000000004",
+      "name": "Alert Grup WA/Telegram Teknisi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/n8n/notify-relay",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "wa_isolir"
+            },
+            {
+              "name": "target",
+              "value": "={{ ($json.body ? $json.body.data.whatsapp : $json.data.whatsapp) || '6281234567890' }}"
+            },
+            {
+              "name": "message",
+              "value": "=⚠️ *PEMBERITAHUAN ISOLIR SEMENTARA*\n\nYth. *{{ $json.body ? $json.body.data.nama : $json.data.nama }}* ({{ $json.body ? $json.body.data.customer_id : $json.data.customer_id }}), sambungan internet Anda saat ini sedang diisolir sementara karena tagihan melewati batas jatuh tempo.\n\nSilakan lakukan pembayaran agar sambungan internet otomatis aktif kembali."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b101a001-0005-4000-8000-000000000005",
+      "name": "Notifikasi Isolir Pelanggan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 420]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wa-chatbot-incoming",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "b101a001-0006-4000-8000-000000000006",
+      "name": "Webhook Chatbot WA / Callback QRIS",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 620],
+      "webhookId": "wa-chatbot-incoming"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/n8n/incoming",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "bw3_n8n_secret_rtrwnet_2026"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"action\": \"{{ ($json.body && $json.body.action) || 'check_bill' }}\",\n  \"customer_id\": \"{{ ($json.body && $json.body.customer_id) || 'PLG001' }}\",\n  \"whatsapp\": \"{{ ($json.body && $json.body.sender) || '' }}\",\n  \"profile_id\": \"{{ ($json.body && $json.body.profile_id) || 'HSP-02' }}\"\n}",
+        "options": {}
+      },
+      "id": "b101a001-0007-4000-8000-000000000007",
+      "name": "Eksekusi Aksi ke Server Billing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [540, 620]
+    }
+  ],
+  "connections": {
+    "Webhook Event dari Billing": {
+      "main": [
+        [
+          {
+            "node": "Router Event Billing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router Event Billing": {
+      "main": [
+        [
+          {
+            "node": "Kirim Struk Lunas via WA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alert Grup WA/Telegram Teknisi",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notifikasi Isolir Pelanggan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Chatbot WA / Callback QRIS": {
+      "main": [
+        [
+          {
+            "node": "Eksekusi Aksi ke Server Billing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+

@@ -13,6 +13,7 @@ const { createNotificationService } = require('./services/notificationService');
 const rbacService = require('./services/rbacService');
 const { createHotspotService } = require('./services/hotspotService');
 const { createPosAndChatService } = require('./services/posAndChatService');
+const { createN8nService } = require('./services/n8nService');
 
 // Migrasi otomatis struktur tenants.json saat server start (menambahkan konfigurasi mikrotik & olt jika belum ada)
 try {
@@ -1101,6 +1102,21 @@ const posAndChatService = createPosAndChatService({
   logActivity: (aksi, ket, opts) => logActivity(aksi, ket, opts)
 });
 
+// Inisialisasi Service Konektor Otomasi & Webhook Dua Arah n8n
+const n8nService = createN8nService({
+  getTenantFilePath: (file, tid) => getTenantFilePath(file, tid),
+  safeWriteJSON: (fp, data) => safeWriteJSON(fp, data),
+  readDB: (tid) => readDB(tid),
+  writeDB: (data, tid) => writeDB(data, tid),
+  ensureFieldsAndInvoices: (data) => ensureFieldsAndInvoices(data),
+  hotspotService,
+  mikrotikService,
+  formatWaktuIndo: (d) => formatWaktuIndo(d),
+  today: (d) => today(d),
+  rupiah: (n) => rupiah(n),
+  logActivity: (aksi, ket, opts) => logActivity(aksi, ket, opts)
+});
+
 // =========================================================================
 // MIDDLEWARE AUTHENTICATION & MULTI-TENANT CONTEXT
 // =========================================================================
@@ -1112,7 +1128,9 @@ app.use((req, res, next) => {
     '/api/client/login',
     '/api/client/portal-data',
     '/api/client/lapor-gangguan',
-    '/api/client/report-issue'
+    '/api/client/report-issue',
+    '/api/n8n/incoming',
+    '/api/n8n/notify-relay'
   ].includes(req.path) || req.path.startsWith('/api/client/chat/') || req.path.startsWith('/api/client/profile/');
 
   if (isStatic || isPublicApi) {
@@ -2179,6 +2197,22 @@ app.patch('/api/customers/:id/status', (req, res) => {
         console.error(`[wa-notify-paid] Gagal kirim notif lunas ${c.nama}:`, e.message);
       }
     })();
+
+    // Trigger Webhook n8n: payment.paid (Non-blocking)
+    n8nService.emitEvent(curTenantId, 'payment.paid', {
+      id: c.id,
+      customer_id: c.customer_id,
+      nama: c.nama,
+      whatsapp: c.whatsapp,
+      wilayah: c.wilayah,
+      paket: c.paket,
+      harga: inv.nominal || c.harga,
+      periode: inv.periode,
+      tanggal_bayar: inv.tanggal_bayar,
+      metode_bayar: inv.metode_bayar
+    }, {
+      summary: `Pelunasan tagihan ${c.nama} (${c.customer_id}) sebesar ${rupiah(inv.nominal || c.harga)} [${inv.metode_bayar}]`
+    }).catch(() => {});
   } else {
     logActivity('BATAL_LUNAS', `Pembatalan pelunasan: Tagihan ${c.nama} (${c.customer_id}) periode ${inv.periode} diubah kembali menjadi Belum Lunas`, {
       kategori: 'Billing',
@@ -2218,10 +2252,30 @@ app.patch('/api/customers/:id/jaringan', (req, res) => {
 
   writeDB(data);
 
+  const curTenantId = getCurrentTenantId();
   logActivity(c.status_jaringan === 'Aktif' ? 'BUKA_ISOLIR' : 'ISOLIR_PELANGGAN', `Perubahan status jaringan ${c.nama} (${c.customer_id}) menjadi "${c.status_jaringan}"${c.catatan_kendala ? ` (${c.catatan_kendala})` : ''}`, {
     kategori: 'Jaringan',
     target_id: c.customer_id
   });
+
+  n8nService.emitEvent(
+    curTenantId,
+    c.status_jaringan === 'Aktif' ? 'customer.restored' : 'customer.isolated',
+    {
+      id: c.id,
+      customer_id: c.customer_id,
+      nama: c.nama,
+      whatsapp: c.whatsapp,
+      alamat: c.alamat,
+      wilayah: c.wilayah,
+      paket: c.paket,
+      status_jaringan: c.status_jaringan,
+      catatan_kendala: c.catatan_kendala || ''
+    },
+    {
+      summary: `${c.status_jaringan === 'Aktif' ? 'Buka Isolir' : 'Isolir'} pelanggan ${c.nama} (${c.customer_id})`
+    }
+  ).catch(() => {});
 
   res.json(c);
 });
@@ -2357,10 +2411,28 @@ app.post('/api/customers/:id/network-logs', (req, res) => {
 
   writeDB(data);
 
+  const curTenantId = getCurrentTenantId();
   logActivity('BUAT_TIKET_GANGGUAN', `Membuka tiket #${logEntry.tiket_id} untuk ${c.nama} (${c.customer_id}): ${logEntry.jenis_kendala} (Teknisi: ${logEntry.teknisi})`, {
     kategori: 'Jaringan',
     target_id: c.customer_id
   });
+
+  n8nService.emitEvent(curTenantId, 'ticket.created', {
+    tiket_id: logEntry.tiket_id,
+    customer_id: c.customer_id,
+    nama: c.nama,
+    whatsapp: c.whatsapp,
+    alamat: c.alamat,
+    wilayah: c.wilayah,
+    olt_port: (c.device && c.device.olt_port) || c.olt_port || '-',
+    onu_id: (c.device && c.device.onu_id) || c.onu_id || '-',
+    jenis_kendala: logEntry.jenis_kendala,
+    teknisi: logEntry.teknisi,
+    status_penanganan: logEntry.status_penanganan,
+    catatan_perbaikan: logEntry.catatan_perbaikan
+  }, {
+    summary: `Tiket gangguan #${logEntry.tiket_id} (${c.nama}): ${logEntry.jenis_kendala}`
+  }).catch(() => {});
 
   res.status(201).json({ customer: c, log: logEntry });
 });
@@ -4256,6 +4328,22 @@ app.post('/api/hotspot/vouchers/generate', rbacService.requireRoles('admin', 'ka
     if (result.error) {
       return res.status(400).json({ error: result.error });
     }
+
+    n8nService.emitEvent(currentTenantId, 'hotspot.voucher_generated', {
+      batch_code: result.batch_code,
+      generated_count: result.generated_count || result.count || 0,
+      profile_id: req.body && req.body.profile_id,
+      reseller: (req.body && req.body.reseller) || 'Loket Utama',
+      vouchers_preview: (result.vouchers || []).slice(0, 10).map(v => ({
+        kode: v.kode || v.kode_voucher,
+        profile_nama: v.profile_nama,
+        durasi_label: v.durasi_label,
+        harga_jual: v.harga_jual
+      }))
+    }, {
+      summary: `Generate ${result.generated_count || result.count || 0} voucher Hotspot (${result.batch_code})`
+    }).catch(() => {});
+
     res.status(201).json({
       success: true,
       message: `Berhasil men-generate ${result.count} kode voucher Hotspot (${result.batch_code}).`,
@@ -4627,6 +4715,254 @@ app.post('/api/livechat/sessions/:sessionId/convert-ticket', rbacService.require
     return res.status(400).json({ error: result.error });
   }
   res.status(201).json(result);
+});
+
+// =========================================================================
+// BAYARWIFI 3.0 - BAGIAN D: MODUL OTOMASI & WEBHOOK DUA ARAH n8n
+// =========================================================================
+
+// 1. GET /api/n8n/config - Ambil konfigurasi konektor n8n & riwayat log terbaru
+app.get('/api/n8n/config', rbacService.requireRoles('admin'), (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const config = n8nService.readConfig(currentTenantId);
+    const logs = n8nService.readLogs(currentTenantId);
+    res.json({
+      success: true,
+      tenant_id: currentTenantId,
+      config,
+      logs_count: logs.length,
+      recent_logs: logs.slice(0, 30),
+      supported_incoming_actions: [
+        { action: 'check_bill', description: 'Cek tagihan & status pelanggan via customer_id atau whatsapp' },
+        { action: 'confirm_payment', description: 'Verifikasi pelunasan otomatis & buka isolir PPPoE MikroTik' },
+        { action: 'buy_voucher', description: 'Terbitkan kode voucher Hotspot otomatis untuk Chatbot WA / Reseller' },
+        { action: 'report_trouble', description: 'Buat tiket gangguan teknis otomatis dari laporan WhatsApp' }
+      ]
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Gagal memuat konfigurasi n8n.' });
+  }
+});
+
+// 2. PUT /api/n8n/config - Simpan pengaturan URL Webhook n8n, Secret Key & toggle event
+app.put('/api/n8n/config', rbacService.requireRoles('admin'), (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const updated = n8nService.saveConfig(currentTenantId, req.body || {});
+    logActivity(
+      'N8N_CONFIG_UPDATE',
+      `Memperbarui pengaturan Webhook n8n (${updated.enabled ? 'AKTIF' : 'STANDBY'}): ${updated.webhook_url || '-'}`,
+      { kategori: 'Sistem' }
+    );
+    res.json({
+      success: true,
+      message: 'Konfigurasi Webhook & Otomasi n8n berhasil disimpan.',
+      config: updated
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Gagal menyimpan konfigurasi n8n.' });
+  }
+});
+
+// 3. POST /api/n8n/test - Kirim test event ke n8n atau jalankan simulasi aksi incoming
+app.post('/api/n8n/test', rbacService.requireRoles('admin'), async (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const testType = String((req.body && req.body.test_type) || 'outgoing_ping').trim();
+
+    if (testType.startsWith('incoming_')) {
+      const actionName = testType.replace('incoming_', '');
+      const customers = readDB(currentTenantId) || [];
+      const firstCust = customers[0] || { customer_id: 'PLG001', whatsapp: '6281234567890' };
+      const actionPayload = {
+        action: actionName,
+        customer_id: (req.body && req.body.customer_id) || firstCust.customer_id || 'PLG001',
+        profile_id: (req.body && req.body.profile_id) || 'HSP-02',
+        keluhan: 'Tes simulasi laporan kendala internet dari Bot WA n8n'
+      };
+
+      // Coba tembak langsung ke node "Webhook Chatbot WA / Callback QRIS" di n8n agar tercatat di Executions n8n
+      const cfg = n8nService.readConfig(currentTenantId);
+      let simRes = null;
+      if (cfg.webhook_url) {
+        try {
+          const baseWebhook = cfg.webhook_url.replace(/\/billing-rtrw-events\/?$/, '/wa-chatbot-incoming');
+          const liveRes = await fetch(baseWebhook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(actionPayload),
+            signal: AbortSignal.timeout(4000)
+          });
+          if (liveRes.ok) {
+            simRes = await liveRes.json();
+          }
+        } catch (_) {
+          // Fallback ke simulasi internal jika webhook kedua belum aktif
+        }
+      }
+
+      if (!simRes) {
+        simRes = await n8nService.handleIncomingAction(currentTenantId, {
+          __internal_test: true,
+          ...actionPayload
+        });
+      }
+
+      return res.status(simRes.status_code || 200).json({
+        success: !simRes.error,
+        message: simRes.message || simRes.whatsapp_reply_text || simRes.error || 'Simulasi aksi incoming selesai.',
+        result: simRes,
+        recent_logs: n8nService.readLogs(currentTenantId).slice(0, 30)
+      });
+    }
+
+    if (testType === 'outgoing_ticket') {
+      const emitTicketRes = await n8nService.emitEvent(
+        currentTenantId,
+        'ticket.created',
+        {
+          tiket_id: 'TKT-' + String(Date.now()).slice(-6),
+          customer_id: 'PLG002',
+          nama: 'Siti Aminah (Simulasi Tiket Gangguan)',
+          whatsapp: '6281298765432',
+          alamat: 'Jl. Melati No. 14 RT 03 / RW 02',
+          wilayah: 'RT 03 / RW 02',
+          olt_port: 'GPON 0/1/2:5',
+          keluhan: 'Indikasi Lampu LOS Merah berkedip pada modem ONT ZTE F609',
+          status_tiket: 'Open'
+        },
+        {
+          force: true,
+          summary: 'Simulasi Alert Tiket Gangguan (ticket.created) -> Grup WA/Telegram Teknisi'
+        }
+      );
+      let relayInfo = null;
+      if (emitTicketRes.simulated) {
+        relayInfo = await n8nService.relayNotification(currentTenantId, {
+          type: 'teknisi_alert',
+          message: `🚨 *ALERT TIKET GANGGUAN BARU*\nPelanggan: *Siti Aminah* (PLG002)\nAlamat: Jl. Melati No. 14 RT 03 / RW 02\nPort OLT: GPON 0/1/2:5\nKeluhan: Indikasi Lampu LOS Merah berkedip pada modem ONT ZTE F609\nStatus: *Open*`
+        });
+      }
+      return res.json({
+        ...emitTicketRes,
+        teknisi_group_relay: relayInfo,
+        recent_logs: n8nService.readLogs(currentTenantId).slice(0, 30)
+      });
+    }
+
+    if (testType === 'outgoing_isolated') {
+      const emitIsoRes = await n8nService.emitEvent(
+        currentTenantId,
+        'customer.isolated',
+        {
+          customer_id: 'PLG003',
+          nama: 'Agus Setiawan (Simulasi Isolir)',
+          whatsapp: '6281311223344',
+          paket: 'Paket Keluarga 20 Mbps',
+          harga: 150000,
+          jatuh_tempo: today(),
+          status_jaringan: 'Terisolir'
+        },
+        {
+          force: true,
+          summary: 'Simulasi Event Isolir Pelanggan (customer.isolated) -> Jalur ke-3 n8n'
+        }
+      );
+      return res.json({
+        ...emitIsoRes,
+        recent_logs: n8nService.readLogs(currentTenantId).slice(0, 30)
+      });
+    }
+
+    const emitRes = await n8nService.emitEvent(
+      currentTenantId,
+      'payment.paid',
+      {
+        customer_id: 'PLG001',
+        nama: 'Budi Santoso (Test Ping n8n)',
+        whatsapp: '6281234567890',
+        paket: 'Paket Warga 20 Mbps',
+        harga: 150000,
+        metode_bayar: 'QRIS Otomatis (Test Event)',
+        tanggal_bayar: today()
+      },
+      {
+        force: true,
+        summary: 'Test Ping Event (payment.paid) dari Dashboard Billing ke n8n'
+      }
+    );
+
+    res.json({
+      ...emitRes,
+      recent_logs: n8nService.readLogs(currentTenantId).slice(0, 30)
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Gagal menjalankan pengujian n8n.' });
+  }
+});
+
+// 4. GET /api/n8n/logs & DELETE /api/n8n/logs - Riwayat log trafik webhook n8n
+app.get('/api/n8n/logs', rbacService.requireRoles('admin'), (req, res) => {
+  const currentTenantId = getCurrentTenantId();
+  const logs = n8nService.readLogs(currentTenantId);
+  res.json({ success: true, count: logs.length, logs });
+});
+
+app.delete('/api/n8n/logs', rbacService.requireRoles('admin'), (req, res) => {
+  const currentTenantId = getCurrentTenantId();
+  n8nService.clearLogs(currentTenantId);
+  res.json({ success: true, message: 'Riwayat log webhook n8n berhasil dibersihkan.' });
+});
+
+// 5. GET /api/n8n/workflow-template - Download file JSON template workflow n8n siap pakai
+app.get('/api/n8n/workflow-template', (req, res) => {
+  const templatePath = path.join(__dirname, 'n8n', 'workflow_billing_rtrw_bayarwifi.json');
+  if (!fs.existsSync(templatePath)) {
+    return res.status(404).json({ error: 'File template workflow n8n tidak ditemukan.' });
+  }
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="workflow_billing_rtrw_bayarwifi.json"');
+  res.sendFile(templatePath);
+});
+
+// 6. POST /api/n8n/incoming - Endpoint Webhook Masuk dari n8n (Chatbot WA / Callback QRIS / Lapor Gangguan)
+app.post('/api/n8n/incoming', async (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const result = await n8nService.handleIncomingAction(currentTenantId, req.body || {}, req.headers || {});
+    if (result.error) {
+      return res.status(result.status_code || 400).json({ success: false, error: result.error });
+    }
+    res.status(result.status_code || 200).json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message || 'Gagal memproses instruksi webhook n8n.' });
+  }
+});
+
+// 7. POST /api/n8n/notify-relay - Endpoint Relay Pintar untuk Grup WA/Telegram Teknisi & Notifikasi Pelanggan (Mendukung Mode Dummy & Live Token)
+app.post('/api/n8n/notify-relay', async (req, res) => {
+  try {
+    const currentTenantId = getCurrentTenantId();
+    const result = await n8nService.relayNotification(currentTenantId, req.body || {});
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ status: false, error: err.message || 'Gagal memproses relay notifikasi.' });
+  }
+});
+
+// 8. POST /api/n8n/detect-telegram-chat - Deteksi otomatis Chat ID Grup Telegram dari Bot Token
+app.post('/api/n8n/detect-telegram-chat', rbacService.requireRoles('admin'), async (req, res) => {
+  try {
+    const botToken = req.body && req.body.bot_token;
+    const result = await n8nService.detectTelegramChatId(botToken);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // Auto-generate tagihan awal bulan & pengecekan auto-isolir berkala

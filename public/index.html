@@ -666,6 +666,10 @@
           <button id="btnSuperAdmin" type="button" class="hidden w-full text-left px-3 py-2 rounded-lg text-amber-300 hover:text-white hover:bg-amber-600/30 items-center gap-2.5 transition text-xs font-bold" title="Buka Panel Master Manajemen Multi-Tenant">
             <span>👑</span> <span>Kelola Tenant</span>
           </button>
+          <button id="btnN8nAutomation" type="button" class="w-full text-left px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-teal-600/30 flex items-center justify-between transition text-xs font-medium cursor-pointer" title="Pengaturan Webhook & Otomasi n8n (Chatbot WA, Auto-Lunas QRIS & Alert Teknisi)">
+            <span class="flex items-center gap-2.5"><span>🤖</span> <span>Otomasi n8n &amp; Webhook</span></span>
+            <span id="badgeN8nStatus" class="text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30 px-1.5 py-0.2 rounded-full">Ready</span>
+          </button>
           <button id="btnActivityLogs" type="button" class="w-full text-left px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-indigo-600/30 flex items-center gap-2.5 transition text-xs font-medium" title="Pencatatan Log Aktivitas Admin">
             <span>📜</span> <span>Log Aktivitas Admin</span>
           </button>
@@ -3771,6 +3775,187 @@
     </div>
   </div>
 
+  <!-- Modal Otomasi n8n & Webhook Dua Arah (BayarWifi 3.0) -->
+  <div id="modalN8nAutomation" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden z-50 items-center justify-center p-3 sm:p-4 no-print">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
+      <!-- Header Modal -->
+      <div class="bg-gradient-to-r from-teal-700 to-indigo-700 text-white px-5 py-4 flex justify-between items-center shrink-0">
+        <div>
+          <h3 class="font-bold text-sm sm:text-base flex items-center gap-2">
+            <span>🤖</span> Otomasi n8n &amp; Konektor Webhook Dua Arah
+            <span id="n8nModalStatusBadge" class="text-[11px] bg-white/20 px-2.5 py-0.5 rounded-full font-semibold">Mode Standby Aman</span>
+          </h3>
+          <p class="text-[11px] text-teal-100 mt-0.5">Integrasikan Billing RT/RW.net dengan workflow n8n untuk Chatbot WA 24 Jam, Auto-Lunas QRIS/Mutasi Bank, &amp; Alert Gangguan OLT Teknisi</p>
+        </div>
+        <button type="button" data-close class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 text-xl font-bold transition cursor-pointer">&times;</button>
+      </div>
+
+      <!-- Body Modal -->
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-5 text-xs sm:text-sm flex-1">
+        <!-- Banner Download Template Workflow JSON Siap Pakai -->
+        <div class="bg-teal-50/90 dark:bg-slate-800/80 border border-teal-200 dark:border-teal-800/60 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div class="space-y-0.5">
+            <div class="font-bold text-teal-900 dark:text-teal-300 flex items-center gap-1.5 text-xs sm:text-sm">
+              <span>📦</span> File Template Workflow n8n Siap Pakai (JSON)
+            </div>
+            <p class="text-xs text-slate-600 dark:text-slate-300">Unduh file <code>workflow_billing_rtrw_bayarwifi.json</code> lalu pilih <strong>Import from File</strong> di aplikasi n8n Anda.</p>
+          </div>
+          <a href="/api/n8n/workflow-template" download="workflow_billing_rtrw_bayarwifi.json" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 shrink-0 self-start sm:self-auto transition">
+            <span>📥</span> Download Workflow n8n (.json)
+          </a>
+        </div>
+
+        <!-- Form Konfigurasi Webhook Outgoing & Secret Key -->
+        <form id="formN8nConfig" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
+            <h4 class="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm flex items-center gap-1.5">
+              <span>⚙️</span> Konfigurasi Endpoint Webhook &amp; Keamanan
+            </h4>
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="n8nEnabledToggle" class="w-4 h-4 rounded text-teal-600 focus:ring-teal-500">
+              <span class="font-bold text-xs text-slate-700 dark:text-slate-200">Aktifkan Pengiriman Live ke Server n8n</span>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Outgoing Webhook URL (di Server n8n)</label>
+              <input type="url" id="n8nWebhookUrl" placeholder="http://localhost:5678/webhook/billing-rtrw-events" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 font-mono bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+              <p class="text-[11px] text-slate-400 mt-1">URL node Webhook Trigger pada workflow n8n Anda.</p>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Secret Key Otentikasi (<code>X-Webhook-Secret</code>)</label>
+              <input type="text" id="n8nSecretKey" placeholder="bw3_n8n_secret_rtrwnet_2026" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 font-mono bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+              <p class="text-[11px] text-slate-400 mt-1">Digunakan untuk mengamankan endpoint masuk <code>POST /api/n8n/incoming</code>.</p>
+            </div>
+          </div>
+
+          <!-- Pilihan Event Trigger Otomatis -->
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-2">Event Otomatis yang Dikirim dari Billing ke n8n:</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
+              <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer">
+                <input type="checkbox" id="n8nEvPaymentPaid" checked class="rounded text-teal-600">
+                <span>💳 Pelunasan Tagihan (<code>payment.paid</code>)</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer">
+                <input type="checkbox" id="n8nEvCustomerIsolated" checked class="rounded text-teal-600">
+                <span>🚫 Isolir Pelanggan (<code>customer.isolated</code>)</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer">
+                <input type="checkbox" id="n8nEvCustomerRestored" checked class="rounded text-teal-600">
+                <span>🔓 Buka Isolir (<code>customer.restored</code>)</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer">
+                <input type="checkbox" id="n8nEvVoucherGenerated" checked class="rounded text-teal-600">
+                <span>🎫 Voucher Hotspot (<code>hotspot.voucher_generated</code>)</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer sm:col-span-2">
+                <input type="checkbox" id="n8nEvTicketCreated" checked class="rounded text-teal-600">
+                <span>🚨 Tiket Gangguan / Alert OLT LOS (<code>ticket.created</code>)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pengaturan Grup WA / Telegram Teknisi -->
+          <div class="bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-900/60 rounded-xl p-3.5 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <div class="font-bold text-indigo-900 dark:text-indigo-300 text-xs flex items-center gap-1.5">
+                <span>🛠️</span> Koneksi Grup WA / Telegram Teknisi Lapangan
+              </div>
+              <span class="text-[11px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full font-semibold">
+                ✅ Siap Jalan (Otomatis Mode Dummy jika Token Kosong)
+              </span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Grup Teknisi</label>
+                <input type="text" id="n8nTelegramGroupName" placeholder="Grup Teknisi Lapangan RT/RW.net" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Telegram Bot Token (<code>@BotFather</code>)</label>
+                <input type="text" id="n8nTelegramBotToken" placeholder="Opsional (Kosong = Mode Dummy)" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 font-mono bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Chat ID Grup Telegram</label>
+                <div class="flex gap-1.5">
+                  <input type="text" id="n8nTelegramChatId" placeholder="-100123456789" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 font-mono bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+                  <button type="button" id="btnDetectTelegramChat" title="Deteksi Chat ID Grup otomatis dari Bot Token" class="px-2.5 py-1.5 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold text-[11px] shrink-0 cursor-pointer">🔍 Cari ID</button>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1 border-t border-slate-100 dark:border-slate-800">
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor / ID Grup WA Teknisi</label>
+                <input type="text" id="n8nWaGroupTarget" placeholder="6281234567890 atau ID Grup Fonnte" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 font-mono bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Token API WhatsApp (Fonnte)</label>
+                <input type="password" id="n8nFonnteToken" placeholder="Opsional (Kosong = Mode Dummy Tanpa Error)" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 font-mono bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button type="button" id="btnTestN8nOutgoing" class="px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs transition cursor-pointer">
+                ⚡ Tes Struk Lunas (Jalur 1)
+              </button>
+              <button type="button" id="btnTestN8nTicketAlert" class="px-2.5 py-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs transition cursor-pointer">
+                🚨 Tes Alert Grup Teknisi (Jalur 2)
+              </button>
+              <button type="button" id="btnTestN8nIsolirAlert" class="px-2.5 py-1.5 rounded-lg border border-orange-200 bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold text-xs transition cursor-pointer">
+                🚫 Tes Notif Isolir (Jalur 3)
+              </button>
+              <button type="button" id="btnTestN8nCheckBill" class="px-2.5 py-1.5 rounded-lg border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 font-semibold text-xs transition cursor-pointer">
+                🤖 Tes Bot WA: Cek Tagihan
+              </button>
+              <button type="button" id="btnTestN8nBuyVoucher" class="px-2.5 py-1.5 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold text-xs transition cursor-pointer">
+                🎫 Tes Bot WA: Beli Voucher
+              </button>
+            </div>
+            <button type="submit" id="btnSaveN8nConfig" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition cursor-pointer flex items-center gap-1.5">
+              <span>💾</span> Simpan Pengaturan n8n
+            </button>
+          </div>
+        </form>
+
+        <!-- Kotak Hasil Simulasi / Respons Terakhir -->
+        <div id="n8nTestResultBox" class="hidden rounded-xl border border-teal-200 bg-teal-50/70 dark:bg-slate-800 p-3 text-xs font-mono whitespace-pre-wrap text-slate-800 dark:text-slate-100"></div>
+
+        <!-- Tabel Riwayat Log Trafik Webhook n8n -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm flex items-center gap-1.5">
+              <span>📋</span> Riwayat Trafik Webhook &amp; Eksekusi Otomasi n8n
+            </h4>
+            <button type="button" id="btnClearN8nLogs" class="text-xs text-rose-600 hover:underline font-semibold cursor-pointer">🗑️ Bersihkan Log</button>
+          </div>
+          <div class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
+            <table class="w-full min-w-[640px] text-xs">
+              <thead class="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 text-left font-bold uppercase text-[11px]">
+                <tr>
+                  <th class="px-3 py-2">Waktu</th>
+                  <th class="px-3 py-2">Arah</th>
+                  <th class="px-3 py-2">Event / Action</th>
+                  <th class="px-3 py-2">Status</th>
+                  <th class="px-3 py-2">Ringkasan Aktivitas</th>
+                </tr>
+              </thead>
+              <tbody id="n8nLogsTableRows" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Modal -->
+      <div class="bg-slate-50 dark:bg-slate-900 px-5 py-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs text-slate-500 shrink-0">
+        <span>Endpoint Masuk n8n: <code class="font-mono font-bold text-indigo-600">POST /api/n8n/incoming</code></span>
+        <button type="button" data-close class="px-4 py-1.5 rounded-lg border hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-medium cursor-pointer">Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-4 right-4 bg-slate-900 text-white text-sm px-4 py-2.5 rounded-lg shadow-lg hidden z-50 no-print"></div>
 
@@ -4535,7 +4720,7 @@ function setBtnLoading(btn, isLoading, loadingText = 'Memproses...') {
 }
 
 // ---- Modal Management (Multi-Layer / Nested Modal Stack System) ----
-const allModals = ['modalForm', 'modalCustomerDetail', 'modalHistory', 'modalPay', 'modalQris', 'modalBulkReminder', 'modalWa', 'modalSettings', 'modalLogGangguan', 'modalBroadcast', 'modalExpenses', 'modalActivityLogs', 'modalMikrotik', 'modalPackages', 'modalBankAccounts', 'modalInventoryStock', 'modalSuperAdmin', 'modalEditTenantCredentials'];
+const allModals = ['modalForm', 'modalCustomerDetail', 'modalHistory', 'modalPay', 'modalQris', 'modalBulkReminder', 'modalWa', 'modalSettings', 'modalLogGangguan', 'modalBroadcast', 'modalExpenses', 'modalActivityLogs', 'modalMikrotik', 'modalPackages', 'modalBankAccounts', 'modalInventoryStock', 'modalSuperAdmin', 'modalEditTenantCredentials', 'modalN8nAutomation'];
 let activeModalStack = [];
 
 function openModal(id) {
@@ -8577,9 +8762,9 @@ function applyRolePermissionsUI(user, permissions) {
   const hiddenMenus = (permissions && Array.isArray(permissions.hidden_menus))
     ? permissions.hidden_menus
     : (role === 'kasir'
-      ? ['btnSuperAdmin', 'btnAutoIsolir', 'btnInventoryStock', 'btnSettings', 'btnSyncMikrotik', 'btnRouterDetail', 'btnOltBatchCheck']
+      ? ['btnSuperAdmin', 'btnAutoIsolir', 'btnInventoryStock', 'btnSettings', 'btnN8nAutomation', 'btnSyncMikrotik', 'btnRouterDetail', 'btnOltBatchCheck']
       : role === 'teknisi'
-        ? ['btnSuperAdmin', 'btnGenerate', 'btnExpenses', 'btnBankAccounts', 'btnBroadcast', 'btnBulkReminder', 'btnSettings']
+        ? ['btnSuperAdmin', 'btnGenerate', 'btnExpenses', 'btnBankAccounts', 'btnBroadcast', 'btnBulkReminder', 'btnSettings', 'btnN8nAutomation']
         : ['btnSuperAdmin']);
 
   const allManagedMenuIds = [
@@ -8596,6 +8781,7 @@ function applyRolePermissionsUI(user, permissions) {
     'btnBroadcast',
     'btnBulkReminder',
     'btnSettings',
+    'btnN8nAutomation',
     'btnActivityLogs',
     'btnSyncMikrotik',
     'btnRouterDetail',
@@ -10527,10 +10713,213 @@ function initHotspotVoucherEvents() {
   }
 }
 
+// ---- Modul Otomasi n8n & Webhook 2 Arah ----
+async function loadN8nConfigAndLogs() {
+  try {
+    const [cfgRes, logRes] = await Promise.all([
+      fetch('/api/n8n/config'),
+      fetch('/api/n8n/logs?limit=25')
+    ]);
+    if (cfgRes.ok) {
+      const rawCfg = await cfgRes.json();
+      const cfg = rawCfg.config || rawCfg;
+      const enabledEl = $('n8nEnabledToggle') || $('n8nEnabled');
+      if (enabledEl) enabledEl.checked = Boolean(cfg.enabled);
+      if ($('n8nWebhookUrl')) $('n8nWebhookUrl').value = cfg.webhook_url || '';
+      if ($('n8nSecretKey')) $('n8nSecretKey').value = cfg.secret_key || 'bw3_n8n_secret_rtrwnet_2026';
+      if ($('n8nTelegramGroupName')) $('n8nTelegramGroupName').value = cfg.telegram_group_name || 'Grup Teknisi Lapangan RT/RW.net';
+      if ($('n8nTelegramBotToken')) $('n8nTelegramBotToken').value = cfg.telegram_bot_token || '';
+      if ($('n8nTelegramChatId')) $('n8nTelegramChatId').value = cfg.telegram_chat_id || '';
+      if ($('n8nWaGroupTarget')) $('n8nWaGroupTarget').value = cfg.wa_group_target || '6281234567890';
+      if ($('n8nFonnteToken')) $('n8nFonnteToken').value = cfg.fonnte_token || '';
+
+      const ev = cfg.events || {};
+      if ($('n8nEvPaymentPaid')) $('n8nEvPaymentPaid').checked = ev.payment_paid !== false && ev['payment.paid'] !== false;
+      if ($('n8nEvCustomerIsolated')) $('n8nEvCustomerIsolated').checked = ev.customer_isolated !== false && ev['customer.isolated'] !== false;
+      if ($('n8nEvCustomerRestored')) $('n8nEvCustomerRestored').checked = ev.customer_restored !== false && ev['customer.restored'] !== false;
+      if ($('n8nEvTicketCreated')) $('n8nEvTicketCreated').checked = ev.ticket_created !== false && ev['ticket.created'] !== false;
+      const evVoucherEl = $('n8nEvVoucherGenerated') || $('n8nEvHotspotVoucher');
+      if (evVoucherEl) evVoucherEl.checked = ev.voucher_generated !== false && ev['hotspot.voucher_generated'] !== false;
+
+      if ($('n8nModeBadge')) {
+        if (cfg.webhook_url && cfg.enabled) {
+          $('n8nModeBadge').className = 'text-[11px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-full font-bold';
+          $('n8nModeBadge').textContent = '🟢 Live Webhook Aktif';
+        } else {
+          $('n8nModeBadge').className = 'text-[11px] bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 px-2.5 py-0.5 rounded-full font-bold';
+          $('n8nModeBadge').textContent = '🛡️ Mode Simulasi Siap';
+        }
+      }
+    }
+
+    if (logRes.ok && $('n8nLogsTableRows')) {
+      const logData = await logRes.json();
+      const logs = Array.isArray(logData.logs) ? logData.logs : [];
+      if (logs.length === 0) {
+        $('n8nLogsTableRows').innerHTML = '<tr><td colspan="5" class="px-3 py-4 text-center text-gray-400">Belum ada riwayat event n8n</td></tr>';
+      } else {
+        $('n8nLogsTableRows').innerHTML = logs.map(item => {
+          const dirBadge = item.direction === 'incoming'
+            ? '<span class="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-bold text-[10px]">IN ⬅️</span>'
+            : '<span class="px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-bold text-[10px]">OUT ➡️</span>';
+          const statusColor = (item.status === 'delivered' || item.status === 'processed')
+            ? 'text-emerald-600 dark:text-emerald-400'
+            : (item.status === 'simulated' ? 'text-indigo-600 dark:text-indigo-400' : 'text-amber-600 dark:text-amber-400');
+          const timeStr = item.timestamp ? new Date(item.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : (item.waktu || '-');
+          const detailText = item.summary || item.detail || '';
+          return `<tr class="hover:bg-gray-50 dark:hover:bg-slate-800/60">
+            <td class="px-3 py-2 whitespace-nowrap text-gray-500 font-mono">${esc(timeStr)}</td>
+            <td class="px-3 py-2 whitespace-nowrap">${dirBadge}</td>
+            <td class="px-3 py-2 font-semibold text-gray-800 dark:text-slate-200">${esc(item.event || '-')}</td>
+            <td class="px-3 py-2 ${statusColor} font-bold whitespace-nowrap">${esc(item.status || '-')}</td>
+            <td class="px-3 py-2 text-gray-600 dark:text-slate-300">${esc(detailText)}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+  } catch (err) {
+    console.error('loadN8nConfigAndLogs error:', err);
+  }
+}
+
+function initN8nAutomationModal() {
+  if ($('btnN8nAutomation')) {
+    $('btnN8nAutomation').addEventListener('click', () => {
+      openModal('modalN8nAutomation');
+      loadN8nConfigAndLogs();
+    });
+  }
+
+  if ($('formN8nConfig')) {
+    $('formN8nConfig').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = $('btnSaveN8nConfig');
+      setBtnLoading(btn, true, 'Menyimpan...');
+      try {
+        const enabledEl = $('n8nEnabledToggle') || $('n8nEnabled');
+        const evVoucherEl = $('n8nEvVoucherGenerated') || $('n8nEvHotspotVoucher');
+        const payload = {
+          enabled: enabledEl ? enabledEl.checked : true,
+          webhook_url: $('n8nWebhookUrl') ? $('n8nWebhookUrl').value.trim() : '',
+          secret_key: $('n8nSecretKey') ? $('n8nSecretKey').value.trim() : 'bw3_n8n_secret_rtrwnet_2026',
+          telegram_group_name: $('n8nTelegramGroupName') ? $('n8nTelegramGroupName').value.trim() : 'Grup Teknisi Lapangan RT/RW.net',
+          telegram_bot_token: $('n8nTelegramBotToken') ? $('n8nTelegramBotToken').value.trim() : '',
+          telegram_chat_id: $('n8nTelegramChatId') ? $('n8nTelegramChatId').value.trim() : '',
+          wa_group_target: $('n8nWaGroupTarget') ? $('n8nWaGroupTarget').value.trim() : '6281234567890',
+          fonnte_token: $('n8nFonnteToken') ? $('n8nFonnteToken').value.trim() : '',
+          events: {
+            payment_paid: $('n8nEvPaymentPaid') ? $('n8nEvPaymentPaid').checked : true,
+            customer_isolated: $('n8nEvCustomerIsolated') ? $('n8nEvCustomerIsolated').checked : true,
+            customer_restored: $('n8nEvCustomerRestored') ? $('n8nEvCustomerRestored').checked : true,
+            ticket_created: $('n8nEvTicketCreated') ? $('n8nEvTicketCreated').checked : true,
+            voucher_generated: evVoucherEl ? evVoucherEl.checked : true
+          }
+        };
+        const res = await fetch('/api/n8n/config', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Gagal menyimpan konfigurasi n8n');
+        toast('💾 Konfigurasi Otomasi n8n & Grup Teknisi berhasil disimpan!');
+        await loadN8nConfigAndLogs();
+      } catch (err) {
+        toast('⚠️ ' + err.message);
+      } finally {
+        setBtnLoading(btn, false);
+      }
+    });
+  }
+
+  if ($('btnDetectTelegramChat')) {
+    $('btnDetectTelegramChat').addEventListener('click', async () => {
+      const btn = $('btnDetectTelegramChat');
+      const token = $('n8nTelegramBotToken') ? $('n8nTelegramBotToken').value.trim() : '';
+      if (!token) {
+        toast('⚠️ Masukkan Telegram Bot Token dari @BotFather terlebih dahulu!');
+        return;
+      }
+      setBtnLoading(btn, true, 'Mencari...');
+      try {
+        const res = await fetch('/api/n8n/detect-telegram-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bot_token: token })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Gagal mendeteksi Chat ID');
+        if ($('n8nTelegramChatId') && data.selected) {
+          $('n8nTelegramChatId').value = data.selected.id;
+        }
+        if ($('n8nTelegramGroupName') && data.selected && data.selected.title) {
+          $('n8nTelegramGroupName').value = data.selected.title;
+        }
+        toast(`✅ Chat ID Grup ditemukan: ${data.selected.title} (${data.selected.id})`);
+      } catch (err) {
+        toast('⚠️ ' + err.message);
+      } finally {
+        setBtnLoading(btn, false);
+      }
+    });
+  }
+
+  const runN8nTest = async (testType, btnEl) => {
+    setBtnLoading(btnEl, true, 'Menguji...');
+    try {
+      const res = await fetch('/api/n8n/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ test_type: testType })
+      });
+      const data = await res.json();
+      if ($('n8nTestResultBox')) {
+        $('n8nTestResultBox').classList.remove('hidden');
+        $('n8nTestResultBox').textContent = JSON.stringify(data, null, 2);
+      }
+      toast('⚡ Simulasi n8n berhasil dijalankan!');
+      await loadN8nConfigAndLogs();
+    } catch (err) {
+      toast('⚠️ Gagal uji n8n: ' + err.message);
+    } finally {
+      setBtnLoading(btnEl, false);
+    }
+  };
+
+  if ($('btnTestN8nOutgoing')) {
+    $('btnTestN8nOutgoing').addEventListener('click', () => runN8nTest('outgoing_ping', $('btnTestN8nOutgoing')));
+  }
+  if ($('btnTestN8nTicketAlert')) {
+    $('btnTestN8nTicketAlert').addEventListener('click', () => runN8nTest('outgoing_ticket', $('btnTestN8nTicketAlert')));
+  }
+  if ($('btnTestN8nIsolirAlert')) {
+    $('btnTestN8nIsolirAlert').addEventListener('click', () => runN8nTest('outgoing_isolated', $('btnTestN8nIsolirAlert')));
+  }
+  if ($('btnTestN8nCheckBill')) {
+    $('btnTestN8nCheckBill').addEventListener('click', () => runN8nTest('incoming_check_bill', $('btnTestN8nCheckBill')));
+  }
+  if ($('btnTestN8nBuyVoucher')) {
+    $('btnTestN8nBuyVoucher').addEventListener('click', () => runN8nTest('incoming_buy_voucher', $('btnTestN8nBuyVoucher')));
+  }
+
+  if ($('btnClearN8nLogs')) {
+    $('btnClearN8nLogs').addEventListener('click', async () => {
+      try {
+        await fetch('/api/n8n/logs', { method: 'DELETE' });
+        toast('🗑️ Log riwayat n8n dibersihkan');
+        await loadN8nConfigAndLogs();
+      } catch (err) {
+        toast('⚠️ Gagal membersihkan log');
+      }
+    });
+  }
+}
+
 // Inisialisasi Sidebar Navigasi & Modul Hotspot
 initSidebarAccordion();
 initSidebarCollapse();
 initHotspotVoucherEvents();
+initN8nAutomationModal();
 initPageViewNavigation();
 
 // Inisialisasi Drag Scroll Horizontal Tabel Pelanggan

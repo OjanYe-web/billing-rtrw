@@ -32,6 +32,7 @@ const ROLE_DEFINITIONS = {
       'btnBroadcast',
       'btnBulkReminder',
       'btnSettings',
+      'btnN8nAutomation',
       'btnSuperAdmin',
       'btnActivityLogs',
       'btnSyncMikrotik',
@@ -92,6 +93,7 @@ const ROLE_DEFINITIONS = {
       'btnBroadcast',
       'btnBulkReminder',
       'btnSettings',
+      'btnN8nAutomation',
       'btnActivityLogs',
       'btnSyncMikrotik',
       'btnRouterDetail',
@@ -156,6 +158,7 @@ const ROLE_DEFINITIONS = {
       'btnAutoIsolir',
       'btnInventoryStock',
       'btnSettings',
+      'btnN8nAutomation',
       'btnSyncMikrotik',
       'btnRouterDetail',
       'btnOltBatchCheck'
@@ -212,7 +215,8 @@ const ROLE_DEFINITIONS = {
       'btnBankAccounts',
       'btnBroadcast',
       'btnBulkReminder',
-      'btnSettings'
+      'btnSettings',
+      'btnN8nAutomation'
     ],
     allowed_customer_actions: [
       'edit',
